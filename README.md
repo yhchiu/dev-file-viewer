@@ -1,8 +1,10 @@
-# Dev File Viewer V1.1.6
+# Dev File Viewer V1.1.8
 
-Dev File Viewer is a Chrome Extension for previewing local and remote developer-oriented files. The product subtitle is **Markdown, Diff & Source Viewer**. V1.1.6 focuses on Markdown, Mermaid diagrams, Markdown tables, Markdown links, a friendlier local-folder UX, collapsible and resizable sidebar, adjustable Markdown content width, session-only scroll position memory, and automatic `file://` Markdown preview.
+![Dev File Viewer brand mark](public/assets/brand/brand-mark.png)
 
-## V1.1.6 scope
+Dev File Viewer is a Chrome Extension for previewing local and remote developer-oriented files. The product subtitle is **Markdown, Diff & Source Viewer**. V1.1.8 focuses on Markdown, Mermaid diagrams, Markdown tables, Markdown links, a friendlier local-folder UX, collapsible and resizable sidebar, adjustable Markdown content width, session-only scroll position memory, and automatic `file://` Markdown preview.
+
+## V1.1.8 scope
 
 - Markdown preview for `.md`, `.mkd`, `.mdx`, `.markdown`
 - Open files from `file://`, `http://`, and `https://`
@@ -11,6 +13,7 @@ Dev File Viewer is a Chrome Extension for previewing local and remote developer-
 - Sidebar collapse/expand control with persisted preference
 - Resizable sidebar width with persisted local UI preference
 - Adjustable Markdown content width: Narrow, Comfortable, Wide, or Full width
+- HiDPI-aware popup and sidebar logos using `srcset` instead of scaling `icon48.png`
 - Markdown table rendering
 - Markdown links: external links, same-page anchors, and folder-relative links to other Markdown files
 - Mermaid fenced-code blocks using ` ```mermaid `
@@ -77,7 +80,11 @@ flowchart TD
 ````
 
 
-## V1.1.6 notes
+## V1.1.7 notes
+
+- Replaced the Chrome extension icon set with the new blue-to-purple **DF** app icon.
+- Updated the in-app brand mark used in the popup, onboarding page, and viewer sidebar to match the new icon style.
+- Added brand assets under `public/assets/brand/`, including the horizontal brand-mark lockup and high-resolution icon source.
 
 - Added a **Content Width** setting for the Markdown reading area. Choices are Narrow, Comfortable, Wide, and Full width. The preference is stored in `chrome.storage.local`.
 - Added a draggable sidebar divider so users can resize the directory sidebar. The width is stored as a local UI preference and can be reset by double-clicking the divider.
