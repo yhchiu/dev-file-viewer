@@ -13,36 +13,48 @@
           <div class="brand-mark">DF</div>
           <div>
             <div class="brand-title">Dev File Viewer</div>
-            <div class="brand-subtitle">Markdown, Diff & Source Viewer</div>
+            <div class="brand-subtitle">Markdown, Diff &amp; Source Viewer</div>
           </div>
         </div>
 
-        <div class="actions">
-          <button id="btn-open-file" type="button">Open File</button>
-          <button id="btn-open-folder" type="button">Open Folder</button>
-          <button id="btn-open-url" type="button">Open URL</button>
-        </div>
+        <details id="sidebar-tools" class="sidebar-tools" open>
+          <summary>Open &amp; Settings</summary>
 
-        <div class="url-box" id="url-box" hidden>
-          <input id="url-input" type="url" placeholder="https://example.com/README.md" />
-          <button id="btn-load-url" type="button">Load</button>
-        </div>
-
-        <section id="file-url-card" class="file-url-card" aria-label="file URL access status">
-          <div class="file-url-card-title">file:// URL access</div>
-          <p id="file-url-status">Checking permission status...</p>
-          <div class="file-url-actions">
-            <button id="btn-open-extension-settings" type="button">Open Settings</button>
-            <button id="btn-copy-settings-link" type="button">Copy Link</button>
+          <div class="actions">
+            <button id="btn-open-file" type="button">Open File</button>
+            <button id="btn-open-folder" type="button">Open Folder</button>
+            <button id="btn-open-url" type="button">Open URL</button>
           </div>
-          <button id="btn-use-open-file" class="secondary-action" type="button">Use Open File instead</button>
+
+          <div class="url-box" id="url-box" hidden>
+            <input id="url-input" type="url" placeholder="https://example.com/README.md" />
+            <button id="btn-load-url" type="button">Load</button>
+          </div>
+
+          <section id="file-url-card" class="file-url-card" aria-label="file URL access status">
+            <div class="file-url-card-title">file:// URL access</div>
+            <p id="file-url-status">Checking permission status...</p>
+            <div class="file-url-actions">
+              <button id="btn-open-extension-settings" type="button">Open Settings</button>
+              <button id="btn-copy-settings-link" type="button">Copy Link</button>
+            </div>
+            <button id="btn-use-open-file" class="secondary-action" type="button">Use Open File instead</button>
+          </section>
+        </details>
+
+        <section id="scroll-memory-card" class="scroll-memory-card" hidden>
+          <label class="checkbox-row" title="Uses local session storage only. Positions are deleted when the browser session ends and are never sent anywhere.">
+            <input id="remember-scroll" type="checkbox" />
+            <span>Remember scroll position</span>
+          </label>
+          <span class="info-dot" tabindex="0" aria-label="Uses local session storage only. Positions are deleted when the browser session ends and are never sent anywhere." title="Uses local session storage only. Positions are deleted when the browser session ends and are never sent anywhere.">?</span>
         </section>
 
         <div class="sidebar-section-title">Directory</div>
         <div id="directory-tree" class="directory-tree empty">Select a folder to show Markdown files.</div>
       </aside>
 
-      <main class="viewer-main">
+      <main id="viewer-main" class="viewer-main">
         <header class="toolbar">
           <div>
             <h1 id="doc-title">Dev File Viewer</h1>
@@ -54,7 +66,7 @@
         </header>
 
         <section id="status" class="status info">
-          V1 supports Markdown, Mermaid diagrams, and Markdown tables. Open File/Open Folder does not require file:// URL access.
+          V1 supports Markdown, Mermaid diagrams, Markdown tables, and Markdown links. Open File/Open Folder does not require file:// URL access.
         </section>
 
         <article id="preview" class="markdown-body" tabindex="0"></article>

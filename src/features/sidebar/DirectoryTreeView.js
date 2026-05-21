@@ -37,6 +37,7 @@ export class DirectoryTreeView {
     button.className = 'tree-file';
     button.textContent = node.name;
     button.title = node.path;
+    button.dataset.path = node.path;
     button.addEventListener('click', () => {
       this.activePath = node.path;
       this.markActive(button);
@@ -53,8 +54,17 @@ export class DirectoryTreeView {
     activeButton.classList.add('active');
   }
 
+  markActivePath(path) {
+    const button = Array.from(this.container.querySelectorAll('.tree-file'))
+      .find(candidate => candidate.dataset.path === path);
+    if (!button) return;
+    this.activePath = path;
+    this.markActive(button);
+  }
+
   showEmpty(message) {
     this.container.classList.add('empty');
     this.container.textContent = message;
   }
 }
+

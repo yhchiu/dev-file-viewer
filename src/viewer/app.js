@@ -8,6 +8,9 @@ import { PluginRegistry } from '../plugins/PluginRegistry.js';
 import { mermaidPlugin } from '../plugins/mermaidPlugin.js';
 import { copyExtensionSettingsUrl, isFileUrlAccessAllowed, openExtensionSettings } from '../core/browser/fileUrlAccess.js';
 
+const SCROLL_ENABLED_KEY = 'devFileViewer:rememberScrollEnabled';
+const SCROLL_POSITIONS_KEY = 'devFileViewer:scrollPositions';
+
 class DevFileViewerApp {
   constructor() {
     this.elements = {
@@ -16,6 +19,10 @@ class DevFileViewerApp {
       format: document.querySelector('#doc-format'),
       status: document.querySelector('#status'),
       preview: document.querySelector('#preview'),
+      viewerMain: document.querySelector('#viewer-main'),
+      sidebarTools: document.querySelector('#sidebar-tools'),
+      scrollMemoryCard: document.querySelector('#scroll-memory-card'),
+      rememberScroll: document.querySelector('#remember-scroll'),
       openFile: document.querySelector('#btn-open-file'),
       openFolder: document.querySelector('#btn-open-folder'),
       openUrl: document.querySelector('#btn-open-url'),
@@ -36,10 +43,17 @@ class DevFileViewerApp {
     this.fileSource = new FilePickerSourceProvider();
     this.directorySource = new DirectorySourceProvider();
     this.directoryTree = new DirectoryTreeView(this.elements.tree);
+
+    this.currentDoc = null;
+    this.currentDocKey = '';
+    this.rememberScrollEnabled = false;
+    this.scrollPositions = {};
+    this.scrollSaveTimer = 0;
   }
 
   async start() {
     await this.plugins.init();
+    await this.restoreScrollSettings();
     this.bindEvents();
     await this.refreshFileUrlAccessStatus();
     await this.loadFromLaunchParams();
@@ -59,6 +73,28 @@ class DevFileViewerApp {
     this.elements.openExtensionSettings.addEventListener('click', () => this.openExtensionSettingsPage());
     this.elements.copySettingsLink.addEventListener('click', () => this.copySettingsUrl());
     this.elements.useOpenFile.addEventListener('click', () => this.openLocalFile());
+    this.elements.rememberScroll.addEventListener('change', () => this.setRememberScroll(this.elements.rememberScroll.checked));
+    this.elements.viewerMain.addEventListener('scroll', () => this.scheduleSaveScrollPosition(), { passive: true });
+  }
+
+  async restoreScrollSettings() {
+    const stored = await chrome.storage.session.get([SCROLL_ENABLED_KEY, SCROLL_POSITIONS_KEY]);
+    this.rememberScrollEnabled = Boolean(stored[SCROLL_ENABLED_KEY]);
+    this.scrollPositions = stored[SCROLL_POSITIONS_KEY] || {};
+    this.elements.rememberScroll.checked = this.rememberScrollEnabled;
+  }
+
+  async setRememberScroll(enabled) {
+    this.rememberScrollEnabled = Boolean(enabled);
+    this.elements.rememberScroll.checked = this.rememberScrollEnabled;
+    await chrome.storage.session.set({ [SCROLL_ENABLED_KEY]: this.rememberScrollEnabled });
+
+    if (this.rememberScrollEnabled) {
+      await this.saveCurrentScrollPosition();
+      this.setStatus('Scroll position memory is enabled for this browser session only.', 'info');
+    } else {
+      this.setStatus('Scroll position memory is disabled. Files will open at the first line.', 'info');
+    }
   }
 
   async loadFromLaunchParams() {
@@ -124,16 +160,14 @@ class DevFileViewerApp {
       const { tree } = await this.directorySource.pickDirectory();
       this.directoryTree.render(tree, async fileNode => {
         try {
-          const doc = await this.directorySource.loadFileNode(fileNode);
-          doc.name = fileNode.name;
-          doc.baseUrl = '';
-          doc.sourceType = 'directory-file';
-          doc.path = fileNode.path;
+          const doc = await this.createDirectoryDocument(fileNode);
           await this.renderDocument(doc);
         } catch (error) {
           this.setStatus(error?.message || String(error), 'error');
         }
       });
+      this.elements.sidebarTools.open = false;
+      this.elements.scrollMemoryCard.hidden = false;
       this.setStatus('Folder loaded. Select a Markdown file from the sidebar.', 'success');
     } catch (error) {
       if (error?.name === 'AbortError') return;
@@ -142,7 +176,40 @@ class DevFileViewerApp {
     }
   }
 
-  async renderDocument(doc) {
+  async createDirectoryDocument(fileNode) {
+    const doc = await this.directorySource.loadFileNode(fileNode);
+    doc.name = fileNode.name;
+    doc.baseUrl = '';
+    doc.sourceType = 'directory-file';
+    doc.path = fileNode.path;
+    return doc;
+  }
+
+  async openDocumentLink(link, sourceDoc) {
+    const linkData = normalizeLinkData(link);
+
+    try {
+      if (linkData.kind === 'relative-document' && sourceDoc?.sourceType === 'directory-file') {
+        const targetPath = this.directorySource.resolveRelativePath(sourceDoc.path, linkData.href);
+        if (!targetPath) return;
+
+        const { doc, node } = await this.directorySource.loadPath(targetPath);
+        this.directoryTree.markActivePath(node.path);
+        await this.renderDocument(doc, { anchor: extractHash(linkData.href) });
+        return;
+      }
+
+      if (linkData.url) {
+        await this.openUrl(linkData.url);
+      }
+    } catch (error) {
+      this.setStatus(error?.message || String(error), 'error');
+    }
+  }
+
+  async renderDocument(doc, options = {}) {
+    await this.saveCurrentScrollPosition();
+
     const format = doc.format || detectFormat(doc);
     this.elements.title.textContent = doc.name || 'Untitled';
     this.elements.source.textContent = doc.url || doc.path || doc.sourceType || '';
@@ -150,15 +217,82 @@ class DevFileViewerApp {
 
     if (format !== FORMAT_IDS.MARKDOWN) {
       this.elements.preview.textContent = doc.text || '';
+      this.currentDoc = doc;
+      this.currentDocKey = this.getDocumentKey(doc);
+      await this.restoreOrResetScroll(doc, options);
       this.setStatus(`Unsupported format in V1: ${format}.`, 'error');
       return;
     }
 
     await this.markdown.render(doc.text, this.elements.preview, {
       baseUrl: doc.baseUrl || doc.url || '',
-      onOpenDocumentLink: linkedUrl => this.openUrl(linkedUrl)
+      onOpenDocumentLink: linkedUrl => this.openDocumentLink(linkedUrl, doc)
     });
+    this.ensureHeadingAnchors();
+
+    this.currentDoc = doc;
+    this.currentDocKey = this.getDocumentKey(doc);
+    await this.restoreOrResetScroll(doc, options);
     this.setStatus(`Loaded ${doc.name || 'document'}.`, 'success');
+  }
+
+  getDocumentKey(doc) {
+    if (doc?.sourceType === 'directory-file' && doc.path) return `directory:${doc.path}`;
+    if (doc?.url) return `url:${doc.url}`;
+    if (doc?.path) return `path:${doc.path}`;
+    if (doc?.name) return `file:${doc.name}`;
+    return '';
+  }
+
+  scheduleSaveScrollPosition() {
+    if (!this.rememberScrollEnabled || !this.currentDocKey) return;
+    clearTimeout(this.scrollSaveTimer);
+    this.scrollSaveTimer = setTimeout(() => {
+      this.saveCurrentScrollPosition().catch(() => {});
+    }, 180);
+  }
+
+  async saveCurrentScrollPosition() {
+    if (!this.rememberScrollEnabled || !this.currentDocKey) return;
+    this.scrollPositions[this.currentDocKey] = {
+      top: this.elements.viewerMain.scrollTop,
+      updatedAt: Date.now()
+    };
+    await chrome.storage.session.set({ [SCROLL_POSITIONS_KEY]: this.scrollPositions });
+  }
+
+  async restoreOrResetScroll(doc, options = {}) {
+    const docKey = this.getDocumentKey(doc);
+    const anchor = options.anchor;
+
+    await nextFrame();
+
+    if (anchor && this.scrollToAnchor(anchor)) return;
+
+    const saved = this.rememberScrollEnabled ? this.scrollPositions[docKey] : null;
+    this.elements.viewerMain.scrollTop = Number.isFinite(saved?.top) ? saved.top : 0;
+  }
+
+  scrollToAnchor(anchor) {
+    const id = safeDecodeURIComponent(String(anchor || '').replace(/^#/, ''));
+    if (!id) return false;
+    const target = document.getElementById(id) || Array.from(this.elements.preview.querySelectorAll('[name]')).find(element => element.getAttribute('name') === id);
+    if (!target) return false;
+    target.scrollIntoView({ block: 'start' });
+    return true;
+  }
+
+  ensureHeadingAnchors() {
+    const used = new Set(Array.from(this.elements.preview.querySelectorAll('[id]')).map(element => element.id));
+    for (const heading of this.elements.preview.querySelectorAll('h1, h2, h3, h4, h5, h6')) {
+      if (heading.id) continue;
+      const base = slugify(heading.textContent || 'section') || 'section';
+      let slug = base;
+      let index = 2;
+      while (used.has(slug)) slug = `${base}-${index++}`;
+      heading.id = slug;
+      used.add(slug);
+    }
   }
 
   async refreshFileUrlAccessStatus() {
@@ -199,6 +333,40 @@ class DevFileViewerApp {
     this.elements.status.className = `status ${type}`;
     this.elements.status.textContent = message;
   }
+}
+
+function normalizeLinkData(link) {
+  if (typeof link === 'string') return { href: link, url: link, kind: 'absolute-document' };
+  return link || {};
+}
+
+function extractHash(href) {
+  const value = String(href || '');
+  const hashIndex = value.indexOf('#');
+  return hashIndex >= 0 ? value.slice(hashIndex + 1) : '';
+}
+
+function safeDecodeURIComponent(value) {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
+
+function slugify(value) {
+  return String(value)
+    .trim()
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^\p{Letter}\p{Number}]+/gu, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+function nextFrame() {
+  return new Promise(resolve => requestAnimationFrame(() => resolve()));
 }
 
 new DevFileViewerApp().start().catch(error => {

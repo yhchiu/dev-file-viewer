@@ -1,16 +1,19 @@
-# Dev File Viewer V1.1.1
+# Dev File Viewer V1.1.2
 
-Dev File Viewer is a Chrome Extension for previewing local and remote developer-oriented files. The product subtitle is **Markdown, Diff & Source Viewer**. V1.1.1 focuses on Markdown, Mermaid diagrams, Markdown tables, a friendlier local-file onboarding flow, and a fix for automatic `file://` Markdown preview.
+Dev File Viewer is a Chrome Extension for previewing local and remote developer-oriented files. The product subtitle is **Markdown, Diff & Source Viewer**. V1.1.2 focuses on Markdown, Mermaid diagrams, Markdown tables, Markdown links, a friendlier local-folder UX, session-only scroll position memory, and automatic `file://` Markdown preview.
 
-## V1.1.1 scope
+## V1.1.2 scope
 
 - Markdown preview for `.md`, `.mkd`, `.mdx`, `.markdown`
 - Open files from `file://`, `http://`, and `https://`
 - Local file and folder picker
 - Sidebar directory tree for user-selected local folders
 - Markdown table rendering
+- Markdown links: external links, same-page anchors, and folder-relative links to other Markdown files
 - Mermaid fenced-code blocks using ` ```mermaid `
 - First-install onboarding page
+- Auto-collapsed Open/Settings tools after a folder is successfully opened
+- Optional scroll position memory per file, stored only in local session storage
 - Popup and viewer status for Chrome's `file://` URL access setting
 - One-click button to open the extension settings page
 - Copyable settings URL fallback
@@ -47,7 +50,9 @@ Then open `chrome://extensions`, enable **Developer mode**, click **Load unpacke
 - Open a remote Markdown URL, then use the extension popup or context menu.
 - Open a local Markdown URL after enabling file URL access. Automatic `file://` preview is routed through the background service worker to avoid Chrome blocking direct `chrome-extension://` navigation from the file page.
 - Use **Open File** to read one local file without changing Chrome settings.
-- Use **Open Folder** to build a directory sidebar from a selected folder.
+- Use **Open Folder** to build a directory sidebar from a selected folder. After a folder opens, the Open/Settings panel collapses automatically; expand it again when needed.
+- Enable **Remember scroll position** after opening a folder if you want each file to reopen at its last scroll position during the current browser session. When disabled, files open at the first line.
+- Markdown links are supported. External links open in a new tab. Folder-relative links to Markdown files open inside Dev File Viewer.
 - Markdown tables are rendered from pipe table syntax:
 
 ```markdown
@@ -69,9 +74,12 @@ flowchart TD
 ````
 
 
-## V1.1.1 fix note
+## V1.1.2 notes
 
-Earlier V1.1 builds redirected a detected Markdown page directly from the content script with `location.replace(chrome-extension://...)`. Chrome can block that page-initiated navigation and show `ERR_BLOCKED_BY_CLIENT`. V1.1.1 captures the already-loaded Markdown text, stores it temporarily in `chrome.storage.session`, and asks the background service worker to replace the tab with the viewer using `chrome.tabs.update()`.
+- Earlier V1.1 builds redirected a detected Markdown page directly from the content script with `location.replace(chrome-extension://...)`. Chrome can block that page-initiated navigation and show `ERR_BLOCKED_BY_CLIENT`. The current build captures the already-loaded Markdown text, stores it temporarily in `chrome.storage.session`, and asks the background service worker to replace the tab with the viewer using `chrome.tabs.update()`.
+- Folder mode now collapses the Open/Settings tools after successful folder selection.
+- Folder mode includes optional per-file scroll position memory using session-only local storage.
+- Markdown links now support external links, anchors, and relative links between Markdown files in the selected folder.
 
 ## Architecture for V2 expansion
 

@@ -1,28 +1,36 @@
-# Dev File Viewer V1.1.1 Sample
+# Dev File Viewer Sample
 
-This sample verifies Markdown rendering, Mermaid diagrams, and Markdown tables.
+This sample verifies Markdown rendering, tables, Mermaid diagrams, and links.
 
-## Table rendering
+## Table Rendering
 
 | Feature | Status | Notes |
 |---|---:|---|
-| Markdown files | ✅ | `.md`, `.mkd`, `.mdx`, `.markdown` |
-| Mermaid diagrams | ✅ | Rendered after Markdown sanitization |
-| Tables | ✅ | Enabled |
-| Diff viewer | Planned | Reserved for V2 |
-| Source-code viewer | Planned | Reserved for V2 |
+| Markdown | ✅ | `.md`, `.mkd`, `.mdx`, `.markdown` |
+| Tables | ✅ | GitHub-style pipe tables |
+| Mermaid | ✅ | Client-side only |
+| Links | ✅ | External, anchors, and folder-relative Markdown links |
 
-## Mermaid rendering
+## Link Rendering
+
+- [Jump to Mermaid section](#mermaid-diagram)
+- [Open an external site](https://example.com/)
+- [Open another Markdown file in the same opened folder](linked.md)
+- [Open a nested Markdown file](docs/notes.md)
+
+## Mermaid Diagram
 
 ```mermaid
-flowchart TD
+graph TD
   A[Open Markdown] --> B[Render Markdown]
-  B --> C[Render Mermaid]
-  B --> D[Render Tables]
+  B --> C{Contains Mermaid?}
+  C -->|Yes| D[Render Diagram]
+  C -->|No| E[Show Document]
 ```
 
-## Local files
+## Code Block
 
-For non-technical users, prefer **Open File** or **Open Folder**.
-
-Automatic `file://` URL preview is optional and requires enabling **Allow access to file URLs** in Chrome's extension settings.
+```js
+const message = 'Dev File Viewer';
+console.log(message);
+```

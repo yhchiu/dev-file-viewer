@@ -1,11 +1,32 @@
 import { isSupportedDocumentFile } from '../format/fileTypes.js';
 
 const SAFE_SCHEMES = new Set(['http:', 'https:', 'file:', 'mailto:']);
+const URL_SCHEME_RE = /^[a-zA-Z][a-zA-Z\d+.-]*:/;
 
 export function rewriteLinks(root, baseUrl, onOpenDocumentLink) {
   for (const link of root.querySelectorAll('a[href]')) {
     const href = link.getAttribute('href');
-    if (!href || href.startsWith('#')) continue;
+    if (!href) continue;
+
+    if (href.startsWith('#')) {
+      link.setAttribute('rel', 'noopener noreferrer');
+      continue;
+    }
+
+    const isRelative = isRelativeHref(href);
+
+    if (isRelative && !baseUrl) {
+      if (isSupportedDocumentFile(stripHashAndQuery(href))) {
+        link.setAttribute('rel', 'noopener noreferrer');
+        link.addEventListener('click', event => {
+          event.preventDefault();
+          onOpenDocumentLink?.({ href, kind: 'relative-document' });
+        });
+      } else {
+        link.removeAttribute('href');
+      }
+      continue;
+    }
 
     let resolved;
     try {
@@ -26,7 +47,7 @@ export function rewriteLinks(root, baseUrl, onOpenDocumentLink) {
     if (isSupportedDocumentFile(resolved.pathname)) {
       link.addEventListener('click', event => {
         event.preventDefault();
-        onOpenDocumentLink?.(resolved.href);
+        onOpenDocumentLink?.({ href, url: resolved.href, kind: isRelative ? 'resolved-relative-document' : 'absolute-document' });
       });
     } else {
       link.setAttribute('target', '_blank');
@@ -46,4 +67,12 @@ export function rewriteLinks(root, baseUrl, onOpenDocumentLink) {
       image.removeAttribute('src');
     }
   }
+}
+
+function isRelativeHref(href) {
+  return !href.startsWith('//') && !URL_SCHEME_RE.test(href);
+}
+
+function stripHashAndQuery(value) {
+  return String(value || '').split('#', 1)[0].split('?', 1)[0];
 }
