@@ -1,10 +1,18 @@
-# Dev File Viewer V2.1.5
+# Dev File Viewer V2.2.0
 
 ![Dev File Viewer brand mark](public/assets/brand/brand-mark.png)
 
-Dev File Viewer is a Chrome Extension for previewing local and remote developer-oriented files. The product subtitle is **Markdown, Diff & Source Viewer**. V2.1.5 continues the V2 roadmap with TOC Phase 2 refinements: SVG-based Outline controls, viewer-aware floating Outline placement, draggable and pinnable floating Outline controls, low-distraction Outline popover, floating Outline access, and heading filtering while keeping the existing Markdown, Mermaid, table, link, local-folder, sidebar, content-width, scroll-memory, and `file://` preview features.
+Dev File Viewer is a Chrome Extension for previewing local and remote developer-oriented files. The product subtitle is **Markdown, Diff & Source Viewer**. V2.2.0 continues the V2 roadmap with collapsible TOC / Outline heading groups. The Outline now builds a navigable H1-H3 tree with SVG disclosure controls, shared collapsed state between sidebar and floating popover, active-section auto-expansion, and filter-aware visibility while keeping the existing Markdown, Mermaid, table, link, local-folder, sidebar, content-width, scroll-memory, and `file://` preview features.
 
-## V2.1.5 scope
+## V2.2.0 scope
+
+- Collapsible Outline heading groups for H1-H3 headings.
+- SVG chevron controls for headings with children.
+- Click chevron to expand/collapse; click heading text to navigate.
+- Active heading auto-expands its ancestors.
+- Filter mode temporarily shows matching headings and their parent path.
+- Sidebar Outline and floating TOC popover share runtime-only collapsed state.
+
 
 - Markdown preview for `.md`, `.mkd`, `.mdx`, `.markdown`
 - Open files from `file://`, `http://`, and `https://`
@@ -89,7 +97,7 @@ flowchart TD
 ````
 
 
-## V2.1.5 notes
+## V2.2.0 notes
 
 - Refined **TOC Phase 2** with SVG-based pop-out and pin controls instead of emoji glyphs.
 - Dragging the floating **Outline** button moves both the button and the TOC popover. This position is runtime-only and is not stored in `chrome.storage.local`.

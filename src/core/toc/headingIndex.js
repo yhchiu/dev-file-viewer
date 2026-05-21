@@ -29,6 +29,43 @@ export function buildHeadingIndex(root, options = {}) {
     .filter(heading => heading.id && heading.text && heading.level <= maxLevel);
 }
 
+export function buildHeadingTree(headings) {
+  const nodes = [];
+  const roots = [];
+  const byId = new Map();
+  const stack = [];
+
+  for (const heading of headings) {
+    const node = {
+      ...heading,
+      parentIds: [],
+      children: [],
+      childIds: [],
+      hasChildren: false
+    };
+
+    while (stack.length && stack[stack.length - 1].level >= node.level) {
+      stack.pop();
+    }
+
+    const parent = stack[stack.length - 1];
+    if (parent) {
+      node.parentIds = [...parent.parentIds, parent.id];
+      parent.children.push(node);
+      parent.childIds.push(node.id);
+      parent.hasChildren = true;
+    } else {
+      roots.push(node);
+    }
+
+    nodes.push(node);
+    byId.set(node.id, node);
+    stack.push(node);
+  }
+
+  return { nodes, roots, byId };
+}
+
 export function normalizeHeadingText(value) {
   return String(value || '').replace(/\s+/g, ' ').trim();
 }

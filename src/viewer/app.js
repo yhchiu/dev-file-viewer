@@ -7,7 +7,7 @@ import { DirectoryTreeView } from '../features/sidebar/DirectoryTreeView.js';
 import { PluginRegistry } from '../plugins/PluginRegistry.js';
 import { mermaidPlugin } from '../plugins/mermaidPlugin.js';
 import { copyExtensionSettingsUrl, isFileUrlAccessAllowed, openExtensionSettings } from '../core/browser/fileUrlAccess.js';
-import { buildHeadingIndex, ensureHeadingAnchors } from '../core/toc/headingIndex.js';
+import { buildHeadingIndex, buildHeadingTree, ensureHeadingAnchors } from '../core/toc/headingIndex.js';
 
 const SCROLL_ENABLED_KEY = 'devFileViewer:rememberScrollEnabled';
 const SCROLL_POSITIONS_KEY = 'devFileViewer:scrollPositions';
@@ -95,6 +95,8 @@ class DevFileViewerApp {
     this.contentWidth = DEFAULT_CONTENT_WIDTH;
     this.activeSidebarTab = 'files';
     this.headings = [];
+    this.headingTree = { nodes: [], roots: [], byId: new Map() };
+    this.tocCollapsedIds = new Set();
     this.tocItems = new Map();
     this.activeHeadingId = '';
     this.activeHeadingFrame = 0;
@@ -869,6 +871,8 @@ class DevFileViewerApp {
 
   buildToc() {
     this.headings = buildHeadingIndex(this.elements.preview, { maxLevel: 3 });
+    this.headingTree = buildHeadingTree(this.headings);
+    this.tocCollapsedIds = new Set();
     this.tocItems = new Map();
     this.activeHeadingId = '';
     this.tocFilterQuery = '';
@@ -896,12 +900,45 @@ class DevFileViewerApp {
 
   renderTocContainer(container, context) {
     const list = document.createElement('div');
-    list.className = 'toc-list';
+    list.className = 'toc-list toc-tree-list';
     list.dataset.tocContext = context;
 
-    for (const heading of this.headings) {
+    for (const heading of this.headingTree.nodes) {
+      const row = document.createElement('div');
+      row.className = `toc-row toc-level-${heading.level}`;
+      row.dataset.headingId = heading.id;
+      row.dataset.parentIds = heading.parentIds.join(' ');
+      row.dataset.tocText = heading.text.toLowerCase();
+      row.dataset.tocContext = context;
+
+      const toggle = document.createElement('button');
+      toggle.type = 'button';
+      toggle.className = 'toc-disclosure';
+      toggle.dataset.headingId = heading.id;
+      toggle.dataset.tocContext = context;
+      toggle.setAttribute('aria-label', `Collapse ${heading.text}`);
+      toggle.setAttribute('aria-expanded', 'true');
+      toggle.innerHTML = `
+        <svg class="button-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path d="M5.75 3.5 10.25 8l-4.5 4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      `;
+      if (!heading.hasChildren) {
+        toggle.classList.add('is-placeholder');
+        toggle.disabled = true;
+        toggle.setAttribute('aria-hidden', 'true');
+        toggle.removeAttribute('aria-label');
+        toggle.removeAttribute('aria-expanded');
+      } else {
+        toggle.addEventListener('click', event => {
+          event.preventDefault();
+          event.stopPropagation();
+          this.toggleTocGroup(heading.id);
+        });
+      }
+
       const item = document.createElement('a');
-      item.className = `toc-item toc-level-${heading.level}`;
+      item.className = 'toc-item';
       item.href = `#${encodeURIComponent(heading.id)}`;
       item.textContent = heading.text;
       item.title = heading.text;
@@ -914,7 +951,9 @@ class DevFileViewerApp {
         this.saveCurrentScrollPosition().catch(() => {});
         if (context === 'popover' && !this.tocPopoverPinned) this.closeTocPopover();
       });
-      list.append(item);
+
+      row.append(toggle, item);
+      list.append(row);
       this.registerTocItem(heading.id, item);
     }
 
@@ -930,6 +969,30 @@ class DevFileViewerApp {
     const items = this.tocItems.get(id) || [];
     items.push(item);
     this.tocItems.set(id, items);
+  }
+
+  toggleTocGroup(id) {
+    const node = this.headingTree.byId.get(id);
+    if (!node || !node.hasChildren) return;
+
+    if (this.tocCollapsedIds.has(id)) this.tocCollapsedIds.delete(id);
+    else this.tocCollapsedIds.add(id);
+
+    if (this.activeHeadingId) this.expandTocAncestors(this.activeHeadingId, { apply: false });
+    this.applyTocFilter();
+  }
+
+  expandTocAncestors(id, options = {}) {
+    const node = this.headingTree.byId.get(id);
+    if (!node || !node.parentIds.length) return false;
+
+    let changed = false;
+    for (const parentId of node.parentIds) {
+      if (this.tocCollapsedIds.delete(parentId)) changed = true;
+    }
+
+    if (changed && options.apply !== false) this.applyTocFilter();
+    return changed;
   }
 
   renderTocEmpty(message) {
@@ -959,20 +1022,72 @@ class DevFileViewerApp {
   applyTocFilter() {
     const query = this.tocFilterQuery;
     for (const container of [this.elements.tocTree, this.elements.tocPopoverTree]) {
-      const items = Array.from(container.querySelectorAll('.toc-item'));
+      const rows = Array.from(container.querySelectorAll('.toc-row'));
       let visibleCount = 0;
-      for (const item of items) {
-        const matches = !query || item.dataset.tocText.includes(query);
-        item.hidden = !matches;
-        if (matches) visibleCount += 1;
+      const matchedIds = new Set();
+      const visibleIds = new Set();
+
+      if (query) {
+        for (const row of rows) {
+          if (row.dataset.tocText.includes(query)) {
+            const id = row.dataset.headingId;
+            matchedIds.add(id);
+            visibleIds.add(id);
+            const node = this.headingTree.byId.get(id);
+            for (const parentId of node?.parentIds || []) visibleIds.add(parentId);
+          }
+        }
       }
+
+      for (const row of rows) {
+        const id = row.dataset.headingId;
+        const node = this.headingTree.byId.get(id);
+        let hidden = false;
+
+        if (query) {
+          hidden = !visibleIds.has(id);
+        } else {
+          hidden = Boolean(node?.parentIds?.some(parentId => this.tocCollapsedIds.has(parentId)));
+        }
+
+        row.hidden = hidden;
+        row.classList.toggle('is-filter-match', query && matchedIds.has(id));
+        if (!hidden) visibleCount += 1;
+      }
+
       const noMatch = container.querySelector('.toc-no-matches');
-      if (noMatch) noMatch.hidden = visibleCount > 0 || items.length === 0;
+      if (noMatch) noMatch.hidden = visibleCount > 0 || rows.length === 0;
+    }
+
+    this.updateTocDisclosureStates();
+  }
+
+  updateTocDisclosureStates() {
+    const query = this.tocFilterQuery;
+    const matchedAncestorIds = new Set();
+
+    if (query) {
+      for (const heading of this.headingTree.nodes) {
+        if (!heading.text.toLowerCase().includes(query)) continue;
+        for (const parentId of heading.parentIds) matchedAncestorIds.add(parentId);
+      }
+    }
+
+    for (const container of [this.elements.tocTree, this.elements.tocPopoverTree]) {
+      for (const toggle of container.querySelectorAll('.toc-disclosure:not(.is-placeholder)')) {
+        const id = toggle.dataset.headingId;
+        const expanded = query ? matchedAncestorIds.has(id) || !this.tocCollapsedIds.has(id) : !this.tocCollapsedIds.has(id);
+        toggle.setAttribute('aria-expanded', String(expanded));
+        const node = this.headingTree.byId.get(id);
+        toggle.setAttribute('aria-label', `${expanded ? 'Collapse' : 'Expand'} ${node?.text || 'section'}`);
+      }
     }
   }
 
   clearToc() {
     this.headings = [];
+    this.headingTree = { nodes: [], roots: [], byId: new Map() };
+    this.tocCollapsedIds = new Set();
     this.tocItems = new Map();
     this.activeHeadingId = '';
     this.tocFilterQuery = '';
@@ -1019,7 +1134,11 @@ class DevFileViewerApp {
   }
 
   setActiveHeading(id) {
-    if (!id || this.activeHeadingId === id) return;
+    if (!id) return;
+    const expanded = !this.tocFilterQuery && this.expandTocAncestors(id, { apply: false });
+    if (expanded) this.applyTocFilter();
+
+    if (this.activeHeadingId === id && !expanded) return;
     if (this.activeHeadingId && this.tocItems.has(this.activeHeadingId)) {
       for (const previous of this.tocItems.get(this.activeHeadingId)) {
         previous.classList.remove('is-active');
@@ -1034,15 +1153,21 @@ class DevFileViewerApp {
       current.setAttribute('aria-current', 'location');
     }
 
+    const shouldScrollToc = !this.tocFilterQuery;
     const panelItem = currentItems.find(item => item.dataset.tocContext === 'panel');
-    if (panelItem && this.activeSidebarTab === 'outline' && !this.elements.outlinePanel.hidden && !panelItem.hidden) {
+    if (shouldScrollToc && panelItem && this.activeSidebarTab === 'outline' && !this.elements.outlinePanel.hidden && this.isTocItemVisible(panelItem)) {
       panelItem.scrollIntoView({ block: 'nearest' });
     }
 
     const popoverItem = currentItems.find(item => item.dataset.tocContext === 'popover');
-    if (popoverItem && this.tocPopoverOpen && !popoverItem.hidden) {
+    if (shouldScrollToc && popoverItem && this.tocPopoverOpen && this.isTocItemVisible(popoverItem)) {
       popoverItem.scrollIntoView({ block: 'nearest' });
     }
+  }
+
+  isTocItemVisible(item) {
+    const row = item.closest('.toc-row');
+    return Boolean(row && !row.hidden);
   }
 
   async refreshFileUrlAccessStatus() {
