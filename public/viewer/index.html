@@ -62,8 +62,22 @@
           <span class="info-dot" tabindex="0" aria-label="Uses local session storage only. Positions are deleted when the browser session ends and are never sent anywhere." title="Uses local session storage only. Positions are deleted when the browser session ends and are never sent anywhere.">?</span>
         </section>
 
-        <div class="sidebar-section-title">Directory</div>
-        <div id="directory-tree" class="directory-tree empty">Select a folder to show Markdown files.</div>
+        <div class="sidebar-tabs" role="tablist" aria-label="Sidebar navigation">
+          <button id="tab-files" class="sidebar-tab active" type="button" role="tab" aria-selected="true" aria-controls="files-panel" data-sidebar-tab="files">Files</button>
+          <button id="tab-outline" class="sidebar-tab" type="button" role="tab" aria-selected="false" aria-controls="outline-panel" data-sidebar-tab="outline" tabindex="-1">Outline</button>
+        </div>
+
+        <section id="files-panel" class="sidebar-panel" role="tabpanel" aria-labelledby="tab-files">
+          <div class="sidebar-section-title">Directory</div>
+          <div id="directory-tree" class="directory-tree empty">Select a folder to show Markdown files.</div>
+        </section>
+
+        <section id="outline-panel" class="sidebar-panel" role="tabpanel" aria-labelledby="tab-outline" hidden>
+          <div class="sidebar-section-title">On this page</div>
+          <nav id="toc-tree" class="toc-tree" aria-label="Table of contents">
+            <div class="toc-empty">Open a Markdown document to show its outline.</div>
+          </nav>
+        </section>
       </aside>
 
       <div
@@ -91,7 +105,7 @@
         </header>
 
         <section id="status" class="status info">
-          V1 supports Markdown, Mermaid diagrams, Markdown tables, and Markdown links. Open File/Open Folder does not require file:// URL access.
+          V2 starts with Markdown Table of Contents. Open a document and use Files / Outline to switch between folder navigation and section navigation.
         </section>
 
         <article id="preview" class="markdown-body" tabindex="0"></article>

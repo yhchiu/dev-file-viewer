@@ -7,12 +7,14 @@ import { DirectoryTreeView } from '../features/sidebar/DirectoryTreeView.js';
 import { PluginRegistry } from '../plugins/PluginRegistry.js';
 import { mermaidPlugin } from '../plugins/mermaidPlugin.js';
 import { copyExtensionSettingsUrl, isFileUrlAccessAllowed, openExtensionSettings } from '../core/browser/fileUrlAccess.js';
+import { buildHeadingIndex, ensureHeadingAnchors } from '../core/toc/headingIndex.js';
 
 const SCROLL_ENABLED_KEY = 'devFileViewer:rememberScrollEnabled';
 const SCROLL_POSITIONS_KEY = 'devFileViewer:scrollPositions';
 const SIDEBAR_COLLAPSED_KEY = 'devFileViewer:sidebarCollapsed';
 const SIDEBAR_WIDTH_KEY = 'devFileViewer:sidebarWidth';
 const CONTENT_WIDTH_KEY = 'devFileViewer:contentWidth';
+const SIDEBAR_ACTIVE_TAB_KEY = 'devFileViewer:sidebarActiveTab';
 const DEFAULT_SIDEBAR_WIDTH = 310;
 const MIN_SIDEBAR_WIDTH = 240;
 const MAX_SIDEBAR_WIDTH = 560;
@@ -53,7 +55,13 @@ class DevFileViewerApp {
       openExtensionSettings: document.querySelector('#btn-open-extension-settings'),
       copySettingsLink: document.querySelector('#btn-copy-settings-link'),
       useOpenFile: document.querySelector('#btn-use-open-file'),
-      contentWidth: document.querySelector('#content-width-select')
+      contentWidth: document.querySelector('#content-width-select'),
+      sidebarTabs: document.querySelectorAll('[data-sidebar-tab]'),
+      filesTab: document.querySelector('#tab-files'),
+      outlineTab: document.querySelector('#tab-outline'),
+      filesPanel: document.querySelector('#files-panel'),
+      outlinePanel: document.querySelector('#outline-panel'),
+      tocTree: document.querySelector('#toc-tree')
     };
 
     this.plugins = new PluginRegistry([mermaidPlugin]);
@@ -72,6 +80,12 @@ class DevFileViewerApp {
     this.sidebarWidth = DEFAULT_SIDEBAR_WIDTH;
     this.resizeDrag = null;
     this.contentWidth = DEFAULT_CONTENT_WIDTH;
+    this.activeSidebarTab = 'files';
+    this.hasStoredSidebarTab = false;
+    this.headings = [];
+    this.tocItems = new Map();
+    this.activeHeadingId = '';
+    this.activeHeadingFrame = 0;
   }
 
   async start() {
@@ -79,6 +93,7 @@ class DevFileViewerApp {
     await this.restoreContentWidth();
     await this.restoreSidebarWidth();
     await this.restoreSidebarState();
+    await this.restoreSidebarTab();
     await this.restoreScrollSettings();
     this.bindEvents();
     await this.refreshFileUrlAccessStatus();
@@ -106,10 +121,50 @@ class DevFileViewerApp {
     this.elements.useOpenFile.addEventListener('click', () => this.openLocalFile());
     this.elements.rememberScroll.addEventListener('change', () => this.setRememberScroll(this.elements.rememberScroll.checked));
     this.elements.contentWidth.addEventListener('change', () => this.setContentWidth(this.elements.contentWidth.value));
-    this.elements.viewerMain.addEventListener('scroll', () => this.scheduleSaveScrollPosition(), { passive: true });
+    for (const tab of this.elements.sidebarTabs) {
+      tab.addEventListener('click', () => this.setSidebarTab(tab.dataset.sidebarTab));
+    }
+    this.elements.preview.addEventListener('click', event => this.handlePreviewAnchorClick(event));
+    this.elements.viewerMain.addEventListener('scroll', () => {
+      this.scheduleSaveScrollPosition();
+      this.scheduleActiveHeadingUpdate();
+    }, { passive: true });
   }
 
 
+
+  async restoreSidebarTab() {
+    const stored = await chrome.storage.local.get(SIDEBAR_ACTIVE_TAB_KEY);
+    const tab = stored[SIDEBAR_ACTIVE_TAB_KEY];
+    this.hasStoredSidebarTab = tab === 'files' || tab === 'outline';
+    this.applySidebarTab(this.hasStoredSidebarTab ? tab : 'files');
+  }
+
+  async setSidebarTab(tab) {
+    this.applySidebarTab(tab);
+    this.hasStoredSidebarTab = true;
+    await chrome.storage.local.set({ [SIDEBAR_ACTIVE_TAB_KEY]: this.activeSidebarTab });
+  }
+
+  applySidebarTab(tab) {
+    const nextTab = tab === 'outline' ? 'outline' : 'files';
+    this.activeSidebarTab = nextTab;
+
+    this.elements.filesTab.classList.toggle('active', nextTab === 'files');
+    this.elements.outlineTab.classList.toggle('active', nextTab === 'outline');
+    this.elements.filesTab.setAttribute('aria-selected', String(nextTab === 'files'));
+    this.elements.outlineTab.setAttribute('aria-selected', String(nextTab === 'outline'));
+    this.elements.filesTab.tabIndex = nextTab === 'files' ? 0 : -1;
+    this.elements.outlineTab.tabIndex = nextTab === 'outline' ? 0 : -1;
+
+    this.elements.filesPanel.hidden = nextTab !== 'files';
+    this.elements.outlinePanel.hidden = nextTab !== 'outline';
+  }
+
+  applyDefaultSidebarTab(tab) {
+    if (this.hasStoredSidebarTab) return;
+    this.applySidebarTab(tab);
+  }
 
   async restoreContentWidth() {
     const stored = await chrome.storage.local.get(CONTENT_WIDTH_KEY);
@@ -198,6 +253,12 @@ class DevFileViewerApp {
     }
     this.resizeDrag = null;
     this.contentWidth = DEFAULT_CONTENT_WIDTH;
+    this.activeSidebarTab = 'files';
+    this.hasStoredSidebarTab = false;
+    this.headings = [];
+    this.tocItems = new Map();
+    this.activeHeadingId = '';
+    this.activeHeadingFrame = 0;
     this.elements.app.classList.remove('sidebar-resizing');
     await this.persistSidebarWidth();
     await nextFrame();
@@ -275,14 +336,14 @@ class DevFileViewerApp {
     const url = params.get('url');
 
     if (snapshotId) {
-      await this.openSnapshot(snapshotId);
+      await this.openSnapshot(snapshotId, { anchor: extractHash(window.location.hash) });
       return;
     }
 
-    if (url) await this.openUrl(url);
+    if (url) await this.openUrl(url, { anchor: extractHash(window.location.hash) || extractHash(url) });
   }
 
-  async openSnapshot(snapshotId) {
+  async openSnapshot(snapshotId, options = {}) {
     const key = `sourceSnapshot:${snapshotId}`;
     const stored = await chrome.storage.session.get(key);
     const snapshot = stored[key];
@@ -302,15 +363,15 @@ class DevFileViewerApp {
       text: snapshot.text || ''
     };
 
-    await this.renderDocument(doc);
+    await this.renderDocument(doc, options);
   }
 
-  async openUrl(url) {
+  async openUrl(url, options = {}) {
     if (!url) return;
     try {
       this.setStatus(`Loading ${url} ...`, 'info');
       const doc = await this.urlSource.load(url);
-      await this.renderDocument(doc);
+      await this.renderDocument(doc, { anchor: options.anchor || extractHash(url) });
     } catch (error) {
       await this.showLoadError(error, url);
     }
@@ -340,6 +401,7 @@ class DevFileViewerApp {
       });
       this.elements.sidebarTools.open = false;
       this.elements.scrollMemoryCard.hidden = false;
+      this.applyDefaultSidebarTab('files');
       this.setStatus('Folder loaded. Select a Markdown file from the sidebar.', 'success');
     } catch (error) {
       if (error?.name === 'AbortError') return;
@@ -389,6 +451,7 @@ class DevFileViewerApp {
 
     if (format !== FORMAT_IDS.MARKDOWN) {
       this.elements.preview.textContent = doc.text || '';
+      this.clearToc();
       this.currentDoc = doc;
       this.currentDocKey = this.getDocumentKey(doc);
       await this.restoreOrResetScroll(doc, options);
@@ -400,7 +463,9 @@ class DevFileViewerApp {
       baseUrl: doc.baseUrl || doc.url || '',
       onOpenDocumentLink: linkedUrl => this.openDocumentLink(linkedUrl, doc)
     });
-    this.ensureHeadingAnchors();
+    ensureHeadingAnchors(this.elements.preview);
+    this.buildToc();
+    if (doc.sourceType !== 'directory-file') this.applyDefaultSidebarTab('outline');
 
     this.currentDoc = doc;
     this.currentDocKey = this.getDocumentKey(doc);
@@ -443,27 +508,125 @@ class DevFileViewerApp {
 
     const saved = this.rememberScrollEnabled ? this.scrollPositions[docKey] : null;
     this.elements.viewerMain.scrollTop = Number.isFinite(saved?.top) ? saved.top : 0;
+    this.scheduleActiveHeadingUpdate();
   }
 
-  scrollToAnchor(anchor) {
+  scrollToAnchor(anchor, options = {}) {
     const id = safeDecodeURIComponent(String(anchor || '').replace(/^#/, ''));
     if (!id) return false;
-    const target = document.getElementById(id) || Array.from(this.elements.preview.querySelectorAll('[name]')).find(element => element.getAttribute('name') === id);
+    const target = Array.from(this.elements.preview.querySelectorAll('[id]')).find(element => element.id === id) || Array.from(this.elements.preview.querySelectorAll('[name]')).find(element => element.getAttribute('name') === id);
     if (!target) return false;
-    target.scrollIntoView({ block: 'start' });
+
+    target.scrollIntoView({ block: 'start', behavior: options.smooth ? 'smooth' : 'auto' });
+    this.setActiveHeading(target.id || id);
+
+    if (options.updateHash) {
+      const hash = encodeURIComponent(target.id || id);
+      history.replaceState(null, '', `${window.location.pathname}${window.location.search}#${hash}`);
+    }
+
     return true;
   }
 
-  ensureHeadingAnchors() {
-    const used = new Set(Array.from(this.elements.preview.querySelectorAll('[id]')).map(element => element.id));
-    for (const heading of this.elements.preview.querySelectorAll('h1, h2, h3, h4, h5, h6')) {
-      if (heading.id) continue;
-      const base = slugify(heading.textContent || 'section') || 'section';
-      let slug = base;
-      let index = 2;
-      while (used.has(slug)) slug = `${base}-${index++}`;
-      heading.id = slug;
-      used.add(slug);
+  handlePreviewAnchorClick(event) {
+    const link = event.target.closest?.('a[href^="#"]');
+    if (!link || !this.elements.preview.contains(link)) return;
+
+    const href = link.getAttribute('href');
+    if (!href || href === '#') return;
+
+    if (this.scrollToAnchor(href, { smooth: true, updateHash: true })) {
+      event.preventDefault();
+      this.saveCurrentScrollPosition().catch(() => {});
+    }
+  }
+
+  buildToc() {
+    this.headings = buildHeadingIndex(this.elements.preview, { maxLevel: 3 });
+    this.tocItems = new Map();
+    this.activeHeadingId = '';
+    this.elements.tocTree.innerHTML = '';
+
+    if (!this.headings.length) {
+      const empty = document.createElement('div');
+      empty.className = 'toc-empty';
+      empty.textContent = 'No headings found in this document.';
+      this.elements.tocTree.append(empty);
+      this.elements.outlineTab.textContent = 'Outline';
+      return;
+    }
+
+    const list = document.createElement('div');
+    list.className = 'toc-list';
+
+    for (const heading of this.headings) {
+      const item = document.createElement('a');
+      item.className = `toc-item toc-level-${heading.level}`;
+      item.href = `#${encodeURIComponent(heading.id)}`;
+      item.textContent = heading.text;
+      item.title = heading.text;
+      item.dataset.headingId = heading.id;
+      item.addEventListener('click', event => {
+        event.preventDefault();
+        this.scrollToAnchor(heading.id, { smooth: true, updateHash: true });
+        this.saveCurrentScrollPosition().catch(() => {});
+      });
+      list.append(item);
+      this.tocItems.set(heading.id, item);
+    }
+
+    this.elements.tocTree.append(list);
+    this.elements.outlineTab.textContent = `Outline (${this.headings.length})`;
+    this.scheduleActiveHeadingUpdate();
+  }
+
+  clearToc() {
+    this.headings = [];
+    this.tocItems = new Map();
+    this.activeHeadingId = '';
+    this.elements.tocTree.innerHTML = '<div class="toc-empty">Open a Markdown document to show its outline.</div>';
+    this.elements.outlineTab.textContent = 'Outline';
+  }
+
+  scheduleActiveHeadingUpdate() {
+    if (this.activeHeadingFrame) return;
+    this.activeHeadingFrame = requestAnimationFrame(() => {
+      this.activeHeadingFrame = 0;
+      this.updateActiveHeading();
+    });
+  }
+
+  updateActiveHeading() {
+    if (!this.headings.length) return;
+
+    const rootTop = this.elements.viewerMain.getBoundingClientRect().top;
+    const activationLine = rootTop + 110;
+    let active = this.headings[0];
+
+    for (const heading of this.headings) {
+      if (heading.element.getBoundingClientRect().top <= activationLine) active = heading;
+      else break;
+    }
+
+    this.setActiveHeading(active.id);
+  }
+
+  setActiveHeading(id) {
+    if (!id || this.activeHeadingId === id) return;
+    if (this.activeHeadingId && this.tocItems.has(this.activeHeadingId)) {
+      const previous = this.tocItems.get(this.activeHeadingId);
+      previous.classList.remove('is-active');
+      previous.removeAttribute('aria-current');
+    }
+
+    this.activeHeadingId = id;
+    const current = this.tocItems.get(id);
+    if (!current) return;
+
+    current.classList.add('is-active');
+    current.setAttribute('aria-current', 'location');
+    if (this.activeSidebarTab === 'outline' && !this.elements.outlinePanel.hidden) {
+      current.scrollIntoView({ block: 'nearest' });
     }
   }
 
@@ -537,16 +700,6 @@ function safeDecodeURIComponent(value) {
   }
 }
 
-
-function slugify(value) {
-  return String(value)
-    .trim()
-    .toLowerCase()
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^\p{Letter}\p{Number}]+/gu, '-')
-    .replace(/^-+|-+$/g, '');
-}
 
 function nextFrame() {
   return new Promise(resolve => requestAnimationFrame(() => resolve()));
