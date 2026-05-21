@@ -150,6 +150,9 @@ input, select { width: 100%; border: 1px solid var(--line); border-radius: 10px;
 .toc-level-1 { padding-left: 0; }
 .toc-level-2 { padding-left: 12px; }
 .toc-level-3 { padding-left: 24px; }
+.toc-level-4 { padding-left: 36px; }
+.toc-level-5 { padding-left: 48px; }
+.toc-level-6 { padding-left: 60px; }
 .toc-disclosure { width: 22px; height: 28px; padding: 0; border: 0; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; background: transparent; color: var(--muted); cursor: pointer; }
 .toc-disclosure:hover { color: var(--accent); background: var(--accent-soft); }
 .toc-disclosure.is-placeholder { visibility: hidden; pointer-events: none; }
@@ -161,6 +164,9 @@ input, select { width: 100%; border: 1px solid var(--line); border-radius: 10px;
 .toc-row.is-filter-match .toc-item { color: var(--fg); font-weight: 750; }
 .toc-level-1 .toc-item { font-weight: 800; color: var(--fg); }
 .toc-level-3 .toc-item { font-size: 12.5px; }
+.toc-level-4 .toc-item,
+.toc-level-5 .toc-item,
+.toc-level-6 .toc-item { font-size: 12px; }
 .markdown-body h1,
 .markdown-body h2,
 .markdown-body h3,
@@ -211,6 +217,11 @@ input, select { width: 100%; border: 1px solid var(--line); border-radius: 10px;
 .toc-popover-close { flex: 0 0 auto; width: 30px; height: 30px; padding: 0; border-radius: 999px; color: var(--muted); background: var(--panel-2); }
 .toc-popover-close:hover { color: var(--danger); background: #fff7f6; }
 .toc-popover-tree { min-height: 0; overflow-y: auto; padding-right: 4px; }
+.toc-depth-row { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; align-items: center; margin: 0 0 10px; }
+.toc-depth-row[hidden] { display: none; }
+.toc-depth-row label { color: var(--muted); font-size: 12px; font-weight: 800; white-space: nowrap; }
+.toc-depth-row select { min-width: 0; min-height: 32px; padding: 6px 8px; border-radius: 10px; border: 1px solid var(--line); background: #fff; color: var(--fg); font-size: 13px; }
+.toc-depth-row select:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
 .toc-filter-row { margin: 0 0 10px; }
 .toc-filter-row[hidden] { display: none; }
 .toc-filter-row input { width: 100%; min-height: 34px; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: #fff; color: var(--fg); font-size: 13px; }
@@ -224,7 +235,7 @@ input, select { width: 100%; border: 1px solid var(--line); border-radius: 10px;
   .toc-popover { top: 54px; left: 12px; width: min(360px, calc(100vw - 24px)); max-height: 72vh; }
 }
 
-/* V2.2.0 SVG icon controls */
+/* V2.2.3 SVG icon controls */
 .icon-button {
   display: inline-flex;
   align-items: center;

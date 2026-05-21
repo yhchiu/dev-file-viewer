@@ -84,6 +84,18 @@
 
         <section id="outline-panel" class="sidebar-panel" role="tabpanel" aria-labelledby="tab-outline" hidden>
           <div class="sidebar-section-title toc-title"><span>On this page</span> <span id="toc-file-name" class="toc-file-name"></span></div>
+          <div id="toc-depth-row" class="toc-depth-row" hidden>
+            <label for="toc-depth-select">Outline depth</label>
+            <select id="toc-depth-select" aria-label="Outline depth">
+              
+              <option value="2">H1-H2</option>
+              <option value="3" selected>H1-H3</option>
+              <option value="4">H1-H4</option>
+              <option value="5">H1-H5</option>
+              <option value="6">H1-H6</option>
+            
+            </select>
+          </div>
           <div id="toc-filter-row" class="toc-filter-row" hidden>
             <input id="toc-filter" type="search" placeholder="Filter headings..." aria-label="Filter headings" autocomplete="off" />
           </div>
@@ -121,6 +133,18 @@
             <button id="btn-close-toc-popover" class="toc-popover-close" type="button" aria-label="Close outline">×</button>
           </div>
         </div>
+        <div id="toc-popover-depth-row" class="toc-depth-row" hidden>
+          <label for="toc-popover-depth-select">Outline depth</label>
+          <select id="toc-popover-depth-select" aria-label="Outline depth">
+            
+              <option value="2">H1-H2</option>
+              <option value="3" selected>H1-H3</option>
+              <option value="4">H1-H4</option>
+              <option value="5">H1-H5</option>
+              <option value="6">H1-H6</option>
+            
+          </select>
+        </div>
         <div id="toc-popover-filter-row" class="toc-filter-row" hidden>
           <input id="toc-popover-filter" type="search" placeholder="Filter headings..." aria-label="Filter headings" autocomplete="off" />
         </div>
@@ -139,7 +163,7 @@
         </header>
 
         <section id="status" class="status info">
-V2.2.0 uses SVG controls for Outline pop-out/pin and places the floating Outline control in the viewer area.
+V2.2.3 uses SVG controls for Outline pop-out/pin and places the floating Outline control in the viewer area.
         </section>
 
         <article id="preview" class="markdown-body" tabindex="0"></article>

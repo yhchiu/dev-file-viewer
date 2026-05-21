@@ -26,6 +26,8 @@ const CONTENT_WIDTHS = {
   full: '100%'
 };
 const TOC_FILTER_THRESHOLD = 12;
+const DEFAULT_TOC_MAX_LEVEL = 3;
+const TOC_DEPTH_LEVELS = new Set([2, 3, 4, 5, 6]);
 
 class DevFileViewerApp {
   constructor() {
@@ -69,10 +71,14 @@ class DevFileViewerApp {
       outlinePanel: document.querySelector('#outline-panel'),
       tocTree: document.querySelector('#toc-tree'),
       tocFileName: document.querySelector('#toc-file-name'),
+      tocDepthRow: document.querySelector('#toc-depth-row'),
+      tocDepth: document.querySelector('#toc-depth-select'),
       tocFilterRow: document.querySelector('#toc-filter-row'),
       tocFilter: document.querySelector('#toc-filter'),
       tocPopoverTree: document.querySelector('#toc-popover-tree'),
       tocPopoverFileName: document.querySelector('#toc-popover-file-name'),
+      tocPopoverDepthRow: document.querySelector('#toc-popover-depth-row'),
+      tocPopoverDepth: document.querySelector('#toc-popover-depth-select'),
       tocPopoverFilterRow: document.querySelector('#toc-popover-filter-row'),
       tocPopoverFilter: document.querySelector('#toc-popover-filter')
     };
@@ -101,6 +107,7 @@ class DevFileViewerApp {
     this.activeHeadingId = '';
     this.activeHeadingFrame = 0;
     this.tocFilterQuery = '';
+    this.tocMaxLevel = DEFAULT_TOC_MAX_LEVEL;
     this.tocPopoverOpen = false;
     this.tocPopoverPinned = false;
     this.outlinePopoutEnabled = false;
@@ -156,6 +163,8 @@ class DevFileViewerApp {
     this.elements.useOpenFile.addEventListener('click', () => this.openLocalFile());
     this.elements.rememberScroll.addEventListener('change', () => this.setRememberScroll(this.elements.rememberScroll.checked));
     this.elements.contentWidth.addEventListener('change', () => this.setContentWidth(this.elements.contentWidth.value));
+    this.elements.tocDepth.addEventListener('change', () => this.setTocDepth(this.elements.tocDepth.value));
+    this.elements.tocPopoverDepth.addEventListener('change', () => this.setTocDepth(this.elements.tocPopoverDepth.value));
     this.elements.tocFilter.addEventListener('input', () => this.setTocFilter(this.elements.tocFilter.value));
     this.elements.tocPopoverFilter.addEventListener('input', () => this.setTocFilter(this.elements.tocPopoverFilter.value));
     document.addEventListener('keydown', event => this.handleGlobalKeydown(event));
@@ -870,7 +879,7 @@ class DevFileViewerApp {
   }
 
   buildToc() {
-    this.headings = buildHeadingIndex(this.elements.preview, { maxLevel: 3 });
+    this.headings = buildHeadingIndex(this.elements.preview, { maxLevel: this.tocMaxLevel });
     this.headingTree = buildHeadingTree(this.headings);
     this.tocCollapsedIds = new Set();
     this.tocItems = new Map();
@@ -880,10 +889,12 @@ class DevFileViewerApp {
     this.elements.tocPopoverTree.innerHTML = '';
     this.elements.tocFilter.value = '';
     this.elements.tocPopoverFilter.value = '';
+    this.syncTocDepthControls();
 
     if (!this.headings.length) {
       this.renderTocEmpty('No headings found in this document.');
       this.elements.outlineTab.textContent = 'Outline';
+      this.updateTocDepthVisibility();
       this.updateTocFilterVisibility();
       this.updateFloatingOutlineState();
       return;
@@ -892,6 +903,7 @@ class DevFileViewerApp {
     this.renderTocContainer(this.elements.tocTree, 'panel');
     this.renderTocContainer(this.elements.tocPopoverTree, 'popover');
     this.elements.outlineTab.textContent = `Outline (${this.headings.length})`;
+    this.updateTocDepthVisibility();
     this.updateTocFilterVisibility();
     this.applyTocFilter();
     this.updateFloatingOutlineState();
@@ -1006,6 +1018,26 @@ class DevFileViewerApp {
     this.elements.tocPopoverTree.append(popoverEmpty);
   }
 
+  syncTocDepthControls() {
+    const value = String(this.tocMaxLevel);
+    if (this.elements.tocDepth.value !== value) this.elements.tocDepth.value = value;
+    if (this.elements.tocPopoverDepth.value !== value) this.elements.tocPopoverDepth.value = value;
+  }
+
+  setTocDepth(value) {
+    const level = Number(value);
+    this.tocMaxLevel = TOC_DEPTH_LEVELS.has(level) ? level : DEFAULT_TOC_MAX_LEVEL;
+    this.syncTocDepthControls();
+    this.buildToc();
+    this.scheduleActiveHeadingUpdate();
+  }
+
+  updateTocDepthVisibility() {
+    const shouldShow = this.elements.preview.querySelectorAll('h1, h2, h3, h4, h5, h6').length > 0;
+    this.elements.tocDepthRow.hidden = !shouldShow;
+    this.elements.tocPopoverDepthRow.hidden = !shouldShow;
+  }
+
   updateTocFilterVisibility() {
     const shouldShow = this.headings.length >= TOC_FILTER_THRESHOLD;
     this.elements.tocFilterRow.hidden = !shouldShow;
@@ -1095,6 +1127,7 @@ class DevFileViewerApp {
     this.elements.tocPopoverFilter.value = '';
     this.renderTocEmpty('Open a Markdown document to show its outline.');
     this.elements.outlineTab.textContent = 'Outline';
+    this.updateTocDepthVisibility();
     this.outlinePopoutEnabled = false;
     this.updateTocFilterVisibility();
     this.updateTocTitle(null);
