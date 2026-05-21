@@ -1,6 +1,7 @@
 import { MarkdownEngine } from '../core/markdown/MarkdownEngine.js';
 import { SourceCodeRenderer } from '../core/source/SourceCodeRenderer.js';
 import { DiffRenderer } from '../core/diff/DiffRenderer.js';
+import { buildDiffOutlineTree } from '../core/diff/diffOutlineTree.js';
 import { FORMAT_IDS, detectFormat, displayNameFromUrl, formatLabel, sourceLanguageFromPath } from '../core/format/fileTypes.js';
 import { UrlSourceProvider } from '../core/sources/UrlSourceProvider.js';
 import { FilePickerSourceProvider } from '../core/sources/FilePickerSourceProvider.js';
@@ -72,12 +73,14 @@ class DevFileViewerApp {
       filesPanel: document.querySelector('#files-panel'),
       outlinePanel: document.querySelector('#outline-panel'),
       tocTree: document.querySelector('#toc-tree'),
+      tocTitleLabel: document.querySelector('#toc-title-label'),
       tocFileName: document.querySelector('#toc-file-name'),
       tocDepthRow: document.querySelector('#toc-depth-row'),
       tocDepth: document.querySelector('#toc-depth-select'),
       tocFilterRow: document.querySelector('#toc-filter-row'),
       tocFilter: document.querySelector('#toc-filter'),
       tocPopoverTree: document.querySelector('#toc-popover-tree'),
+      tocPopoverTitleLabel: document.querySelector('#toc-popover-title-label'),
       tocPopoverFileName: document.querySelector('#toc-popover-file-name'),
       tocPopoverDepthRow: document.querySelector('#toc-popover-depth-row'),
       tocPopoverDepth: document.querySelector('#toc-popover-depth-select'),
@@ -104,6 +107,7 @@ class DevFileViewerApp {
     this.resizeDrag = null;
     this.contentWidth = DEFAULT_CONTENT_WIDTH;
     this.activeSidebarTab = 'files';
+    this.outlineType = 'markdown';
     this.headings = [];
     this.headingTree = { nodes: [], roots: [], byId: new Map() };
     this.tocCollapsedIds = new Set();
@@ -807,13 +811,16 @@ class DevFileViewerApp {
 
     if (format === FORMAT_IDS.DIFF) {
       if (!this.diffRenderer) this.diffRenderer = new DiffRenderer();
-      this.diffRenderer.render(doc.text, this.elements.preview, {
+      const diffOutline = this.diffRenderer.render(doc.text, this.elements.preview, {
         name: doc.name || '',
         url: doc.url || '',
         path: doc.path || ''
       });
-      this.clearToc();
-      this.updateTocTitle(doc);
+      this.buildDiffOutline(diffOutline?.files || [], doc);
+      if (doc.sourceType !== 'directory-file' && diffOutline?.files?.length) {
+        this.applySidebarTab('outline');
+        this.elements.sidebarTools.open = false;
+      }
       this.currentDoc = doc;
       this.currentDocKey = this.getDocumentKey(doc);
       await this.restoreOrResetScroll(doc, options);
@@ -918,6 +925,7 @@ class DevFileViewerApp {
   }
 
   buildToc() {
+    this.outlineType = 'markdown';
     this.headings = buildHeadingIndex(this.elements.preview, { maxLevel: this.tocMaxLevel });
     this.headingTree = buildHeadingTree(this.headings);
     this.tocCollapsedIds = new Set();
@@ -949,72 +957,135 @@ class DevFileViewerApp {
     this.scheduleActiveHeadingUpdate();
   }
 
-  renderTocContainer(container, context) {
-    const list = document.createElement('div');
-    list.className = 'toc-list toc-tree-list';
-    list.dataset.tocContext = context;
 
-    for (const heading of this.headingTree.nodes) {
-      const row = document.createElement('div');
-      row.className = `toc-row toc-level-${heading.level}`;
-      row.dataset.headingId = heading.id;
-      row.dataset.parentIds = heading.parentIds.join(' ');
-      row.dataset.tocText = heading.text.toLowerCase();
-      row.dataset.tocContext = context;
+buildDiffOutline(files, doc) {
+  this.outlineType = 'diff';
+  this.headingTree = buildDiffOutlineTree(files);
+  this.headings = this.headingTree.fileNodes;
+  this.tocCollapsedIds = new Set();
+  this.tocItems = new Map();
+  this.activeHeadingId = '';
+  this.tocFilterQuery = '';
+  this.elements.tocTree.innerHTML = '';
+  this.elements.tocPopoverTree.innerHTML = '';
+  this.elements.tocFilter.value = '';
+  this.elements.tocPopoverFilter.value = '';
+  this.updateTocTitle(doc, 'Changed files');
+  this.elements.tocDepthRow.hidden = true;
+  this.elements.tocPopoverDepthRow.hidden = true;
 
-      const toggle = document.createElement('button');
-      toggle.type = 'button';
-      toggle.className = 'toc-disclosure';
-      toggle.dataset.headingId = heading.id;
-      toggle.dataset.tocContext = context;
-      toggle.setAttribute('aria-label', `Collapse ${heading.text}`);
-      toggle.setAttribute('aria-expanded', 'true');
-      toggle.innerHTML = `
-        <svg class="button-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-          <path d="M5.75 3.5 10.25 8l-4.5 4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-      `;
-      if (!heading.hasChildren) {
-        toggle.classList.add('is-placeholder');
-        toggle.disabled = true;
-        toggle.setAttribute('aria-hidden', 'true');
-        toggle.removeAttribute('aria-label');
-        toggle.removeAttribute('aria-expanded');
-      } else {
-        toggle.addEventListener('click', event => {
-          event.preventDefault();
-          event.stopPropagation();
-          this.toggleTocGroup(heading.id);
-        });
-      }
+  if (!this.headingTree.nodes.length) {
+    this.renderTocEmpty('No changed files found in this diff.');
+    this.elements.outlineTab.textContent = 'Files';
+    this.outlinePopoutEnabled = false;
+    this.updateTocFilterVisibility();
+    this.updateFloatingOutlineState();
+    return;
+  }
 
-      const item = document.createElement('a');
-      item.className = 'toc-item';
+  this.renderTocContainer(this.elements.tocTree, 'panel');
+  this.renderTocContainer(this.elements.tocPopoverTree, 'popover');
+  this.elements.outlineTab.textContent = `Changes (${this.headings.length})`;
+  this.updateTocFilterVisibility();
+  this.applyTocFilter();
+  this.updateFloatingOutlineState();
+  this.scheduleActiveHeadingUpdate();
+}
+
+
+renderTocContainer(container, context) {
+  const list = document.createElement('div');
+  list.className = 'toc-list toc-tree-list';
+  list.dataset.tocContext = context;
+
+  for (const heading of this.headingTree.nodes) {
+    const row = document.createElement('div');
+    row.className = `toc-row toc-level-${heading.level}`;
+    row.classList.toggle('toc-kind-diff-directory', heading.kind === 'diff-directory');
+    row.classList.toggle('toc-kind-diff-file', heading.kind === 'diff-file');
+    row.dataset.headingId = heading.id;
+    row.dataset.parentIds = heading.parentIds.join(' ');
+    row.dataset.tocText = `${heading.text || ''} ${heading.path || ''} ${heading.filePath || ''}`.toLowerCase();
+    row.dataset.tocContext = context;
+
+    const toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'toc-disclosure';
+    toggle.dataset.headingId = heading.id;
+    toggle.dataset.tocContext = context;
+    toggle.setAttribute('aria-label', `Collapse ${heading.text}`);
+    toggle.setAttribute('aria-expanded', 'true');
+    toggle.innerHTML = `
+      <svg class="button-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+        <path d="M5.75 3.5 10.25 8l-4.5 4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    `;
+    if (!heading.hasChildren) {
+      toggle.classList.add('is-placeholder');
+      toggle.disabled = true;
+      toggle.setAttribute('aria-hidden', 'true');
+      toggle.removeAttribute('aria-label');
+      toggle.removeAttribute('aria-expanded');
+    } else {
+      toggle.addEventListener('click', event => {
+        event.preventDefault();
+        event.stopPropagation();
+        this.toggleTocGroup(heading.id);
+      });
+    }
+
+    const item = heading.kind === 'diff-directory'
+      ? document.createElement('button')
+      : document.createElement('a');
+
+    item.className = 'toc-item';
+    item.dataset.tocContext = context;
+    item.title = heading.path || heading.text;
+
+    if (heading.kind === 'diff-directory') {
+      item.type = 'button';
+      item.classList.add('toc-directory-item');
+      item.innerHTML = `${tocIconSvg('folder')}<span class="toc-item-label"></span>`;
+      item.querySelector('.toc-item-label').textContent = heading.text;
+      item.addEventListener('click', event => {
+        event.preventDefault();
+        this.toggleTocGroup(heading.id);
+      });
+    } else if (heading.kind === 'diff-file') {
       item.href = `#${encodeURIComponent(heading.id)}`;
-      item.textContent = heading.text;
-      item.title = heading.text;
-      item.dataset.headingId = heading.id;
-      item.dataset.tocContext = context;
-      item.dataset.tocText = heading.text.toLowerCase();
+      item.innerHTML = `${tocIconSvg('file')}<span class="toc-item-label"></span><span class="toc-item-stats"></span>`;
+      item.querySelector('.toc-item-label').textContent = heading.text;
+      item.querySelector('.toc-item-stats').textContent = `+${heading.stats?.added || 0} −${heading.stats?.removed || 0}`;
       item.addEventListener('click', event => {
         event.preventDefault();
         this.scrollToAnchor(heading.id, { smooth: true, updateHash: true });
         this.saveCurrentScrollPosition().catch(() => {});
         if (context === 'popover' && !this.tocPopoverPinned) this.closeTocPopover();
       });
-
-      row.append(toggle, item);
-      list.append(row);
+      this.registerTocItem(heading.id, item);
+    } else {
+      item.href = `#${encodeURIComponent(heading.id)}`;
+      item.textContent = heading.text;
+      item.addEventListener('click', event => {
+        event.preventDefault();
+        this.scrollToAnchor(heading.id, { smooth: true, updateHash: true });
+        this.saveCurrentScrollPosition().catch(() => {});
+        if (context === 'popover' && !this.tocPopoverPinned) this.closeTocPopover();
+      });
       this.registerTocItem(heading.id, item);
     }
 
-    const noMatch = document.createElement('div');
-    noMatch.className = 'toc-empty toc-no-matches';
-    noMatch.textContent = 'No matching headings.';
-    noMatch.hidden = true;
-
-    container.append(list, noMatch);
+    row.append(toggle, item);
+    list.append(row);
   }
+
+  const noMatch = document.createElement('div');
+  noMatch.className = 'toc-empty toc-no-matches';
+  noMatch.textContent = this.outlineType === 'diff' ? 'No matching files.' : 'No matching headings.';
+  noMatch.hidden = true;
+
+  container.append(list, noMatch);
+}
 
   registerTocItem(id, item) {
     const items = this.tocItems.get(id) || [];
@@ -1106,6 +1177,7 @@ class DevFileViewerApp {
             visibleIds.add(id);
             const node = this.headingTree.byId.get(id);
             for (const parentId of node?.parentIds || []) visibleIds.add(parentId);
+            this.collectTocDescendantIds(node, visibleIds);
           }
         }
       }
@@ -1133,13 +1205,22 @@ class DevFileViewerApp {
     this.updateTocDisclosureStates();
   }
 
+
+collectTocDescendantIds(node, targetSet) {
+  if (!node?.children?.length) return;
+  for (const child of node.children) {
+    targetSet.add(child.id);
+    this.collectTocDescendantIds(child, targetSet);
+  }
+}
+
   updateTocDisclosureStates() {
     const query = this.tocFilterQuery;
     const matchedAncestorIds = new Set();
 
     if (query) {
       for (const heading of this.headingTree.nodes) {
-        if (!heading.text.toLowerCase().includes(query)) continue;
+        if (!`${heading.text || ''} ${heading.path || ''} ${heading.filePath || ''}`.toLowerCase().includes(query)) continue;
         for (const parentId of heading.parentIds) matchedAncestorIds.add(parentId);
       }
     }
@@ -1156,6 +1237,7 @@ class DevFileViewerApp {
   }
 
   clearToc() {
+    this.outlineType = 'markdown';
     this.headings = [];
     this.headingTree = { nodes: [], roots: [], byId: new Map() };
     this.tocCollapsedIds = new Set();
@@ -1164,17 +1246,20 @@ class DevFileViewerApp {
     this.tocFilterQuery = '';
     this.elements.tocFilter.value = '';
     this.elements.tocPopoverFilter.value = '';
-    this.renderTocEmpty('Open a Markdown document to show its outline.');
+    this.renderTocEmpty('Open a Markdown document or diff file to show an outline.');
     this.elements.outlineTab.textContent = 'Outline';
     this.updateTocDepthVisibility();
     this.outlinePopoutEnabled = false;
     this.updateTocFilterVisibility();
-    this.updateTocTitle(null);
+    this.updateTocTitle(null, 'On this page');
     this.updateFloatingOutlineState();
   }
 
-  updateTocTitle(doc) {
+  updateTocTitle(doc, label = 'On this page') {
     const name = doc?.name || '';
+    for (const titleElement of [this.elements.tocTitleLabel, this.elements.tocPopoverTitleLabel]) {
+      if (titleElement) titleElement.textContent = label;
+    }
     for (const element of [this.elements.tocFileName, this.elements.tocPopoverFileName]) {
       if (!element) continue;
       element.textContent = name ? `(${name})` : '';
@@ -1280,6 +1365,20 @@ class DevFileViewerApp {
     this.elements.status.className = `status ${type}`;
     this.elements.status.textContent = message;
   }
+}
+
+
+function tocIconSvg(kind) {
+  if (kind === 'folder') {
+    return `<svg class="toc-item-icon toc-folder-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+      <path d="M1.75 4.25A1.25 1.25 0 0 1 3 3h3.15l1.25 1.35H13a1.25 1.25 0 0 1 1.25 1.25v6.15A1.25 1.25 0 0 1 13 13H3a1.25 1.25 0 0 1-1.25-1.25v-7.5Z" fill="currentColor" />
+    </svg>`;
+  }
+
+  return `<svg class="toc-item-icon toc-file-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+    <path d="M4 2.25h5.1L12 5.15v8.6H4V2.25Z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" />
+    <path d="M9 2.25V5.3h3" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" />
+  </svg>`;
 }
 
 function contentWidthLabel(value) {

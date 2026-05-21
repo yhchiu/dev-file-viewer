@@ -1,7 +1,3 @@
-function escapeText(value = '') {
-  return String(value);
-}
-
 export class DiffRenderer {
   render(diffText, targetElement) {
     targetElement.textContent = '';
@@ -10,6 +6,7 @@ export class DiffRenderer {
     const wrapper = document.createElement('div');
     wrapper.className = 'diff-viewer';
     const sections = this.parseUnifiedDiff(diffText || '');
+    const outlineFiles = [];
 
     if (!sections.length) {
       const empty = document.createElement('div');
@@ -17,14 +14,17 @@ export class DiffRenderer {
       empty.textContent = 'No diff content found.';
       wrapper.append(empty);
       targetElement.append(wrapper);
-      return;
+      return { files: [] };
     }
 
-    for (const section of sections) {
-      wrapper.append(this.renderFileSection(section));
-    }
+    sections.forEach((section, index) => {
+      const rendered = this.renderFileSection(section, index);
+      wrapper.append(rendered.element);
+      outlineFiles.push(rendered.outline);
+    });
 
     targetElement.append(wrapper);
+    return { files: outlineFiles };
   }
 
   parseUnifiedDiff(text) {
@@ -71,6 +71,18 @@ export class DiffRenderer {
         continue;
       }
 
+      if (line.startsWith('rename from ')) {
+        section.oldFile = normalizeFileLabel(line.slice('rename from '.length));
+        section.meta.push(line);
+        continue;
+      }
+
+      if (line.startsWith('rename to ')) {
+        section.newFile = normalizeFileLabel(line.slice('rename to '.length));
+        section.meta.push(line);
+        continue;
+      }
+
       if (line.startsWith('@@')) {
         section.hunks.push({
           header: line,
@@ -92,18 +104,25 @@ export class DiffRenderer {
     return sections.filter(section => section.meta.length || section.hunks.length || section.oldFile || section.newFile);
   }
 
-  renderFileSection(section) {
+  renderFileSection(section, index) {
+    const filePath = displayFileTitle(section);
+    const stats = diffStats(section);
+    const id = uniqueFileSectionId(filePath, index);
+
     const root = document.createElement('section');
     root.className = 'diff-file';
+    root.id = id;
+    root.dataset.diffFilePath = filePath;
+    root.dataset.diffAdded = String(stats.added);
+    root.dataset.diffRemoved = String(stats.removed);
 
     const header = document.createElement('div');
     header.className = 'diff-file-header';
 
     const title = document.createElement('div');
     title.className = 'diff-file-title';
-    title.textContent = displayFileTitle(section);
+    title.textContent = filePath;
 
-    const stats = diffStats(section);
     const badge = document.createElement('div');
     badge.className = 'diff-file-stats';
     badge.textContent = `+${stats.added} −${stats.removed}`;
@@ -124,14 +143,20 @@ export class DiffRenderer {
       empty.className = 'diff-empty';
       empty.textContent = 'No hunks in this diff file.';
       root.append(empty);
-      return root;
+      return {
+        element: root,
+        outline: { id, path: filePath, text: filePath, stats, element: root }
+      };
     }
 
     for (const hunk of section.hunks) {
       root.append(this.renderHunk(hunk));
     }
 
-    return root;
+    return {
+      element: root,
+      outline: { id, path: filePath, text: filePath, stats, element: root }
+    };
   }
 
   renderHunk(hunk) {
@@ -169,22 +194,22 @@ export class DiffRenderer {
         oldCell.textContent = '';
         newCell.textContent = String(newLine++);
         markerCell.textContent = '+';
-        codeCell.textContent = escapeText(line.slice(1));
+        codeCell.textContent = line.slice(1);
       } else if (type === 'removed') {
         oldCell.textContent = String(oldLine++);
         newCell.textContent = '';
         markerCell.textContent = '−';
-        codeCell.textContent = escapeText(line.slice(1));
+        codeCell.textContent = line.slice(1);
       } else if (type === 'context') {
         oldCell.textContent = String(oldLine++);
         newCell.textContent = String(newLine++);
         markerCell.textContent = ' ';
-        codeCell.textContent = escapeText(line.startsWith(' ') ? line.slice(1) : line);
+        codeCell.textContent = line.startsWith(' ') ? line.slice(1) : line;
       } else {
         oldCell.textContent = '';
         newCell.textContent = '';
         markerCell.textContent = '';
-        codeCell.textContent = escapeText(line);
+        codeCell.textContent = line;
       }
 
       row.append(oldCell, newCell, markerCell, codeCell);
@@ -197,14 +222,17 @@ export class DiffRenderer {
 }
 
 function normalizeFileLabel(value = '') {
-  return String(value).trim().replace(/^\w\//, '');
+  return String(value).trim().replace(/^[ab]\//, '');
 }
 
 function displayFileTitle(section) {
   if (section.newFile && section.newFile !== '/dev/null') return section.newFile;
   if (section.oldFile && section.oldFile !== '/dev/null') return section.oldFile;
   const gitLine = section.meta.find(line => line.startsWith('diff --git '));
-  if (gitLine) return gitLine.replace(/^diff --git\s+/, '');
+  if (gitLine) {
+    const parts = gitLine.trim().split(/\s+/);
+    return normalizeFileLabel(parts.at(-1) || gitLine.replace(/^diff --git\s+/, ''));
+  }
   return 'Diff file';
 }
 
@@ -234,4 +262,15 @@ function diffStats(section) {
     }
   }
   return { added, removed };
+}
+
+function uniqueFileSectionId(filePath, index) {
+  const slug = String(filePath || 'diff-file')
+    .toLowerCase()
+    .replace(/^[ab]\//, '')
+    .replace(/[^a-z0-9._/-]+/g, '-')
+    .replace(/[/.]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'diff-file';
+
+  return `diff-file-${index + 1}-${slug}`;
 }

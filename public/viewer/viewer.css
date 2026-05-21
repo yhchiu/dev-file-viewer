@@ -619,7 +619,7 @@ body.markdown-width-full .diff-body,
 }
 
 
-/* V2.5.2 GitHub-like diff table reset.
+/* V2.5.5 GitHub-like diff table reset.
    Diff tables must not inherit Markdown table/card styles. */
 .markdown-body.diff-body {
   padding: 0;
@@ -726,4 +726,61 @@ body.markdown-width-full .diff-body,
   background: #ffffff;
   color: var(--muted);
   font-style: italic;
+}
+
+
+/* V2.5.5 diff outline tree */
+.toc-directory-item {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font-weight: 650;
+}
+
+.toc-kind-diff-directory .toc-item,
+.toc-kind-diff-file .toc-item {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.toc-kind-diff-directory .toc-item {
+  grid-template-columns: 18px minmax(0, 1fr);
+  color: var(--fg);
+}
+
+.toc-item-icon {
+  width: 16px;
+  height: 16px;
+  display: block;
+  flex: 0 0 auto;
+  color: #54a6ff;
+}
+
+.toc-file-icon {
+  color: var(--muted);
+}
+
+.toc-item-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.toc-item-stats {
+  justify-self: end;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.toc-kind-diff-file .toc-item.is-active .toc-item-stats,
+.toc-kind-diff-file .toc-item:hover .toc-item-stats {
+  color: var(--accent);
 }
