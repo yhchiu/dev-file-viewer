@@ -8,13 +8,15 @@
   </head>
   <body>
     <div id="app" class="app-shell">
-      <aside class="sidebar" aria-label="Directory sidebar">
+      <button id="btn-sidebar-restore" class="sidebar-restore" type="button" aria-label="Show sidebar" title="Show sidebar" hidden>☰</button>
+      <aside id="sidebar" class="sidebar" aria-label="Directory sidebar">
         <div class="brand">
           <div class="brand-mark">DF</div>
-          <div>
+          <div class="brand-copy">
             <div class="brand-title">Dev File Viewer</div>
             <div class="brand-subtitle">Markdown, Diff &amp; Source Viewer</div>
           </div>
+          <button id="btn-sidebar-toggle" class="sidebar-toggle" type="button" aria-label="Hide sidebar" title="Hide sidebar" aria-expanded="true">←</button>
         </div>
 
         <details id="sidebar-tools" class="sidebar-tools" open>
@@ -53,6 +55,19 @@
         <div class="sidebar-section-title">Directory</div>
         <div id="directory-tree" class="directory-tree empty">Select a folder to show Markdown files.</div>
       </aside>
+
+      <div
+        id="sidebar-resizer"
+        class="sidebar-resizer"
+        role="separator"
+        aria-orientation="vertical"
+        aria-label="Resize sidebar"
+        aria-valuemin="240"
+        aria-valuemax="560"
+        aria-valuenow="310"
+        tabindex="0"
+        title="Drag to resize sidebar. Double-click to reset."
+      ></div>
 
       <main id="viewer-main" class="viewer-main">
         <header class="toolbar">
