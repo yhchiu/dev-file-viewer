@@ -1,8 +1,8 @@
-# Dev File Viewer V1.1.5
+# Dev File Viewer V1.1.6
 
-Dev File Viewer is a Chrome Extension for previewing local and remote developer-oriented files. The product subtitle is **Markdown, Diff & Source Viewer**. V1.1.5 focuses on Markdown, Mermaid diagrams, Markdown tables, Markdown links, a friendlier local-folder UX, collapsible and resizable sidebar, session-only scroll position memory, and automatic `file://` Markdown preview.
+Dev File Viewer is a Chrome Extension for previewing local and remote developer-oriented files. The product subtitle is **Markdown, Diff & Source Viewer**. V1.1.6 focuses on Markdown, Mermaid diagrams, Markdown tables, Markdown links, a friendlier local-folder UX, collapsible and resizable sidebar, adjustable Markdown content width, session-only scroll position memory, and automatic `file://` Markdown preview.
 
-## V1.1.5 scope
+## V1.1.6 scope
 
 - Markdown preview for `.md`, `.mkd`, `.mdx`, `.markdown`
 - Open files from `file://`, `http://`, and `https://`
@@ -10,6 +10,7 @@ Dev File Viewer is a Chrome Extension for previewing local and remote developer-
 - Sidebar directory tree for user-selected local folders
 - Sidebar collapse/expand control with persisted preference
 - Resizable sidebar width with persisted local UI preference
+- Adjustable Markdown content width: Narrow, Comfortable, Wide, or Full width
 - Markdown table rendering
 - Markdown links: external links, same-page anchors, and folder-relative links to other Markdown files
 - Mermaid fenced-code blocks using ` ```mermaid `
@@ -52,7 +53,7 @@ Then open `chrome://extensions`, enable **Developer mode**, click **Load unpacke
 - Open a remote Markdown URL, then use the extension popup or context menu.
 - Open a local Markdown URL after enabling file URL access. Automatic `file://` preview is routed through the background service worker to avoid Chrome blocking direct `chrome-extension://` navigation from the file page.
 - Use **Open File** to read one local file without changing Chrome settings.
-- Use **Open Folder** to build a directory sidebar from a selected folder. After a folder opens, the Open/Settings panel collapses automatically; expand it again when needed. Use the sidebar arrow to collapse the full sidebar and the floating button to restore it. Drag the divider between the sidebar and preview pane to resize the sidebar; double-click the divider to reset it.
+- Use **Open Folder** to build a directory sidebar from a selected folder. After a folder opens, the Open/Settings panel collapses automatically; expand it again when needed. Use the sidebar arrow to collapse the full sidebar and the floating button to restore it. Drag the divider between the sidebar and preview pane to resize the sidebar; double-click the divider to reset it. Use **Content Width** to switch the Markdown reading area between Narrow, Comfortable, Wide, and Full width.
 - Enable **Remember scroll position** after opening a folder if you want each file to reopen at its last scroll position during the current browser session. When disabled, files open at the first line.
 - Markdown links are supported. External links open in a new tab. Folder-relative links to Markdown files open inside Dev File Viewer.
 - Markdown tables are rendered from pipe table syntax:
@@ -76,8 +77,9 @@ flowchart TD
 ````
 
 
-## V1.1.5 notes
+## V1.1.6 notes
 
+- Added a **Content Width** setting for the Markdown reading area. Choices are Narrow, Comfortable, Wide, and Full width. The preference is stored in `chrome.storage.local`.
 - Added a draggable sidebar divider so users can resize the directory sidebar. The width is stored as a local UI preference and can be reset by double-clicking the divider.
 - Added a sidebar collapse/expand control. The collapsed state is stored as a local UI preference so the viewer keeps the same layout after reopening.
 - Fixed a viewer layout issue where long Markdown documents with Mermaid diagrams or wide tables could show both the page scrollbar and the viewer scrollbar. The app shell now owns the viewport height and only the sidebar/viewer panes scroll internally.

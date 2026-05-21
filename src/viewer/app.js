@@ -12,9 +12,17 @@ const SCROLL_ENABLED_KEY = 'devFileViewer:rememberScrollEnabled';
 const SCROLL_POSITIONS_KEY = 'devFileViewer:scrollPositions';
 const SIDEBAR_COLLAPSED_KEY = 'devFileViewer:sidebarCollapsed';
 const SIDEBAR_WIDTH_KEY = 'devFileViewer:sidebarWidth';
+const CONTENT_WIDTH_KEY = 'devFileViewer:contentWidth';
 const DEFAULT_SIDEBAR_WIDTH = 310;
 const MIN_SIDEBAR_WIDTH = 240;
 const MAX_SIDEBAR_WIDTH = 560;
+const DEFAULT_CONTENT_WIDTH = 'comfortable';
+const CONTENT_WIDTHS = {
+  narrow: '760px',
+  comfortable: '920px',
+  wide: '1180px',
+  full: '100%'
+};
 
 class DevFileViewerApp {
   constructor() {
@@ -44,7 +52,8 @@ class DevFileViewerApp {
       fileUrlStatus: document.querySelector('#file-url-status'),
       openExtensionSettings: document.querySelector('#btn-open-extension-settings'),
       copySettingsLink: document.querySelector('#btn-copy-settings-link'),
-      useOpenFile: document.querySelector('#btn-use-open-file')
+      useOpenFile: document.querySelector('#btn-use-open-file'),
+      contentWidth: document.querySelector('#content-width-select')
     };
 
     this.plugins = new PluginRegistry([mermaidPlugin]);
@@ -62,10 +71,12 @@ class DevFileViewerApp {
     this.sidebarCollapsed = false;
     this.sidebarWidth = DEFAULT_SIDEBAR_WIDTH;
     this.resizeDrag = null;
+    this.contentWidth = DEFAULT_CONTENT_WIDTH;
   }
 
   async start() {
     await this.plugins.init();
+    await this.restoreContentWidth();
     await this.restoreSidebarWidth();
     await this.restoreSidebarState();
     await this.restoreScrollSettings();
@@ -94,9 +105,31 @@ class DevFileViewerApp {
     this.elements.copySettingsLink.addEventListener('click', () => this.copySettingsUrl());
     this.elements.useOpenFile.addEventListener('click', () => this.openLocalFile());
     this.elements.rememberScroll.addEventListener('change', () => this.setRememberScroll(this.elements.rememberScroll.checked));
+    this.elements.contentWidth.addEventListener('change', () => this.setContentWidth(this.elements.contentWidth.value));
     this.elements.viewerMain.addEventListener('scroll', () => this.scheduleSaveScrollPosition(), { passive: true });
   }
 
+
+
+  async restoreContentWidth() {
+    const stored = await chrome.storage.local.get(CONTENT_WIDTH_KEY);
+    this.applyContentWidth(stored[CONTENT_WIDTH_KEY] || DEFAULT_CONTENT_WIDTH);
+  }
+
+  applyContentWidth(value) {
+    const widthKey = Object.prototype.hasOwnProperty.call(CONTENT_WIDTHS, value) ? value : DEFAULT_CONTENT_WIDTH;
+    this.contentWidth = widthKey;
+    this.elements.contentWidth.value = widthKey;
+    this.elements.app.classList.toggle('content-width-full', widthKey === 'full');
+    this.elements.app.style.setProperty('--markdown-body-width', CONTENT_WIDTHS[widthKey]);
+  }
+
+  async setContentWidth(value) {
+    this.applyContentWidth(value);
+    await chrome.storage.local.set({ [CONTENT_WIDTH_KEY]: this.contentWidth });
+    this.setStatus(`Content width set to ${contentWidthLabel(this.contentWidth)}.`, 'info');
+    await nextFrame();
+  }
 
   async restoreSidebarWidth() {
     const stored = await chrome.storage.local.get(SIDEBAR_WIDTH_KEY);
@@ -164,6 +197,7 @@ class DevFileViewerApp {
       // Pointer capture can already be released by the browser.
     }
     this.resizeDrag = null;
+    this.contentWidth = DEFAULT_CONTENT_WIDTH;
     this.elements.app.classList.remove('sidebar-resizing');
     await this.persistSidebarWidth();
     await nextFrame();
@@ -470,6 +504,17 @@ class DevFileViewerApp {
     this.elements.status.hidden = false;
     this.elements.status.className = `status ${type}`;
     this.elements.status.textContent = message;
+  }
+}
+
+function contentWidthLabel(value) {
+  switch (value) {
+    case 'narrow': return 'Narrow';
+    case 'wide': return 'Wide';
+    case 'full': return 'Full width';
+    case 'comfortable':
+    default:
+      return 'Comfortable';
   }
 }
 
