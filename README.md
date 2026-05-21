@@ -1,10 +1,10 @@
-# Dev File Viewer V2.0.1
+# Dev File Viewer V2.1.0
 
 ![Dev File Viewer brand mark](public/assets/brand/brand-mark.png)
 
-Dev File Viewer is a Chrome Extension for previewing local and remote developer-oriented files. The product subtitle is **Markdown, Diff & Source Viewer**. V2.0.1 continues the V2 roadmap with Markdown Table of Contents / Outline navigation while keeping the existing Markdown, Mermaid, table, link, local-folder, sidebar, content-width, scroll-memory, and `file://` preview features.
+Dev File Viewer is a Chrome Extension for previewing local and remote developer-oriented files. The product subtitle is **Markdown, Diff & Source Viewer**. V2.1.0 continues the V2 roadmap with TOC Phase 2: low-distraction Outline popover, floating Outline access, and heading filtering while keeping the existing Markdown, Mermaid, table, link, local-folder, sidebar, content-width, scroll-memory, and `file://` preview features.
 
-## V2.0.1 scope
+## V2.1.0 scope
 
 - Markdown preview for `.md`, `.mkd`, `.mdx`, `.markdown`
 - Open files from `file://`, `http://`, and `https://`
@@ -15,6 +15,9 @@ Dev File Viewer is a Chrome Extension for previewing local and remote developer-
 - Adjustable Markdown content width: Narrow, Comfortable, Wide, or Full width
 - HiDPI-aware popup and sidebar logos using `srcset` instead of scaling `icon48.png`
 - Table of Contents / Outline tab generated from Markdown headings H1-H3
+- Floating Outline button when the sidebar is collapsed
+- Low-distraction Outline popover for quick section jumps without reopening the full sidebar
+- Heading filter when a document has many headings
 - Active section highlighting while reading
 - Smooth section jump from the Outline tab
 - Stable heading anchors for same-page Markdown links and TOC links
@@ -60,7 +63,7 @@ Then open `chrome://extensions`, enable **Developer mode**, click **Load unpacke
 - Open a remote Markdown URL, then use the extension popup or context menu.
 - Open a local Markdown URL after enabling file URL access. Automatic `file://` preview is routed through the background service worker to avoid Chrome blocking direct `chrome-extension://` navigation from the file page.
 - Use **Open File** to read one local file without changing Chrome settings.
-- Use **Open Folder** to build a directory sidebar from a selected folder. After a folder opens, the Open/Settings panel collapses automatically; expand it again when needed. Use **Files / Outline** to switch between folder navigation and the current document TOC. Use the sidebar arrow to collapse the full sidebar and the floating button to restore it. Drag the divider between the sidebar and preview pane to resize the sidebar; double-click the divider to reset it. Use **Content Width** to switch the Markdown reading area between Narrow, Comfortable, Wide, and Full width.
+- Use **Open Folder** to build a directory sidebar from a selected folder. After a folder opens, the Open/Settings panel collapses automatically; expand it again when needed. Use **Files / Outline** to switch between folder navigation and the current document TOC. Use the sidebar arrow to collapse the full sidebar, the `☰` button to restore it, and the floating **Outline** button to open a quick TOC popover without reopening the sidebar. Drag the divider between the sidebar and preview pane to resize the sidebar; double-click the divider to reset it. Use **Content Width** to switch the Markdown reading area between Narrow, Comfortable, Wide, and Full width.
 - Enable **Remember scroll position** after opening a folder if you want each file to reopen at its last scroll position during the current browser session. When disabled, files open at the first line.
 - Markdown links are supported. External links open in a new tab. Folder-relative links to Markdown files open inside Dev File Viewer.
 - Markdown tables are rendered from pipe table syntax:
@@ -83,6 +86,13 @@ flowchart TD
 ```
 ````
 
+
+## V2.1.0 notes
+
+- Added **TOC Phase 2** low-distraction navigation: when the sidebar is collapsed and the current Markdown document has headings, a floating **Outline** button appears beside the sidebar restore button.
+- The floating Outline button opens a popover TOC, so users can jump to sections without reopening the full sidebar or reducing the Markdown reading width.
+- Added heading filtering for long documents. The filter appears when the document has 12 or more headings and is shared between the sidebar Outline and the popover Outline.
+- Popover behavior is intentionally session-only runtime state: it closes on outside click, Escape, section selection, or sidebar expansion. It is not persisted.
 
 ## V2.0.1 notes
 

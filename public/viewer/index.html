@@ -9,6 +9,7 @@
   <body>
     <div id="app" class="app-shell">
       <button id="btn-sidebar-restore" class="sidebar-restore" type="button" aria-label="Show sidebar" title="Show sidebar" hidden>☰</button>
+      <button id="btn-floating-outline" class="floating-outline" type="button" aria-label="Open document outline" aria-expanded="false" title="Open document outline" hidden>Outline</button>
       <aside id="sidebar" class="sidebar" aria-label="Directory sidebar">
         <div class="brand">
           <img class="brand-mark" src="../assets/icons/icon48.png" srcset="../assets/icons/icon48.png 1x, ../assets/icons/icon128.png 2x" width="42" height="42" alt="" aria-hidden="true" />
@@ -74,6 +75,9 @@
 
         <section id="outline-panel" class="sidebar-panel" role="tabpanel" aria-labelledby="tab-outline" hidden>
           <div class="sidebar-section-title toc-title"><span>On this page</span> <span id="toc-file-name" class="toc-file-name"></span></div>
+          <div id="toc-filter-row" class="toc-filter-row" hidden>
+            <input id="toc-filter" type="search" placeholder="Filter headings..." aria-label="Filter headings" autocomplete="off" />
+          </div>
           <nav id="toc-tree" class="toc-tree" aria-label="Table of contents">
             <div class="toc-empty">Open a Markdown document to show its outline.</div>
           </nav>
@@ -93,6 +97,17 @@
         title="Drag to resize sidebar. Double-click to reset."
       ></div>
 
+      <section id="toc-popover" class="toc-popover" aria-label="Table of contents popover" hidden>
+        <div class="toc-popover-header">
+          <div class="toc-popover-title"><span>On this page</span> <span id="toc-popover-file-name" class="toc-file-name"></span></div>
+          <button id="btn-close-toc-popover" class="toc-popover-close" type="button" aria-label="Close outline">×</button>
+        </div>
+        <div id="toc-popover-filter-row" class="toc-filter-row" hidden>
+          <input id="toc-popover-filter" type="search" placeholder="Filter headings..." aria-label="Filter headings" autocomplete="off" />
+        </div>
+        <nav id="toc-popover-tree" class="toc-tree toc-popover-tree" aria-label="Table of contents"></nav>
+      </section>
+
       <main id="viewer-main" class="viewer-main">
         <header class="toolbar">
           <div>
@@ -105,7 +120,7 @@
         </header>
 
         <section id="status" class="status info">
-          V2 starts with Markdown Table of Contents. Open a document and use Files / Outline to switch between folder navigation and section navigation.
+V2.1 adds a low-distraction Outline popover. Open a document and use Files / Outline to switch between folder navigation and section navigation.
         </section>
 
         <article id="preview" class="markdown-body" tabindex="0"></article>

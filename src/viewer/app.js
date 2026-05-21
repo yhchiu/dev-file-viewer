@@ -24,6 +24,7 @@ const CONTENT_WIDTHS = {
   wide: '1180px',
   full: '100%'
 };
+const TOC_FILTER_THRESHOLD = 12;
 
 class DevFileViewerApp {
   constructor() {
@@ -39,6 +40,9 @@ class DevFileViewerApp {
       sidebarTools: document.querySelector('#sidebar-tools'),
       sidebarToggle: document.querySelector('#btn-sidebar-toggle'),
       sidebarRestore: document.querySelector('#btn-sidebar-restore'),
+      floatingOutline: document.querySelector('#btn-floating-outline'),
+      tocPopover: document.querySelector('#toc-popover'),
+      closeTocPopover: document.querySelector('#btn-close-toc-popover'),
       sidebarResizer: document.querySelector('#sidebar-resizer'),
       scrollMemoryCard: document.querySelector('#scroll-memory-card'),
       rememberScroll: document.querySelector('#remember-scroll'),
@@ -61,7 +65,13 @@ class DevFileViewerApp {
       filesPanel: document.querySelector('#files-panel'),
       outlinePanel: document.querySelector('#outline-panel'),
       tocTree: document.querySelector('#toc-tree'),
-      tocFileName: document.querySelector('#toc-file-name')
+      tocFileName: document.querySelector('#toc-file-name'),
+      tocFilterRow: document.querySelector('#toc-filter-row'),
+      tocFilter: document.querySelector('#toc-filter'),
+      tocPopoverTree: document.querySelector('#toc-popover-tree'),
+      tocPopoverFileName: document.querySelector('#toc-popover-file-name'),
+      tocPopoverFilterRow: document.querySelector('#toc-popover-filter-row'),
+      tocPopoverFilter: document.querySelector('#toc-popover-filter')
     };
 
     this.plugins = new PluginRegistry([mermaidPlugin]);
@@ -85,6 +95,8 @@ class DevFileViewerApp {
     this.tocItems = new Map();
     this.activeHeadingId = '';
     this.activeHeadingFrame = 0;
+    this.tocFilterQuery = '';
+    this.tocPopoverOpen = false;
   }
 
   async start() {
@@ -102,6 +114,8 @@ class DevFileViewerApp {
   bindEvents() {
     this.elements.sidebarToggle.addEventListener('click', () => this.setSidebarCollapsed(true));
     this.elements.sidebarRestore.addEventListener('click', () => this.setSidebarCollapsed(false));
+    this.elements.floatingOutline.addEventListener('click', () => this.toggleTocPopover());
+    this.elements.closeTocPopover.addEventListener('click', () => this.closeTocPopover());
     this.elements.sidebarResizer.addEventListener('pointerdown', event => this.startSidebarResize(event));
     this.elements.sidebarResizer.addEventListener('keydown', event => this.handleSidebarResizeKey(event));
     this.elements.sidebarResizer.addEventListener('dblclick', () => this.resetSidebarWidth());
@@ -120,6 +134,10 @@ class DevFileViewerApp {
     this.elements.useOpenFile.addEventListener('click', () => this.openLocalFile());
     this.elements.rememberScroll.addEventListener('change', () => this.setRememberScroll(this.elements.rememberScroll.checked));
     this.elements.contentWidth.addEventListener('change', () => this.setContentWidth(this.elements.contentWidth.value));
+    this.elements.tocFilter.addEventListener('input', () => this.setTocFilter(this.elements.tocFilter.value));
+    this.elements.tocPopoverFilter.addEventListener('input', () => this.setTocFilter(this.elements.tocPopoverFilter.value));
+    document.addEventListener('keydown', event => this.handleGlobalKeydown(event));
+    document.addEventListener('pointerdown', event => this.handleDocumentPointerDown(event));
     for (const tab of this.elements.sidebarTabs) {
       tab.addEventListener('click', () => this.setSidebarTab(tab.dataset.sidebarTab));
     }
@@ -129,6 +147,53 @@ class DevFileViewerApp {
       this.scheduleActiveHeadingUpdate();
     }, { passive: true });
   }
+
+
+  handleGlobalKeydown(event) {
+    if (event.key === 'Escape' && this.tocPopoverOpen) {
+      event.preventDefault();
+      this.closeTocPopover();
+    }
+  }
+
+  handleDocumentPointerDown(event) {
+    if (!this.tocPopoverOpen) return;
+    const target = event.target;
+    if (this.elements.tocPopover.contains(target) || this.elements.floatingOutline.contains(target)) return;
+    this.closeTocPopover();
+  }
+
+  toggleTocPopover() {
+    if (this.tocPopoverOpen) this.closeTocPopover();
+    else this.openTocPopover();
+  }
+
+  openTocPopover() {
+    if (!this.headings.length) return;
+    this.tocPopoverOpen = true;
+    this.elements.tocPopover.hidden = false;
+    this.elements.floatingOutline.setAttribute('aria-expanded', 'true');
+    this.setActiveHeading(this.activeHeadingId || this.headings[0]?.id || '');
+
+    requestAnimationFrame(() => {
+      if (!this.tocPopoverOpen) return;
+      if (!this.elements.tocPopoverFilterRow.hidden) this.elements.tocPopoverFilter.focus();
+      else this.elements.tocPopover.querySelector('.toc-item:not([hidden])')?.focus();
+    });
+  }
+
+  closeTocPopover() {
+    this.tocPopoverOpen = false;
+    this.elements.tocPopover.hidden = true;
+    this.elements.floatingOutline.setAttribute('aria-expanded', 'false');
+  }
+
+  updateFloatingOutlineState() {
+    const shouldShow = this.sidebarCollapsed && this.headings.length > 0;
+    this.elements.floatingOutline.hidden = !shouldShow;
+    if (!shouldShow) this.closeTocPopover();
+  }
+
   setSidebarTab(tab) {
     this.applySidebarTab(tab);
   }
@@ -282,6 +347,7 @@ class DevFileViewerApp {
       await chrome.storage.local.set({ [SIDEBAR_COLLAPSED_KEY]: this.sidebarCollapsed });
     }
 
+    this.updateFloatingOutlineState();
     await nextFrame();
   }
 
@@ -524,19 +590,33 @@ class DevFileViewerApp {
     this.headings = buildHeadingIndex(this.elements.preview, { maxLevel: 3 });
     this.tocItems = new Map();
     this.activeHeadingId = '';
+    this.tocFilterQuery = '';
     this.elements.tocTree.innerHTML = '';
+    this.elements.tocPopoverTree.innerHTML = '';
+    this.elements.tocFilter.value = '';
+    this.elements.tocPopoverFilter.value = '';
 
     if (!this.headings.length) {
-      const empty = document.createElement('div');
-      empty.className = 'toc-empty';
-      empty.textContent = 'No headings found in this document.';
-      this.elements.tocTree.append(empty);
+      this.renderTocEmpty('No headings found in this document.');
       this.elements.outlineTab.textContent = 'Outline';
+      this.updateTocFilterVisibility();
+      this.updateFloatingOutlineState();
       return;
     }
 
+    this.renderTocContainer(this.elements.tocTree, 'panel');
+    this.renderTocContainer(this.elements.tocPopoverTree, 'popover');
+    this.elements.outlineTab.textContent = `Outline (${this.headings.length})`;
+    this.updateTocFilterVisibility();
+    this.applyTocFilter();
+    this.updateFloatingOutlineState();
+    this.scheduleActiveHeadingUpdate();
+  }
+
+  renderTocContainer(container, context) {
     const list = document.createElement('div');
     list.className = 'toc-list';
+    list.dataset.tocContext = context;
 
     for (const heading of this.headings) {
       const item = document.createElement('a');
@@ -545,34 +625,92 @@ class DevFileViewerApp {
       item.textContent = heading.text;
       item.title = heading.text;
       item.dataset.headingId = heading.id;
+      item.dataset.tocContext = context;
+      item.dataset.tocText = heading.text.toLowerCase();
       item.addEventListener('click', event => {
         event.preventDefault();
         this.scrollToAnchor(heading.id, { smooth: true, updateHash: true });
         this.saveCurrentScrollPosition().catch(() => {});
+        if (context === 'popover') this.closeTocPopover();
       });
       list.append(item);
-      this.tocItems.set(heading.id, item);
+      this.registerTocItem(heading.id, item);
     }
 
-    this.elements.tocTree.append(list);
-    this.elements.outlineTab.textContent = `Outline (${this.headings.length})`;
-    this.scheduleActiveHeadingUpdate();
+    const noMatch = document.createElement('div');
+    noMatch.className = 'toc-empty toc-no-matches';
+    noMatch.textContent = 'No matching headings.';
+    noMatch.hidden = true;
+
+    container.append(list, noMatch);
+  }
+
+  registerTocItem(id, item) {
+    const items = this.tocItems.get(id) || [];
+    items.push(item);
+    this.tocItems.set(id, items);
+  }
+
+  renderTocEmpty(message) {
+    this.elements.tocTree.innerHTML = '';
+    this.elements.tocPopoverTree.innerHTML = '';
+    const panelEmpty = document.createElement('div');
+    panelEmpty.className = 'toc-empty';
+    panelEmpty.textContent = message;
+    const popoverEmpty = panelEmpty.cloneNode(true);
+    this.elements.tocTree.append(panelEmpty);
+    this.elements.tocPopoverTree.append(popoverEmpty);
+  }
+
+  updateTocFilterVisibility() {
+    const shouldShow = this.headings.length >= TOC_FILTER_THRESHOLD;
+    this.elements.tocFilterRow.hidden = !shouldShow;
+    this.elements.tocPopoverFilterRow.hidden = !shouldShow;
+  }
+
+  setTocFilter(value) {
+    this.tocFilterQuery = String(value || '').trim().toLowerCase();
+    if (this.elements.tocFilter.value !== value) this.elements.tocFilter.value = value;
+    if (this.elements.tocPopoverFilter.value !== value) this.elements.tocPopoverFilter.value = value;
+    this.applyTocFilter();
+  }
+
+  applyTocFilter() {
+    const query = this.tocFilterQuery;
+    for (const container of [this.elements.tocTree, this.elements.tocPopoverTree]) {
+      const items = Array.from(container.querySelectorAll('.toc-item'));
+      let visibleCount = 0;
+      for (const item of items) {
+        const matches = !query || item.dataset.tocText.includes(query);
+        item.hidden = !matches;
+        if (matches) visibleCount += 1;
+      }
+      const noMatch = container.querySelector('.toc-no-matches');
+      if (noMatch) noMatch.hidden = visibleCount > 0 || items.length === 0;
+    }
   }
 
   clearToc() {
     this.headings = [];
     this.tocItems = new Map();
     this.activeHeadingId = '';
-    this.elements.tocTree.innerHTML = '<div class="toc-empty">Open a Markdown document to show its outline.</div>';
+    this.tocFilterQuery = '';
+    this.elements.tocFilter.value = '';
+    this.elements.tocPopoverFilter.value = '';
+    this.renderTocEmpty('Open a Markdown document to show its outline.');
     this.elements.outlineTab.textContent = 'Outline';
+    this.updateTocFilterVisibility();
     this.updateTocTitle(null);
+    this.updateFloatingOutlineState();
   }
 
   updateTocTitle(doc) {
-    if (!this.elements.tocFileName) return;
     const name = doc?.name || '';
-    this.elements.tocFileName.textContent = name ? `(${name})` : '';
-    this.elements.tocFileName.title = name;
+    for (const element of [this.elements.tocFileName, this.elements.tocPopoverFileName]) {
+      if (!element) continue;
+      element.textContent = name ? `(${name})` : '';
+      element.title = name;
+    }
   }
 
   scheduleActiveHeadingUpdate() {
@@ -601,19 +739,27 @@ class DevFileViewerApp {
   setActiveHeading(id) {
     if (!id || this.activeHeadingId === id) return;
     if (this.activeHeadingId && this.tocItems.has(this.activeHeadingId)) {
-      const previous = this.tocItems.get(this.activeHeadingId);
-      previous.classList.remove('is-active');
-      previous.removeAttribute('aria-current');
+      for (const previous of this.tocItems.get(this.activeHeadingId)) {
+        previous.classList.remove('is-active');
+        previous.removeAttribute('aria-current');
+      }
     }
 
     this.activeHeadingId = id;
-    const current = this.tocItems.get(id);
-    if (!current) return;
+    const currentItems = this.tocItems.get(id) || [];
+    for (const current of currentItems) {
+      current.classList.add('is-active');
+      current.setAttribute('aria-current', 'location');
+    }
 
-    current.classList.add('is-active');
-    current.setAttribute('aria-current', 'location');
-    if (this.activeSidebarTab === 'outline' && !this.elements.outlinePanel.hidden) {
-      current.scrollIntoView({ block: 'nearest' });
+    const panelItem = currentItems.find(item => item.dataset.tocContext === 'panel');
+    if (panelItem && this.activeSidebarTab === 'outline' && !this.elements.outlinePanel.hidden && !panelItem.hidden) {
+      panelItem.scrollIntoView({ block: 'nearest' });
+    }
+
+    const popoverItem = currentItems.find(item => item.dataset.tocContext === 'popover');
+    if (popoverItem && this.tocPopoverOpen && !popoverItem.hidden) {
+      popoverItem.scrollIntoView({ block: 'nearest' });
     }
   }
 
