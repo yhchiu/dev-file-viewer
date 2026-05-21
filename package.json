@@ -1,0 +1,23 @@
+{
+  "name": "dev-file-viewer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Chrome extension for local and remote Markdown file previews, designed for future diff and source-code formats.",
+  "type": "module",
+  "scripts": {
+    "clean": "node scripts/clean.mjs",
+    "build": "node scripts/build.mjs",
+    "zip": "npm run build && node scripts/zip.mjs"
+  },
+  "dependencies": {
+    "dompurify": "^3.3.0",
+    "marked": "^18.0.4",
+    "mermaid": "^11.12.1"
+  },
+  "devDependencies": {
+    "esbuild": "^0.27.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

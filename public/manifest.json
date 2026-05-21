@@ -1,0 +1,48 @@
+{
+  "manifest_version": 3,
+  "name": "Dev File Viewer",
+  "short_name": "Dev Viewer",
+  "version": "1.0.0",
+  "description": "Preview local and remote Markdown files with Mermaid diagrams. Offline-only and client-side.",
+  "minimum_chrome_version": "116",
+  "icons": {
+    "16": "assets/icons/icon16.png",
+    "32": "assets/icons/icon32.png",
+    "48": "assets/icons/icon48.png",
+    "128": "assets/icons/icon128.png"
+  },
+  "action": {
+    "default_title": "Dev File Viewer",
+    "default_popup": "popup/index.html"
+  },
+  "background": {
+    "service_worker": "background/service-worker.js",
+    "type": "module"
+  },
+  "permissions": [
+    "contextMenus",
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*",
+    "file:///*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*",
+        "file:///*"
+      ],
+      "js": [
+        "content/markdown-autoview.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; base-uri 'none'; frame-ancestors 'none';"
+  }
+}

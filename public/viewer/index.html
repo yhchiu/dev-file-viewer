@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dev File Viewer</title>
+    <link rel="stylesheet" href="viewer.css" />
+  </head>
+  <body>
+    <div id="app" class="app-shell">
+      <aside class="sidebar" aria-label="Directory sidebar">
+        <div class="brand">
+          <div class="brand-mark">DF</div>
+          <div>
+            <div class="brand-title">Dev File Viewer</div>
+            <div class="brand-subtitle">Markdown, Diff &amp; Source Viewer</div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="btn-open-file" type="button">Open File</button>
+          <button id="btn-open-folder" type="button">Open Folder</button>
+          <button id="btn-open-url" type="button">Open URL</button>
+        </div>
+
+        <div class="url-box" id="url-box" hidden>
+          <input id="url-input" type="url" placeholder="https://example.com/README.md" />
+          <button id="btn-load-url" type="button">Load</button>
+        </div>
+
+        <div class="sidebar-section-title">Directory</div>
+        <div id="directory-tree" class="directory-tree empty">Select a folder to show Markdown files.</div>
+      </aside>
+
+      <main class="viewer-main">
+        <header class="toolbar">
+          <div>
+            <h1 id="doc-title">Dev File Viewer</h1>
+            <p id="doc-source">Open a Markdown file or URL.</p>
+          </div>
+          <div class="toolbar-meta">
+            <span id="doc-format">Markdown</span>
+          </div>
+        </header>
+
+        <section id="status" class="status info">
+          V1 supports Markdown and Mermaid diagrams. Local folder sidebar requires explicit folder selection.
+        </section>
+
+        <article id="preview" class="markdown-body" tabindex="0"></article>
+      </main>
+    </div>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
