@@ -9,6 +9,9 @@ export const features = Object.freeze({
     breaks: false,
     headerIds: false
   },
+  syntaxHighlighting: {
+    markdownCodeBlocks: true
+  },
   plugins: {
     mermaid: true,
     emoji: false,

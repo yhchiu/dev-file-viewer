@@ -34,3 +34,24 @@ graph TD
 const message = 'Dev File Viewer';
 console.log(message);
 ```
+
+
+## Syntax highlighting sample
+
+```js
+async function loadMarkdown(url) {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  return response.text();
+}
+```
+
+```python
+def normalize_heading(text: str) -> str:
+    return text.strip().lower().replace(" ", "-")
+```
+
+```diff
+- old title
++ new title
+```

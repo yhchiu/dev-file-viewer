@@ -2,6 +2,7 @@ import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import { features } from '../config/features.js';
 import { rewriteLinks } from '../security/linkPolicy.js';
+import { highlightMarkdownCodeBlocks } from '../highlight/syntaxHighlighter.js';
 
 export class MarkdownEngine {
   constructor(pluginRegistry) {
@@ -23,6 +24,7 @@ export class MarkdownEngine {
     });
 
     targetElement.innerHTML = cleanHtml;
+    highlightMarkdownCodeBlocks(targetElement);
     rewriteLinks(targetElement, context.baseUrl, context.onOpenDocumentLink);
     return this.pluginRegistry.runAfterRender(targetElement, context);
   }
