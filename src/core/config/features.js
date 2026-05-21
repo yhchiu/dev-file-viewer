@@ -1,7 +1,7 @@
 export const features = Object.freeze({
   formats: {
     markdown: true,
-    diff: false,
+    diff: true,
     sourceCode: true
   },
   markdown: {

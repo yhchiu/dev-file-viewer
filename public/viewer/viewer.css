@@ -465,3 +465,265 @@ input, select { width: 100%; border: 1px solid var(--line); border-radius: 10px;
   font-size: 13px;
   line-height: 1.55;
 }
+
+
+/* V2.5 diff viewer */
+.diff-body {
+  width: min(calc(100% - 48px), var(--markdown-body-width, 920px));
+  max-width: var(--markdown-body-width, 920px);
+  margin: 0 auto;
+}
+
+body.markdown-width-full .diff-body,
+.app-shell.markdown-width-full .diff-body {
+  width: calc(100% - 48px);
+  max-width: none;
+}
+
+.diff-viewer {
+  display: grid;
+  gap: 18px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.diff-file {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(16, 24, 40, .04);
+}
+
+.diff-file-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel-2);
+}
+
+.diff-file-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--fg);
+}
+
+.diff-file-stats {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.diff-meta {
+  margin: 0;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  background: #fafbff;
+  overflow-x: auto;
+  font: inherit;
+  white-space: pre;
+}
+
+.diff-hunk {
+  overflow-x: auto;
+}
+
+.diff-hunk + .diff-hunk {
+  border-top: 1px solid var(--line);
+}
+
+.diff-hunk-header {
+  padding: 7px 12px;
+  color: #4f46e5;
+  background: #f4f4ff;
+  border-bottom: 1px solid #ddddff;
+  white-space: pre;
+  font-weight: 700;
+}
+
+.diff-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+}
+
+.diff-line-number {
+  width: 1%;
+  min-width: 44px;
+  padding: 0 8px;
+  color: #8a94a6;
+  background: #f8fafc;
+  border-right: 1px solid var(--line);
+  text-align: right;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.diff-marker {
+  width: 1%;
+  min-width: 24px;
+  padding: 0 8px;
+  color: #667085;
+  text-align: center;
+  user-select: none;
+  white-space: pre;
+}
+
+.diff-code {
+  width: 100%;
+  padding: 0 12px 0 4px;
+  white-space: pre;
+}
+
+.diff-line-added {
+  background: #eafff1;
+}
+
+.diff-line-added .diff-line-number,
+.diff-line-added .diff-marker {
+  background: #dcffe4;
+  color: #1a7f37;
+}
+
+.diff-line-removed {
+  background: #fff0f0;
+}
+
+.diff-line-removed .diff-line-number,
+.diff-line-removed .diff-marker {
+  background: #ffe2e2;
+  color: #cf222e;
+}
+
+.diff-line-note {
+  color: var(--muted);
+  background: #fbfcff;
+  font-style: italic;
+}
+
+.diff-empty {
+  padding: 18px;
+  color: var(--muted);
+  background: var(--panel);
+}
+
+
+/* V2.5.2 GitHub-like diff table reset.
+   Diff tables must not inherit Markdown table/card styles. */
+.markdown-body.diff-body {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  line-height: 1.45;
+}
+
+.markdown-body.diff-body .diff-table {
+  display: table;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  border-collapse: collapse;
+  border-spacing: 0;
+  overflow: visible;
+  font-size: inherit;
+  background: transparent;
+}
+
+.markdown-body.diff-body .diff-table tbody,
+.markdown-body.diff-body .diff-table tr,
+.markdown-body.diff-body .diff-table td {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background-clip: padding-box;
+  vertical-align: top;
+}
+
+.markdown-body.diff-body .diff-table tr:nth-child(even) td {
+  background: inherit;
+}
+
+.markdown-body.diff-body .diff-line-number {
+  width: 1%;
+  min-width: 48px;
+  padding: 0 10px;
+  border: 0;
+  color: #57606a;
+  background: #f6f8fa;
+  text-align: right;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.markdown-body.diff-body .diff-line-number-old,
+.markdown-body.diff-body .diff-line-number-new {
+  border-right: 1px solid #d0d7de;
+}
+
+.markdown-body.diff-body .diff-marker {
+  width: 1%;
+  min-width: 24px;
+  padding: 0 8px;
+  border: 0;
+  color: #57606a;
+  text-align: center;
+  white-space: pre;
+  user-select: none;
+}
+
+.markdown-body.diff-body .diff-code {
+  width: 100%;
+  padding: 0 10px 0 4px;
+  border: 0;
+  white-space: pre;
+}
+
+.markdown-body.diff-body .diff-line-added,
+.markdown-body.diff-body .diff-line-added td {
+  background: #ccffd8;
+}
+
+.markdown-body.diff-body .diff-line-added .diff-line-number,
+.markdown-body.diff-body .diff-line-added .diff-marker {
+  background: #abf2bc;
+  color: #1a7f37;
+}
+
+.markdown-body.diff-body .diff-line-removed,
+.markdown-body.diff-body .diff-line-removed td {
+  background: #ffebe9;
+}
+
+.markdown-body.diff-body .diff-line-removed .diff-line-number,
+.markdown-body.diff-body .diff-line-removed .diff-marker {
+  background: #ffd7d5;
+  color: #cf222e;
+}
+
+.markdown-body.diff-body .diff-line-context,
+.markdown-body.diff-body .diff-line-context td {
+  background: #ffffff;
+}
+
+.markdown-body.diff-body .diff-line-note,
+.markdown-body.diff-body .diff-line-note td {
+  background: #ffffff;
+  color: var(--muted);
+  font-style: italic;
+}

@@ -1,6 +1,7 @@
 (() => {
   const EXTENSIONS = [
     '.md', '.mkd', '.mdx', '.markdown',
+    '.diff', '.patch',
     '.js', '.mjs', '.cjs', '.jsx', '.ts', '.tsx',
     '.html', '.htm', '.css', '.json', '.jsonc', '.yaml', '.yml', '.toml', '.ini',
     '.xml', '.svg', '.sh', '.bash', '.zsh', '.ps1', '.py', '.go', '.java',

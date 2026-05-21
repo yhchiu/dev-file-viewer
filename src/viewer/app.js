@@ -1,5 +1,6 @@
 import { MarkdownEngine } from '../core/markdown/MarkdownEngine.js';
 import { SourceCodeRenderer } from '../core/source/SourceCodeRenderer.js';
+import { DiffRenderer } from '../core/diff/DiffRenderer.js';
 import { FORMAT_IDS, detectFormat, displayNameFromUrl, formatLabel, sourceLanguageFromPath } from '../core/format/fileTypes.js';
 import { UrlSourceProvider } from '../core/sources/UrlSourceProvider.js';
 import { FilePickerSourceProvider } from '../core/sources/FilePickerSourceProvider.js';
@@ -87,6 +88,7 @@ class DevFileViewerApp {
     this.plugins = new PluginRegistry([mermaidPlugin]);
     this.markdown = new MarkdownEngine(this.plugins);
     this.sourceRenderer = new SourceCodeRenderer();
+    this.diffRenderer = new DiffRenderer();
     this.urlSource = new UrlSourceProvider();
     this.fileSource = new FilePickerSourceProvider();
     this.directorySource = new DirectorySourceProvider();
@@ -784,6 +786,7 @@ class DevFileViewerApp {
     this.elements.source.textContent = doc.url || doc.path || doc.sourceType || '';
     this.elements.format.textContent = formatLabel(format);
     this.elements.preview.classList.toggle('source-code-body', format === FORMAT_IDS.SOURCE_CODE);
+    this.elements.preview.classList.toggle('diff-body', format === FORMAT_IDS.DIFF);
 
     if (format === FORMAT_IDS.SOURCE_CODE) {
       if (!this.sourceRenderer) this.sourceRenderer = new SourceCodeRenderer();
@@ -799,6 +802,22 @@ class DevFileViewerApp {
       this.currentDocKey = this.getDocumentKey(doc);
       await this.restoreOrResetScroll(doc, options);
       this.setStatus(`Loaded ${doc.name || 'source file'}.`, 'success');
+      return;
+    }
+
+    if (format === FORMAT_IDS.DIFF) {
+      if (!this.diffRenderer) this.diffRenderer = new DiffRenderer();
+      this.diffRenderer.render(doc.text, this.elements.preview, {
+        name: doc.name || '',
+        url: doc.url || '',
+        path: doc.path || ''
+      });
+      this.clearToc();
+      this.updateTocTitle(doc);
+      this.currentDoc = doc;
+      this.currentDocKey = this.getDocumentKey(doc);
+      await this.restoreOrResetScroll(doc, options);
+      this.setStatus(`Loaded ${doc.name || 'diff file'}.`, 'success');
       return;
     }
 

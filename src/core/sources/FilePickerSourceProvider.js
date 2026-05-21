@@ -2,6 +2,7 @@ import { detectFormat } from '../format/fileTypes.js';
 
 const SUPPORTED_EXTENSIONS = [
   '.md', '.mkd', '.mdx', '.markdown',
+  '.diff', '.patch',
   '.js', '.mjs', '.cjs', '.jsx', '.ts', '.tsx',
   '.html', '.htm', '.css', '.scss', '.sass', '.less',
   '.json', '.jsonc', '.yaml', '.yml', '.toml', '.ini', '.conf', '.cfg', '.env',

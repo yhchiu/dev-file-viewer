@@ -1,0 +1,16 @@
+diff --git a/src/example.js b/src/example.js
+index 2f6c1d0..77a8e32 100644
+--- a/src/example.js
++++ b/src/example.js
+@@ -1,7 +1,9 @@
+ export async function loadMarkdown(url) {
+   const response = await fetch(url);
+-  if (!response.ok) throw new Error('Load failed');
++  if (!response.ok) {
++    throw new Error(`HTTP ${response.status}`);
++  }
+   return response.text();
+ }
+
+-console.log('old viewer');
++console.log('Dev File Viewer');

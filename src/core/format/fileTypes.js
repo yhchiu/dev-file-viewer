@@ -1,5 +1,7 @@
 export const DOCUMENT_EXTENSIONS = new Set(['.md', '.mkd', '.mdx', '.markdown']);
 
+export const DIFF_EXTENSIONS = new Set(['.diff', '.patch']);
+
 export const SOURCE_CODE_EXTENSIONS = new Set([
   '.js', '.mjs', '.cjs', '.jsx',
   '.ts', '.tsx',
@@ -54,7 +56,6 @@ export const FORMAT_IDS = Object.freeze({
   MARKDOWN: 'markdown',
   SOURCE_CODE: 'source-code',
   UNKNOWN: 'unknown',
-  // Reserved for V2.
   DIFF: 'diff'
 });
 
@@ -75,12 +76,16 @@ export function isSupportedDocumentFile(value = '') {
   return DOCUMENT_EXTENSIONS.has(getExtension(value));
 }
 
+export function isSupportedDiffFile(value = '') {
+  return DIFF_EXTENSIONS.has(getExtension(value));
+}
+
 export function isSupportedSourceCodeFile(value = '') {
   return SOURCE_CODE_EXTENSIONS.has(getExtension(value)) || SPECIAL_SOURCE_FILE_NAMES.has(getFileName(value).toLowerCase());
 }
 
 export function isSupportedViewerFile(value = '') {
-  return isSupportedDocumentFile(value) || isSupportedSourceCodeFile(value);
+  return isSupportedDocumentFile(value) || isSupportedDiffFile(value) || isSupportedSourceCodeFile(value);
 }
 
 export function sourceLanguageFromPath(value = '') {
@@ -101,6 +106,8 @@ export function detectFormat({ url = '', name = '', mimeType = '' } = {}) {
   const target = name || url;
   if (isSupportedDocumentFile(target)) return FORMAT_IDS.MARKDOWN;
   if (/markdown|mdx/i.test(mimeType)) return FORMAT_IDS.MARKDOWN;
+  if (isSupportedDiffFile(target)) return FORMAT_IDS.DIFF;
+  if (/^(text\/x-diff|text\/x-patch)$/i.test(String(mimeType).split(';', 1)[0])) return FORMAT_IDS.DIFF;
   if (isSupportedSourceCodeFile(target)) return FORMAT_IDS.SOURCE_CODE;
   if (/application\/(json|javascript|xml)|text\/(css|html|javascript|xml|x-python|x-go|x-c|x-c\+\+|x-java-source|x-shellscript)/i.test(mimeType)) {
     return FORMAT_IDS.SOURCE_CODE;
