@@ -441,3 +441,27 @@ input, select { width: 100%; border: 1px solid var(--line); border-radius: 10px;
 .hljs-strong {
   font-weight: 700;
 }
+
+
+/* V2.4 source code viewer */
+.markdown-body.source-code-body {
+  padding: 0;
+  background: var(--code-bg);
+  overflow: hidden;
+}
+
+.markdown-body.source-code-body .source-code-pre {
+  margin: 0;
+  min-height: 64vh;
+  border: 0;
+  border-radius: 20px;
+  background: var(--code-bg);
+  overflow: auto;
+}
+
+.markdown-body.source-code-body pre code.hljs {
+  padding: 24px 26px;
+  min-width: max-content;
+  font-size: 13px;
+  line-height: 1.55;
+}

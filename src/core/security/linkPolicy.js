@@ -1,4 +1,4 @@
-import { isSupportedDocumentFile } from '../format/fileTypes.js';
+import { isSupportedViewerFile } from '../format/fileTypes.js';
 
 const SAFE_SCHEMES = new Set(['http:', 'https:', 'file:', 'mailto:']);
 const URL_SCHEME_RE = /^[a-zA-Z][a-zA-Z\d+.-]*:/;
@@ -16,7 +16,7 @@ export function rewriteLinks(root, baseUrl, onOpenDocumentLink) {
     const isRelative = isRelativeHref(href);
 
     if (isRelative && !baseUrl) {
-      if (isSupportedDocumentFile(stripHashAndQuery(href))) {
+      if (isSupportedViewerFile(stripHashAndQuery(href))) {
         link.setAttribute('rel', 'noopener noreferrer');
         link.addEventListener('click', event => {
           event.preventDefault();
@@ -44,7 +44,7 @@ export function rewriteLinks(root, baseUrl, onOpenDocumentLink) {
     link.setAttribute('href', resolved.href);
     link.setAttribute('rel', 'noopener noreferrer');
 
-    if (isSupportedDocumentFile(resolved.pathname)) {
+    if (isSupportedViewerFile(resolved.pathname)) {
       link.addEventListener('click', event => {
         event.preventDefault();
         onOpenDocumentLink?.({ href, url: resolved.href, kind: isRelative ? 'resolved-relative-document' : 'absolute-document' });

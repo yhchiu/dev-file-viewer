@@ -1,0 +1,5 @@
+app:
+  name: Dev File Viewer
+  features:
+    markdown: true
+    sourceCode: true

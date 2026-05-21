@@ -1,4 +1,4 @@
-import { isSupportedDocumentFile } from '../format/fileTypes.js';
+import { isSupportedViewerFile } from '../format/fileTypes.js';
 import { FilePickerSourceProvider } from './FilePickerSourceProvider.js';
 
 const MAX_FILES = 2000;
@@ -40,7 +40,7 @@ export class DirectorySourceProvider {
       const childPath = path ? `${path}/${name}` : name;
       if (handle.kind === 'directory') {
         node.children.push(await this.buildTree(handle, childPath));
-      } else if (handle.kind === 'file' && isSupportedDocumentFile(name)) {
+      } else if (handle.kind === 'file' && isSupportedViewerFile(name)) {
         node.children.push({
           type: 'file',
           name,

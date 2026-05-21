@@ -1,5 +1,6 @@
 import { MarkdownEngine } from '../core/markdown/MarkdownEngine.js';
-import { FORMAT_IDS, detectFormat, displayNameFromUrl } from '../core/format/fileTypes.js';
+import { SourceCodeRenderer } from '../core/source/SourceCodeRenderer.js';
+import { FORMAT_IDS, detectFormat, displayNameFromUrl, formatLabel, sourceLanguageFromPath } from '../core/format/fileTypes.js';
 import { UrlSourceProvider } from '../core/sources/UrlSourceProvider.js';
 import { FilePickerSourceProvider } from '../core/sources/FilePickerSourceProvider.js';
 import { DirectorySourceProvider } from '../core/sources/DirectorySourceProvider.js';
@@ -85,6 +86,7 @@ class DevFileViewerApp {
 
     this.plugins = new PluginRegistry([mermaidPlugin]);
     this.markdown = new MarkdownEngine(this.plugins);
+    this.sourceRenderer = new SourceCodeRenderer();
     this.urlSource = new UrlSourceProvider();
     this.fileSource = new FilePickerSourceProvider();
     this.directorySource = new DirectorySourceProvider();
@@ -735,7 +737,7 @@ class DevFileViewerApp {
       this.elements.sidebarTools.open = false;
       this.elements.scrollMemoryCard.hidden = false;
       this.applySidebarTab('files');
-      this.setStatus('Folder loaded. Select a Markdown file from the sidebar.', 'success');
+      this.setStatus('Folder loaded. Select a supported developer file from the sidebar.', 'success');
     } catch (error) {
       if (error?.name === 'AbortError') return;
       this.directoryTree.showEmpty('Folder could not be opened.');
@@ -780,7 +782,25 @@ class DevFileViewerApp {
     const format = doc.format || detectFormat(doc);
     this.elements.title.textContent = doc.name || 'Untitled';
     this.elements.source.textContent = doc.url || doc.path || doc.sourceType || '';
-    this.elements.format.textContent = format === FORMAT_IDS.MARKDOWN ? 'Markdown' : format;
+    this.elements.format.textContent = formatLabel(format);
+    this.elements.preview.classList.toggle('source-code-body', format === FORMAT_IDS.SOURCE_CODE);
+
+    if (format === FORMAT_IDS.SOURCE_CODE) {
+      if (!this.sourceRenderer) this.sourceRenderer = new SourceCodeRenderer();
+      this.sourceRenderer.render(doc.text, this.elements.preview, {
+        language: sourceLanguageFromPath(doc.name || doc.url || doc.path || ''),
+        name: doc.name || '',
+        url: doc.url || '',
+        path: doc.path || ''
+      });
+      this.clearToc();
+      this.updateTocTitle(doc);
+      this.currentDoc = doc;
+      this.currentDocKey = this.getDocumentKey(doc);
+      await this.restoreOrResetScroll(doc, options);
+      this.setStatus(`Loaded ${doc.name || 'source file'}.`, 'success');
+      return;
+    }
 
     if (format !== FORMAT_IDS.MARKDOWN) {
       this.elements.preview.textContent = doc.text || '';
@@ -788,7 +808,7 @@ class DevFileViewerApp {
       this.currentDoc = doc;
       this.currentDocKey = this.getDocumentKey(doc);
       await this.restoreOrResetScroll(doc, options);
-      this.setStatus(`Unsupported format in V1: ${format}.`, 'error');
+      this.setStatus(`Unsupported format: ${format}.`, 'error');
       return;
     }
 

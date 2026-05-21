@@ -17,7 +17,7 @@ async function refreshFileUrlStatus() {
 
   card.dataset.state = isAllowed ? 'enabled' : 'disabled';
   status.textContent = isAllowed
-    ? 'Enabled. file:// Markdown links can open automatically.'
+    ? 'Enabled. file:// Markdown and source links can open automatically.'
     : 'Not enabled. Use Open File/Open Folder, or enable this for automatic file:// links.';
 }
 

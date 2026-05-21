@@ -79,7 +79,7 @@
 
         <section id="files-panel" class="sidebar-panel" role="tabpanel" aria-labelledby="tab-files">
           <div class="sidebar-section-title">Directory</div>
-          <div id="directory-tree" class="directory-tree empty">Select a folder to show Markdown files.</div>
+          <div id="directory-tree" class="directory-tree empty">Select a folder to show supported files.</div>
         </section>
 
         <section id="outline-panel" class="sidebar-panel" role="tabpanel" aria-labelledby="tab-outline" hidden>
@@ -100,7 +100,7 @@
             <input id="toc-filter" type="search" placeholder="Filter headings..." aria-label="Filter headings" autocomplete="off" />
           </div>
           <nav id="toc-tree" class="toc-tree" aria-label="Table of contents">
-            <div class="toc-empty">Open a Markdown document to show its outline.</div>
+            <div class="toc-empty">Open a Markdown document to show its outline. Source files do not have an outline yet.</div>
           </nav>
         </section>
       </aside>
@@ -155,7 +155,7 @@
         <header class="toolbar">
           <div>
             <h1 id="doc-title">Dev File Viewer</h1>
-            <p id="doc-source">Open a Markdown file or URL.</p>
+            <p id="doc-source">Open a Markdown or source file, folder, or URL.</p>
           </div>
           <div class="toolbar-meta">
             <span id="doc-format">Markdown</span>
@@ -163,7 +163,7 @@
         </header>
 
         <section id="status" class="status info">
-V2.3.0 uses SVG controls for Outline pop-out/pin and places the floating Outline control in the viewer area.
+V2.4.1 uses SVG controls for Outline pop-out/pin and places the floating Outline control in the viewer area.
         </section>
 
         <article id="preview" class="markdown-body" tabindex="0"></article>

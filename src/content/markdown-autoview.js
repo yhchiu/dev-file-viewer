@@ -1,5 +1,14 @@
 (() => {
-  const EXTENSIONS = ['.md', '.mkd', '.mdx', '.markdown'];
+  const EXTENSIONS = [
+    '.md', '.mkd', '.mdx', '.markdown',
+    '.js', '.mjs', '.cjs', '.jsx', '.ts', '.tsx',
+    '.html', '.htm', '.css', '.json', '.jsonc', '.yaml', '.yml', '.toml', '.ini',
+    '.xml', '.svg', '.sh', '.bash', '.zsh', '.ps1', '.py', '.go', '.java',
+    '.c', '.h', '.cpp', '.cc', '.cxx', '.hpp', '.hh', '.hxx', '.rs', '.cs',
+    '.php', '.rb', '.sql', '.swift', '.kt', '.kts', '.scala', '.dart', '.lua',
+    '.r', '.pl', '.pm', '.ex', '.exs', '.erl', '.hrl', '.clj', '.cljs',
+    '.groovy', '.gradle', '.vue', '.svelte', '.dockerfile', '.makefile', '.cmake'
+  ];
   const REDIRECT_FLAG = 'devFileViewerRedirecting';
 
   function hasSupportedExtension(url) {

@@ -1,4 +1,13 @@
-const DOCUMENT_EXTENSIONS = ['.md', '.mkd', '.mdx', '.markdown'];
+const DOCUMENT_EXTENSIONS = [
+    '.md', '.mkd', '.mdx', '.markdown',
+    '.js', '.mjs', '.cjs', '.jsx', '.ts', '.tsx',
+    '.html', '.htm', '.css', '.json', '.jsonc', '.yaml', '.yml', '.toml', '.ini',
+    '.xml', '.svg', '.sh', '.bash', '.zsh', '.ps1', '.py', '.go', '.java',
+    '.c', '.h', '.cpp', '.cc', '.cxx', '.hpp', '.hh', '.hxx', '.rs', '.cs',
+    '.php', '.rb', '.sql', '.swift', '.kt', '.kts', '.scala', '.dart', '.lua',
+    '.r', '.pl', '.pm', '.ex', '.exs', '.erl', '.hrl', '.clj', '.cljs',
+    '.groovy', '.gradle', '.vue', '.svelte', '.dockerfile', '.makefile', '.cmake'
+  ];
 const SNAPSHOT_PREFIX = 'sourceSnapshot:';
 const SNAPSHOT_TTL_MS = 30 * 60 * 1000;
 
@@ -38,7 +47,7 @@ async function cleanupExpiredSnapshots(now = Date.now()) {
 async function openViewerForSnapshot(message, sender) {
   const tabId = sender.tab?.id;
   if (typeof tabId !== 'number') throw new Error('Missing sender tab.');
-  if (!isSupportedDocumentUrl(message.url || '')) throw new Error('Unsupported document URL.');
+  if (!isSupportedDocumentUrl(message.url || '')) throw new Error('Unsupported developer file URL.');
 
   await cleanupExpiredSnapshots();
 

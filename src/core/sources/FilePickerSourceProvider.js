@@ -1,5 +1,17 @@
 import { detectFormat } from '../format/fileTypes.js';
 
+const SUPPORTED_EXTENSIONS = [
+  '.md', '.mkd', '.mdx', '.markdown',
+  '.js', '.mjs', '.cjs', '.jsx', '.ts', '.tsx',
+  '.html', '.htm', '.css', '.scss', '.sass', '.less',
+  '.json', '.jsonc', '.yaml', '.yml', '.toml', '.ini', '.conf', '.cfg', '.env',
+  '.xml', '.svg', '.sh', '.bash', '.zsh', '.ps1',
+  '.py', '.go', '.java', '.c', '.h', '.cpp', '.cc', '.cxx', '.hpp', '.hh', '.hxx',
+  '.rs', '.cs', '.php', '.rb', '.sql', '.swift', '.kt', '.kts', '.scala', '.dart',
+  '.lua', '.r', '.pl', '.pm', '.ex', '.exs', '.erl', '.hrl', '.clj', '.cljs',
+  '.groovy', '.gradle', '.vue', '.svelte', '.dockerfile', '.makefile', '.cmake'
+];
+
 export class FilePickerSourceProvider {
   async pickFile() {
     if ('showOpenFilePicker' in window) {
@@ -7,10 +19,15 @@ export class FilePickerSourceProvider {
         multiple: false,
         types: [
           {
-            description: 'Markdown documents',
+            description: 'Developer files',
             accept: {
               'text/markdown': ['.md', '.mkd', '.mdx', '.markdown'],
-              'text/plain': ['.md', '.mkd', '.mdx', '.markdown']
+              'text/plain': SUPPORTED_EXTENSIONS,
+              'application/json': ['.json', '.jsonc'],
+              'application/javascript': ['.js', '.mjs', '.cjs'],
+              'text/css': ['.css'],
+              'text/html': ['.html', '.htm'],
+              'application/xml': ['.xml', '.svg']
             }
           }
         ]
@@ -45,7 +62,7 @@ export class FilePickerSourceProvider {
     return new Promise((resolve, reject) => {
       const input = document.createElement('input');
       input.type = 'file';
-      input.accept = '.md,.mkd,.mdx,.markdown,text/markdown,text/plain';
+      input.accept = `${SUPPORTED_EXTENSIONS.join(',')},text/markdown,text/plain,application/json,application/javascript,text/css,text/html,application/xml`;
       input.addEventListener('change', async () => {
         try {
           const file = input.files?.[0];
