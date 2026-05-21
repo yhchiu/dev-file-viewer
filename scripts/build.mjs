@@ -47,4 +47,11 @@ await build({
   format: 'esm'
 });
 
+await build({
+  ...common,
+  entryPoints: [path.join(root, 'src/onboarding/onboarding.js')],
+  outfile: path.join(dist, 'onboarding/onboarding.js'),
+  format: 'iife'
+});
+
 console.log(`Built Chrome extension to ${dist}`);

@@ -1,13 +1,7 @@
 import { copyExtensionSettingsUrl, isFileUrlAccessAllowed, openExtensionSettings } from '../core/browser/fileUrlAccess.js';
 
-function viewerUrl(url = '') {
-  const suffix = url ? `?url=${encodeURIComponent(url)}` : '';
-  return chrome.runtime.getURL(`viewer/index.html${suffix}`);
-}
-
-async function getActiveTab() {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  return tab;
+function viewerUrl() {
+  return chrome.runtime.getURL('viewer/index.html');
 }
 
 async function refreshFileUrlStatus() {
@@ -17,25 +11,15 @@ async function refreshFileUrlStatus() {
 
   card.dataset.state = isAllowed ? 'enabled' : 'disabled';
   status.textContent = isAllowed
-    ? 'Enabled. file:// Markdown links can open automatically.'
-    : 'Not enabled. Use Open File/Open Folder, or enable this for automatic file:// links.';
+    ? 'Enabled. Dev File Viewer can automatically preview supported file:// Markdown URLs.'
+    : 'Not enabled. This is optional; Open File and Open Folder work without this setting.';
 }
-
-document.querySelector('#open-current').addEventListener('click', async () => {
-  const tab = await getActiveTab();
-  await chrome.tabs.create({ url: viewerUrl(tab?.url || '') });
-  window.close();
-});
 
 document.querySelector('#open-viewer').addEventListener('click', async () => {
   await chrome.tabs.create({ url: viewerUrl() });
-  window.close();
 });
 
-document.querySelector('#open-settings').addEventListener('click', async () => {
-  await openExtensionSettings();
-  window.close();
-});
+document.querySelector('#open-settings').addEventListener('click', () => openExtensionSettings());
 
 document.querySelector('#copy-settings-link').addEventListener('click', async () => {
   const status = document.querySelector('#file-url-status');

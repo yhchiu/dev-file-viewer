@@ -12,16 +12,25 @@
         <div class="logo">DF</div>
         <div>
           <h1>Dev File Viewer</h1>
-          <p>Markdown, Diff &amp; Source Viewer</p>
+          <p>Markdown, Diff & Source Viewer</p>
         </div>
       </header>
 
       <button id="open-current" type="button">Open current tab</button>
       <button id="open-viewer" type="button">Open viewer</button>
 
+      <section id="file-url-card" class="file-url-card">
+        <strong>file:// URL access</strong>
+        <span id="file-url-status">Checking...</span>
+        <div class="file-url-actions">
+          <button id="open-settings" type="button">Open Settings</button>
+          <button id="copy-settings-link" type="button">Copy Link</button>
+        </div>
+      </section>
+
       <section class="hint">
-        <strong>Local files</strong>
-        <span>For file:// URLs, enable “Allow access to file URLs” in chrome://extensions.</span>
+        <strong>Recommended for local files</strong>
+        <span>Use Open File or Open Folder in the viewer. No extra Chrome setting is required.</span>
       </section>
     </main>
     <script src="popup.js"></script>

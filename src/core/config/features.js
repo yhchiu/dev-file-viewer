@@ -5,7 +5,7 @@ export const features = Object.freeze({
     sourceCode: false
   },
   markdown: {
-    gfm: false,
+    gfm: true,
     breaks: false,
     headerIds: false
   },
@@ -15,7 +15,7 @@ export const features = Object.freeze({
     math: false,
     toc: false,
     alerts: false,
-    checkboxes: false,
+    checkboxes: false, // Reserved for V2 UI polish; tables are enabled through GFM parsing in V1.1.
     abbreviations: false,
     annotations: false
   },

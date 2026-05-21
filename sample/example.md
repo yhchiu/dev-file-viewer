@@ -1,23 +1,28 @@
-# Dev File Viewer Sample
+# Dev File Viewer V1.1.1 Sample
 
-This is a local Markdown sample for V1.
+This sample verifies Markdown rendering, Mermaid diagrams, and Markdown tables.
 
-## Mermaid
+## Table rendering
+
+| Feature | Status | Notes |
+|---|---:|---|
+| Markdown files | ✅ | `.md`, `.mkd`, `.mdx`, `.markdown` |
+| Mermaid diagrams | ✅ | Rendered after Markdown sanitization |
+| Tables | ✅ | Enabled |
+| Diff viewer | Planned | Reserved for V2 |
+| Source-code viewer | Planned | Reserved for V2 |
+
+## Mermaid rendering
 
 ```mermaid
 flowchart TD
   A[Open Markdown] --> B[Render Markdown]
-  B --> C[Sanitize HTML]
-  C --> D[Render Mermaid]
+  B --> C[Render Mermaid]
+  B --> D[Render Tables]
 ```
 
-## Code
+## Local files
 
-```js
-console.log('Future V2 will add syntax highlighting.');
-```
+For non-technical users, prefer **Open File** or **Open Folder**.
 
-## Links
-
-- [Chrome Extensions docs](https://developer.chrome.com/docs/extensions/)
-- [Relative sample](./example.md)
+Automatic `file://` URL preview is optional and requires enabling **Allow access to file URLs** in Chrome's extension settings.

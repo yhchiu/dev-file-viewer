@@ -2,8 +2,8 @@
   "manifest_version": 3,
   "name": "Dev File Viewer",
   "short_name": "Dev Viewer",
-  "version": "1.0.0",
-  "description": "Preview local and remote Markdown files with Mermaid diagrams. Offline-only and client-side.",
+  "version": "1.1.1",
+  "description": "Markdown, Diff & Source Viewer. V1 supports private, offline Markdown preview with Mermaid diagrams and tables.",
   "minimum_chrome_version": "116",
   "icons": {
     "16": "assets/icons/icon16.png",
@@ -44,5 +44,6 @@
   ],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'; base-uri 'none'; frame-ancestors 'none';"
-  }
+  },
+  "options_page": "onboarding/index.html"
 }

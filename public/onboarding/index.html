@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Welcome to Dev File Viewer</title>
+    <link rel="stylesheet" href="onboarding.css" />
+  </head>
+  <body>
+    <main class="page">
+      <section class="hero">
+        <div class="brand-mark">DF</div>
+        <p class="eyebrow">Dev File Viewer V1.1.1</p>
+        <h1>Preview Markdown files without sending your files anywhere.</h1>
+        <p class="lead">Use Open File or Open Folder for local Markdown files. Enable file:// URL access only when you want Chrome to automatically open local Markdown links with this extension.</p>
+        <div class="hero-actions">
+          <button id="open-viewer" type="button">Open Viewer</button>
+          <button id="open-settings" class="secondary" type="button">Open Extension Settings</button>
+        </div>
+      </section>
+
+      <section class="cards">
+        <article class="card recommended">
+          <div class="badge">Recommended</div>
+          <h2>Open File / Open Folder</h2>
+          <p>This is the easiest local-file workflow. The user chooses a file or folder, then Dev File Viewer reads only that selected content.</p>
+          <ul>
+            <li>No file:// setting required</li>
+            <li>Works well for non-technical users</li>
+            <li>Best fit for privacy-first local preview</li>
+          </ul>
+        </article>
+
+        <article class="card advanced" id="file-url-card">
+          <div class="badge">Advanced</div>
+          <h2>Automatic file:// URL preview</h2>
+          <p id="file-url-status">Checking current permission status...</p>
+          <ol>
+            <li>Open the extension settings page.</li>
+            <li>Enable <strong>Allow access to file URLs</strong>.</li>
+            <li>Open a local .md, .mkd, .mdx, or .markdown link again.</li>
+          </ol>
+          <div class="inline-actions">
+            <button id="copy-settings-link" type="button">Copy Settings Link</button>
+          </div>
+        </article>
+      </section>
+
+      <section class="features">
+        <h2>V1.1.1 includes</h2>
+        <div class="feature-grid">
+          <span>Markdown render</span>
+          <span>Markdown tables</span>
+          <span>Mermaid diagrams</span>
+          <span>Local folder sidebar</span>
+          <span>Offline-only runtime</span>
+          <span>No tracking</span>
+        </div>
+      </section>
+    </main>
+    <script src="onboarding.js"></script>
+  </body>
+</html>

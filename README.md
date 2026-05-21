@@ -1,27 +1,37 @@
-# Dev File Viewer V1
+# Dev File Viewer V1.1.1
 
-Dev File Viewer is a Chrome Extension for previewing local and remote developer-oriented files. V1 focuses on Markdown and Mermaid while keeping the internal architecture ready for V2 formats such as diff files, source code, syntax highlighting, GFM, alerts, themes, and keyboard shortcuts.
+Dev File Viewer is a Chrome Extension for previewing local and remote developer-oriented files. The product subtitle is **Markdown, Diff & Source Viewer**. V1.1.1 focuses on Markdown, Mermaid diagrams, Markdown tables, a friendlier local-file onboarding flow, and a fix for automatic `file://` Markdown preview.
 
-## V1 scope
+## V1.1.1 scope
 
 - Markdown preview for `.md`, `.mkd`, `.mdx`, `.markdown`
 - Open files from `file://`, `http://`, and `https://`
 - Local file and folder picker
 - Sidebar directory tree for user-selected local folders
+- Markdown table rendering
 - Mermaid fenced-code blocks using ` ```mermaid `
+- First-install onboarding page
+- Popup and viewer status for Chrome's `file://` URL access setting
+- One-click button to open the extension settings page
+- Copyable settings URL fallback
 - Offline-only runtime: all parser, sanitizer, renderer, and Mermaid code are bundled inside the extension
 - 100% client-side processing
 - No tracking, no analytics, no data collection
 
-## Important Chrome behavior
+## Local-file UX recommendation
 
-For `file://` URLs, Chrome requires the user to enable file URL access manually:
+For non-technical users, use **Open File** or **Open Folder**. These workflows do not require the user to enable Chrome's advanced `file://` URL access setting.
 
-1. Open `chrome://extensions`
-2. Find **Dev File Viewer**
-3. Enable **Allow access to file URLs**
+Automatic preview for `file://.../*.md` links is an advanced workflow. Chrome requires the user to enable file URL access manually:
 
-The extension cannot silently enumerate local directories from a `file://` URL. The sidebar directory tree is available after the user explicitly selects a folder with **Open Folder**.
+1. Open the Dev File Viewer popup, onboarding page, or viewer.
+2. Click **Open Settings**.
+3. Enable **Allow access to file URLs**.
+4. Open the local Markdown URL again.
+
+If the settings button does not deep-link correctly in a Chromium-based browser, use **Copy Link** and paste the copied `chrome://extensions/?id=...` URL manually.
+
+The extension cannot silently enumerate local directories from a `file://` URL. The sidebar directory tree is available only after the user explicitly selects a folder with **Open Folder**.
 
 ## Install for development
 
@@ -35,9 +45,19 @@ Then open `chrome://extensions`, enable **Developer mode**, click **Load unpacke
 ## Usage
 
 - Open a remote Markdown URL, then use the extension popup or context menu.
-- Open a local Markdown URL after enabling file URL access.
-- Use **Open File** to read one local file.
+- Open a local Markdown URL after enabling file URL access. Automatic `file://` preview is routed through the background service worker to avoid Chrome blocking direct `chrome-extension://` navigation from the file page.
+- Use **Open File** to read one local file without changing Chrome settings.
 - Use **Open Folder** to build a directory sidebar from a selected folder.
+- Markdown tables are rendered from pipe table syntax:
+
+```markdown
+| Feature | Status |
+|---|---:|
+| Markdown | Supported |
+| Mermaid | Supported |
+| Tables | Supported |
+```
+
 - Mermaid diagrams are rendered from fenced code blocks:
 
 ````markdown
@@ -48,11 +68,17 @@ flowchart TD
 ```
 ````
 
+
+## V1.1.1 fix note
+
+Earlier V1.1 builds redirected a detected Markdown page directly from the content script with `location.replace(chrome-extension://...)`. Chrome can block that page-initiated navigation and show `ERR_BLOCKED_BY_CLIENT`. V1.1.1 captures the already-loaded Markdown text, stores it temporarily in `chrome.storage.session`, and asks the background service worker to replace the tab with the viewer using `chrome.tabs.update()`.
+
 ## Architecture for V2 expansion
 
 ```text
 src/
   core/
+    browser/           browser-specific helpers, such as file URL access UX
     format/            file-type detection and format registry
     markdown/          Markdown engine boundary
     security/          sanitization and safe link policies
@@ -60,6 +86,7 @@ src/
   features/sidebar/    local directory tree UI
   plugins/             syntax/plugin lifecycle
   viewer/              app shell and orchestration
+  onboarding/          first-run and permission guidance
   content/             auto-detect Markdown URL pages
   background/          context menu and tab actions
 ```
