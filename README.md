@@ -1,8 +1,8 @@
-# Dev File Viewer V1.1.2
+# Dev File Viewer V1.1.3
 
-Dev File Viewer is a Chrome Extension for previewing local and remote developer-oriented files. The product subtitle is **Markdown, Diff & Source Viewer**. V1.1.2 focuses on Markdown, Mermaid diagrams, Markdown tables, Markdown links, a friendlier local-folder UX, session-only scroll position memory, and automatic `file://` Markdown preview.
+Dev File Viewer is a Chrome Extension for previewing local and remote developer-oriented files. The product subtitle is **Markdown, Diff & Source Viewer**. V1.1.3 focuses on Markdown, Mermaid diagrams, Markdown tables, Markdown links, a friendlier local-folder UX, session-only scroll position memory, and automatic `file://` Markdown preview.
 
-## V1.1.2 scope
+## V1.1.3 scope
 
 - Markdown preview for `.md`, `.mkd`, `.mdx`, `.markdown`
 - Open files from `file://`, `http://`, and `https://`
@@ -74,8 +74,9 @@ flowchart TD
 ````
 
 
-## V1.1.2 notes
+## V1.1.3 notes
 
+- Fixed a viewer layout issue where long Markdown documents with Mermaid diagrams or wide tables could show both the page scrollbar and the viewer scrollbar. The app shell now owns the viewport height and only the sidebar/viewer panes scroll internally.
 - Earlier V1.1 builds redirected a detected Markdown page directly from the content script with `location.replace(chrome-extension://...)`. Chrome can block that page-initiated navigation and show `ERR_BLOCKED_BY_CLIENT`. The current build captures the already-loaded Markdown text, stores it temporarily in `chrome.storage.session`, and asks the background service worker to replace the tab with the viewer using `chrome.tabs.update()`.
 - Folder mode now collapses the Open/Settings tools after successful folder selection.
 - Folder mode includes optional per-file scroll position memory using session-only local storage.
