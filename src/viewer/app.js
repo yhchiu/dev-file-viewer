@@ -14,7 +14,6 @@ const SCROLL_POSITIONS_KEY = 'devFileViewer:scrollPositions';
 const SIDEBAR_COLLAPSED_KEY = 'devFileViewer:sidebarCollapsed';
 const SIDEBAR_WIDTH_KEY = 'devFileViewer:sidebarWidth';
 const CONTENT_WIDTH_KEY = 'devFileViewer:contentWidth';
-const SIDEBAR_ACTIVE_TAB_KEY = 'devFileViewer:sidebarActiveTab';
 const DEFAULT_SIDEBAR_WIDTH = 310;
 const MIN_SIDEBAR_WIDTH = 240;
 const MAX_SIDEBAR_WIDTH = 560;
@@ -61,7 +60,8 @@ class DevFileViewerApp {
       outlineTab: document.querySelector('#tab-outline'),
       filesPanel: document.querySelector('#files-panel'),
       outlinePanel: document.querySelector('#outline-panel'),
-      tocTree: document.querySelector('#toc-tree')
+      tocTree: document.querySelector('#toc-tree'),
+      tocFileName: document.querySelector('#toc-file-name')
     };
 
     this.plugins = new PluginRegistry([mermaidPlugin]);
@@ -81,7 +81,6 @@ class DevFileViewerApp {
     this.resizeDrag = null;
     this.contentWidth = DEFAULT_CONTENT_WIDTH;
     this.activeSidebarTab = 'files';
-    this.hasStoredSidebarTab = false;
     this.headings = [];
     this.tocItems = new Map();
     this.activeHeadingId = '';
@@ -93,7 +92,7 @@ class DevFileViewerApp {
     await this.restoreContentWidth();
     await this.restoreSidebarWidth();
     await this.restoreSidebarState();
-    await this.restoreSidebarTab();
+    this.applySidebarTab('files');
     await this.restoreScrollSettings();
     this.bindEvents();
     await this.refreshFileUrlAccessStatus();
@@ -130,20 +129,8 @@ class DevFileViewerApp {
       this.scheduleActiveHeadingUpdate();
     }, { passive: true });
   }
-
-
-
-  async restoreSidebarTab() {
-    const stored = await chrome.storage.local.get(SIDEBAR_ACTIVE_TAB_KEY);
-    const tab = stored[SIDEBAR_ACTIVE_TAB_KEY];
-    this.hasStoredSidebarTab = tab === 'files' || tab === 'outline';
-    this.applySidebarTab(this.hasStoredSidebarTab ? tab : 'files');
-  }
-
-  async setSidebarTab(tab) {
+  setSidebarTab(tab) {
     this.applySidebarTab(tab);
-    this.hasStoredSidebarTab = true;
-    await chrome.storage.local.set({ [SIDEBAR_ACTIVE_TAB_KEY]: this.activeSidebarTab });
   }
 
   applySidebarTab(tab) {
@@ -159,11 +146,6 @@ class DevFileViewerApp {
 
     this.elements.filesPanel.hidden = nextTab !== 'files';
     this.elements.outlinePanel.hidden = nextTab !== 'outline';
-  }
-
-  applyDefaultSidebarTab(tab) {
-    if (this.hasStoredSidebarTab) return;
-    this.applySidebarTab(tab);
   }
 
   async restoreContentWidth() {
@@ -252,13 +234,6 @@ class DevFileViewerApp {
       // Pointer capture can already be released by the browser.
     }
     this.resizeDrag = null;
-    this.contentWidth = DEFAULT_CONTENT_WIDTH;
-    this.activeSidebarTab = 'files';
-    this.hasStoredSidebarTab = false;
-    this.headings = [];
-    this.tocItems = new Map();
-    this.activeHeadingId = '';
-    this.activeHeadingFrame = 0;
     this.elements.app.classList.remove('sidebar-resizing');
     await this.persistSidebarWidth();
     await nextFrame();
@@ -401,7 +376,7 @@ class DevFileViewerApp {
       });
       this.elements.sidebarTools.open = false;
       this.elements.scrollMemoryCard.hidden = false;
-      this.applyDefaultSidebarTab('files');
+      this.applySidebarTab('files');
       this.setStatus('Folder loaded. Select a Markdown file from the sidebar.', 'success');
     } catch (error) {
       if (error?.name === 'AbortError') return;
@@ -465,7 +440,11 @@ class DevFileViewerApp {
     });
     ensureHeadingAnchors(this.elements.preview);
     this.buildToc();
-    if (doc.sourceType !== 'directory-file') this.applyDefaultSidebarTab('outline');
+    this.updateTocTitle(doc);
+    if (doc.sourceType !== 'directory-file' && this.headings.length) {
+      this.applySidebarTab('outline');
+      this.elements.sidebarTools.open = false;
+    }
 
     this.currentDoc = doc;
     this.currentDocKey = this.getDocumentKey(doc);
@@ -586,6 +565,14 @@ class DevFileViewerApp {
     this.activeHeadingId = '';
     this.elements.tocTree.innerHTML = '<div class="toc-empty">Open a Markdown document to show its outline.</div>';
     this.elements.outlineTab.textContent = 'Outline';
+    this.updateTocTitle(null);
+  }
+
+  updateTocTitle(doc) {
+    if (!this.elements.tocFileName) return;
+    const name = doc?.name || '';
+    this.elements.tocFileName.textContent = name ? `(${name})` : '';
+    this.elements.tocFileName.title = name;
   }
 
   scheduleActiveHeadingUpdate() {

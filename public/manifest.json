@@ -2,8 +2,8 @@
   "manifest_version": 3,
   "name": "Dev File Viewer",
   "short_name": "Dev Viewer",
-  "version": "2.0.0",
-  "description": "Markdown, Diff & Source Viewer. V2 starts with Markdown Table of Contents / Outline navigation.",
+  "version": "2.0.1",
+  "description": "Markdown, Diff & Source Viewer. V2 includes Markdown Table of Contents / Outline navigation.",
   "minimum_chrome_version": "116",
   "icons": {
     "16": "assets/icons/icon16.png",

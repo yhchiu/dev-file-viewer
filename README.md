@@ -1,10 +1,10 @@
-# Dev File Viewer V2.0.0
+# Dev File Viewer V2.0.1
 
 ![Dev File Viewer brand mark](public/assets/brand/brand-mark.png)
 
-Dev File Viewer is a Chrome Extension for previewing local and remote developer-oriented files. The product subtitle is **Markdown, Diff & Source Viewer**. V2.0.0 starts the V2 roadmap with Markdown Table of Contents / Outline navigation while keeping the existing Markdown, Mermaid, table, link, local-folder, sidebar, content-width, scroll-memory, and `file://` preview features.
+Dev File Viewer is a Chrome Extension for previewing local and remote developer-oriented files. The product subtitle is **Markdown, Diff & Source Viewer**. V2.0.1 continues the V2 roadmap with Markdown Table of Contents / Outline navigation while keeping the existing Markdown, Mermaid, table, link, local-folder, sidebar, content-width, scroll-memory, and `file://` preview features.
 
-## V2.0.0 scope
+## V2.0.1 scope
 
 - Markdown preview for `.md`, `.mkd`, `.mdx`, `.markdown`
 - Open files from `file://`, `http://`, and `https://`
@@ -84,12 +84,12 @@ flowchart TD
 ````
 
 
-## V2.0.0 notes
+## V2.0.1 notes
 
 - Added **Outline** as TOC Phase 1. It is generated from rendered Markdown headings, so code blocks containing `#` are ignored.
-- The sidebar now has **Files** and **Outline** tabs. Files shows the selected folder tree; Outline shows the current document section list.
-- Outline currently indexes H1-H3 headings by default to keep navigation useful without becoming noisy.
-- Clicking an Outline item smoothly scrolls the internal viewer pane to the heading and updates the viewer URL hash.
+- The sidebar has **Files** and **Outline** tabs. Tab switching is runtime-only and is not saved to `chrome.storage.local`. Files shows the selected folder tree; Outline shows the current document section list.
+- Outline currently indexes H1-H3 headings by default to keep navigation useful without becoming noisy. The title shows the current file name, for example `On this page (03-bridge.md)`.
+- Clicking an Outline item smoothly scrolls the internal viewer pane to the heading and updates the viewer URL hash. Opening a single Markdown file with headings automatically switches to Outline and collapses Open/Settings to maximize reading space.
 - Scrolling the document highlights the active heading in the Outline tab.
 - Heading IDs are generated when missing, with duplicate handling, so same-page anchor links and TOC links share the same target IDs.
 

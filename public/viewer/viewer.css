@@ -134,6 +134,9 @@ input, select { width: 100%; border: 1px solid var(--line); border-radius: 10px;
 .sidebar-tab.active { color: var(--accent); background: #fff; box-shadow: 0 6px 18px rgba(15, 23, 42, .08); }
 .sidebar-tab:focus { outline: 2px solid var(--accent-soft); outline-offset: 2px; }
 .sidebar-panel[hidden] { display: none; }
+.toc-title { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.toc-title > span:first-child { flex: 0 0 auto; }
+.toc-file-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted); text-transform: none; letter-spacing: 0; font-weight: 750; }
 .toc-tree { font-size: 13px; color: var(--fg); }
 .toc-empty { color: var(--muted); padding: 10px; border: 1px dashed var(--line); border-radius: 12px; line-height: 1.45; }
 .toc-list { display: grid; gap: 2px; }
