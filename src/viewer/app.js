@@ -14,6 +14,7 @@ const SCROLL_POSITIONS_KEY = 'devFileViewer:scrollPositions';
 const SIDEBAR_COLLAPSED_KEY = 'devFileViewer:sidebarCollapsed';
 const SIDEBAR_WIDTH_KEY = 'devFileViewer:sidebarWidth';
 const CONTENT_WIDTH_KEY = 'devFileViewer:contentWidth';
+const TOC_POPOVER_PINNED_KEY = 'devFileViewer:tocPopoverPinned';
 const DEFAULT_SIDEBAR_WIDTH = 310;
 const MIN_SIDEBAR_WIDTH = 240;
 const MAX_SIDEBAR_WIDTH = 560;
@@ -41,8 +42,10 @@ class DevFileViewerApp {
       sidebarToggle: document.querySelector('#btn-sidebar-toggle'),
       sidebarRestore: document.querySelector('#btn-sidebar-restore'),
       floatingOutline: document.querySelector('#btn-floating-outline'),
+      popoutOutline: document.querySelector('#btn-popout-outline'),
       tocPopover: document.querySelector('#toc-popover'),
       closeTocPopover: document.querySelector('#btn-close-toc-popover'),
+      pinTocPopover: document.querySelector('#btn-pin-toc-popover'),
       sidebarResizer: document.querySelector('#sidebar-resizer'),
       scrollMemoryCard: document.querySelector('#scroll-memory-card'),
       rememberScroll: document.querySelector('#remember-scroll'),
@@ -97,6 +100,11 @@ class DevFileViewerApp {
     this.activeHeadingFrame = 0;
     this.tocFilterQuery = '';
     this.tocPopoverOpen = false;
+    this.tocPopoverPinned = false;
+    this.outlinePopoutEnabled = false;
+    this.floatingTocPosition = null;
+    this.floatingOutlineDrag = null;
+    this.ignoreNextFloatingOutlineClick = false;
   }
 
   async start() {
@@ -104,6 +112,7 @@ class DevFileViewerApp {
     await this.restoreContentWidth();
     await this.restoreSidebarWidth();
     await this.restoreSidebarState();
+    await this.restoreTocPopoverPinState();
     this.applySidebarTab('files');
     await this.restoreScrollSettings();
     this.bindEvents();
@@ -114,8 +123,19 @@ class DevFileViewerApp {
   bindEvents() {
     this.elements.sidebarToggle.addEventListener('click', () => this.setSidebarCollapsed(true));
     this.elements.sidebarRestore.addEventListener('click', () => this.setSidebarCollapsed(false));
-    this.elements.floatingOutline.addEventListener('click', () => this.toggleTocPopover());
-    this.elements.closeTocPopover.addEventListener('click', () => this.closeTocPopover());
+    this.elements.floatingOutline.addEventListener('pointerdown', event => this.startFloatingOutlineDrag(event));
+    this.elements.floatingOutline.addEventListener('click', event => {
+      if (this.ignoreNextFloatingOutlineClick) {
+        event.preventDefault();
+        event.stopPropagation();
+        this.ignoreNextFloatingOutlineClick = false;
+        return;
+      }
+      this.toggleTocPopover();
+    });
+    this.elements.closeTocPopover.addEventListener('click', () => this.closeTocPopover({ force: true }));
+    this.elements.pinTocPopover.addEventListener('click', () => this.setTocPopoverPinned(!this.tocPopoverPinned));
+    this.elements.popoutOutline.addEventListener('click', () => this.toggleOutlinePopout());
     this.elements.sidebarResizer.addEventListener('pointerdown', event => this.startSidebarResize(event));
     this.elements.sidebarResizer.addEventListener('keydown', event => this.handleSidebarResizeKey(event));
     this.elements.sidebarResizer.addEventListener('dblclick', () => this.resetSidebarWidth());
@@ -138,6 +158,7 @@ class DevFileViewerApp {
     this.elements.tocPopoverFilter.addEventListener('input', () => this.setTocFilter(this.elements.tocPopoverFilter.value));
     document.addEventListener('keydown', event => this.handleGlobalKeydown(event));
     document.addEventListener('pointerdown', event => this.handleDocumentPointerDown(event));
+    window.addEventListener('resize', () => this.reflowFloatingTocPosition());
     for (const tab of this.elements.sidebarTabs) {
       tab.addEventListener('click', () => this.setSidebarTab(tab.dataset.sidebarTab));
     }
@@ -150,31 +171,34 @@ class DevFileViewerApp {
 
 
   handleGlobalKeydown(event) {
-    if (event.key === 'Escape' && this.tocPopoverOpen) {
+    if (event.key === 'Escape' && this.tocPopoverOpen && !this.tocPopoverPinned) {
       event.preventDefault();
       this.closeTocPopover();
     }
   }
 
   handleDocumentPointerDown(event) {
-    if (!this.tocPopoverOpen) return;
+    if (!this.tocPopoverOpen || this.tocPopoverPinned) return;
     const target = event.target;
     if (this.elements.tocPopover.contains(target) || this.elements.floatingOutline.contains(target)) return;
     this.closeTocPopover();
   }
 
   toggleTocPopover() {
-    if (this.tocPopoverOpen) this.closeTocPopover();
+    if (this.tocPopoverOpen) this.closeTocPopover({ force: true });
     else this.openTocPopover();
   }
 
-  openTocPopover() {
+  openTocPopover(options = {}) {
     if (!this.headings.length) return;
     this.tocPopoverOpen = true;
     this.elements.tocPopover.hidden = false;
     this.elements.floatingOutline.setAttribute('aria-expanded', 'true');
+    this.updateOutlinePopoutControl();
+    this.updateFloatingTocPopoverPosition();
     this.setActiveHeading(this.activeHeadingId || this.headings[0]?.id || '');
 
+    if (options.focus === false) return;
     requestAnimationFrame(() => {
       if (!this.tocPopoverOpen) return;
       if (!this.elements.tocPopoverFilterRow.hidden) this.elements.tocPopoverFilter.focus();
@@ -186,12 +210,265 @@ class DevFileViewerApp {
     this.tocPopoverOpen = false;
     this.elements.tocPopover.hidden = true;
     this.elements.floatingOutline.setAttribute('aria-expanded', 'false');
+    this.updateOutlinePopoutControl();
   }
 
   updateFloatingOutlineState() {
-    const shouldShow = this.sidebarCollapsed && this.headings.length > 0;
+    const hasHeadings = this.headings.length > 0;
+    if (!hasHeadings) {
+      this.outlinePopoutEnabled = false;
+    }
+
+    const shouldShow = hasHeadings && (this.sidebarCollapsed || this.tocPopoverPinned || this.outlinePopoutEnabled);
     this.elements.floatingOutline.hidden = !shouldShow;
-    if (!shouldShow) this.closeTocPopover();
+    this.updateOutlinePopoutControl();
+
+    if (!shouldShow) {
+      this.closeTocPopover();
+      return;
+    }
+
+    this.reflowFloatingTocPosition();
+    if (this.tocPopoverPinned && !this.tocPopoverOpen) {
+      this.openTocPopover({ focus: false });
+    }
+  }
+
+  toggleOutlinePopout() {
+    if (!this.headings.length) return;
+
+    if (this.tocPopoverPinned) {
+      this.openTocPopover({ focus: false });
+      this.updateOutlinePopoutControl();
+      return;
+    }
+
+    if (this.outlinePopoutEnabled) {
+      this.outlinePopoutEnabled = false;
+      this.closeTocPopover({ force: true });
+      this.updateFloatingOutlineState();
+      return;
+    }
+
+    this.outlinePopoutEnabled = true;
+    this.updateFloatingOutlineState();
+    this.openTocPopover({ focus: false });
+  }
+
+  updateOutlinePopoutControl() {
+    const button = this.elements.popoutOutline;
+    if (!button) return;
+
+    const hasHeadings = this.headings.length > 0;
+    const floatingVisible = !this.elements.floatingOutline.hidden;
+    button.disabled = !hasHeadings;
+    button.classList.toggle('is-active', hasHeadings && floatingVisible);
+    button.setAttribute('aria-pressed', String(hasHeadings && floatingVisible));
+
+    if (!hasHeadings) {
+      button.title = 'No headings in this document';
+      button.setAttribute('aria-label', 'No headings in this document');
+    } else if (this.tocPopoverPinned) {
+      button.title = 'Floating outline is pinned';
+      button.setAttribute('aria-label', 'Floating outline is pinned');
+    } else if (this.outlinePopoutEnabled) {
+      button.title = 'Hide floating outline';
+      button.setAttribute('aria-label', 'Hide floating outline');
+    } else {
+      button.title = 'Pop out outline';
+      button.setAttribute('aria-label', 'Pop out outline');
+    }
+  }
+
+  async restoreTocPopoverPinState() {
+    const stored = await chrome.storage.local.get(TOC_POPOVER_PINNED_KEY);
+    this.applyTocPopoverPinned(Boolean(stored[TOC_POPOVER_PINNED_KEY]));
+  }
+
+  async setTocPopoverPinned(pinned) {
+    this.applyTocPopoverPinned(Boolean(pinned));
+    await chrome.storage.local.set({ [TOC_POPOVER_PINNED_KEY]: this.tocPopoverPinned });
+    this.updateFloatingOutlineState();
+  }
+
+  applyTocPopoverPinned(pinned) {
+    this.tocPopoverPinned = Boolean(pinned);
+    this.elements.app.classList.toggle('toc-popover-pinned', this.tocPopoverPinned);
+    this.elements.pinTocPopover.classList.toggle('is-active', this.tocPopoverPinned);
+    this.elements.pinTocPopover.setAttribute('aria-pressed', String(this.tocPopoverPinned));
+    this.elements.pinTocPopover.title = this.tocPopoverPinned
+      ? 'Unpin outline popover'
+      : 'Pin outline popover';
+    this.elements.pinTocPopover.setAttribute('aria-label', this.elements.pinTocPopover.title);
+    this.updateOutlinePopoutControl();
+  }
+
+  startFloatingOutlineDrag(event) {
+    if (event.button !== 0) return;
+    const startPosition = this.getFloatingTocPosition();
+    this.floatingOutlineDrag = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      startLeft: startPosition.left,
+      startTop: startPosition.top,
+      moved: false
+    };
+    this.elements.floatingOutline.setPointerCapture(event.pointerId);
+    this.elements.floatingOutline.classList.add('is-dragging');
+
+    const onMove = moveEvent => this.updateFloatingOutlineDrag(moveEvent);
+    const onEnd = endEvent => {
+      this.finishFloatingOutlineDrag(endEvent);
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onEnd);
+      window.removeEventListener('pointercancel', onEnd);
+    };
+
+    window.addEventListener('pointermove', onMove, { passive: false });
+    window.addEventListener('pointerup', onEnd);
+    window.addEventListener('pointercancel', onEnd);
+  }
+
+  updateFloatingOutlineDrag(event) {
+    if (!this.floatingOutlineDrag) return;
+    const dx = event.clientX - this.floatingOutlineDrag.startX;
+    const dy = event.clientY - this.floatingOutlineDrag.startY;
+    if (Math.abs(dx) + Math.abs(dy) > 4) this.floatingOutlineDrag.moved = true;
+    if (!this.floatingOutlineDrag.moved) return;
+    event.preventDefault();
+    this.applyFloatingTocPosition({
+      left: this.floatingOutlineDrag.startLeft + dx,
+      top: this.floatingOutlineDrag.startTop + dy
+    });
+  }
+
+  finishFloatingOutlineDrag(event) {
+    if (!this.floatingOutlineDrag) return;
+    const moved = this.floatingOutlineDrag.moved;
+    try {
+      if (this.elements.floatingOutline.hasPointerCapture?.(this.floatingOutlineDrag.pointerId)) {
+        this.elements.floatingOutline.releasePointerCapture(this.floatingOutlineDrag.pointerId);
+      }
+    } catch {
+      // Pointer capture can already be released by the browser.
+    }
+    this.floatingOutlineDrag = null;
+    this.elements.floatingOutline.classList.remove('is-dragging');
+    if (moved) {
+      event.preventDefault();
+      this.ignoreNextFloatingOutlineClick = true;
+      window.setTimeout(() => {
+        this.ignoreNextFloatingOutlineClick = false;
+      }, 250);
+    }
+  }
+
+  reflowFloatingTocPosition() {
+    if (this.elements.floatingOutline.hidden) return;
+
+    if (this.floatingTocPosition) {
+      this.applyFloatingTocPosition(this.floatingTocPosition);
+      return;
+    }
+
+    this.applyDefaultFloatingTocPosition();
+  }
+
+  getFloatingTocPosition() {
+    if (this.floatingTocPosition) return this.clampFloatingTocPosition(this.floatingTocPosition);
+    const rect = this.elements.floatingOutline.getBoundingClientRect();
+    return this.clampFloatingTocPosition({ left: rect.left, top: rect.top });
+  }
+
+  getDefaultFloatingTocPosition() {
+    const viewerRect = this.elements.viewerMain.getBoundingClientRect();
+    const padding = 16;
+    let left = viewerRect.left + padding;
+    let top = viewerRect.top + padding;
+
+    if (this.sidebarCollapsed && !this.elements.sidebarRestore.hidden) {
+      const restoreRect = this.elements.sidebarRestore.getBoundingClientRect();
+      left = Math.max(left, restoreRect.right + 8);
+    }
+
+    return this.clampFloatingTocPosition({ left, top });
+  }
+
+  applyDefaultFloatingTocPosition() {
+    const position = this.getDefaultFloatingTocPosition();
+    this.applyFloatingTocPosition(position, { remember: false });
+  }
+
+  applyFloatingTocPosition(position, options = {}) {
+    const nextPosition = this.clampFloatingTocPosition(position);
+    if (options.remember === false) {
+      this.floatingTocPosition = null;
+    } else {
+      this.floatingTocPosition = nextPosition;
+    }
+
+    this.elements.floatingOutline.style.left = `${nextPosition.left}px`;
+    this.elements.floatingOutline.style.top = `${nextPosition.top}px`;
+    this.elements.floatingOutline.style.right = 'auto';
+    this.elements.floatingOutline.style.bottom = 'auto';
+    this.updateFloatingTocPopoverPosition();
+  }
+
+  getFloatingTocBounds() {
+    const padding = 8;
+    const viewerRect = this.elements.viewerMain.getBoundingClientRect();
+    const minLeft = Math.max(padding, Math.round(viewerRect.left + padding));
+    const minTop = Math.max(padding, Math.round(viewerRect.top + padding));
+
+    return {
+      padding,
+      minLeft,
+      minTop,
+      maxRight: Math.max(minLeft, window.innerWidth - padding),
+      maxBottom: Math.max(minTop, window.innerHeight - padding)
+    };
+  }
+
+  clampFloatingTocPosition(position) {
+    const bounds = this.getFloatingTocBounds();
+    const rect = this.elements.floatingOutline.getBoundingClientRect();
+    const width = rect.width || 92;
+    const height = rect.height || 38;
+    const maxLeft = Math.max(bounds.minLeft, bounds.maxRight - width);
+    const maxTop = Math.max(bounds.minTop, bounds.maxBottom - height);
+
+    return {
+      left: Math.min(Math.max(Number(position.left) || bounds.minLeft, bounds.minLeft), maxLeft),
+      top: Math.min(Math.max(Number(position.top) || bounds.minTop, bounds.minTop), maxTop)
+    };
+  }
+
+  updateFloatingTocPopoverPosition() {
+    if (this.elements.floatingOutline.hidden) return;
+    const buttonRect = this.elements.floatingOutline.getBoundingClientRect();
+    const popover = this.elements.tocPopover;
+    const gap = 8;
+    const bounds = this.getFloatingTocBounds();
+    const padding = bounds.padding;
+    const availableWidth = Math.max(0, bounds.maxRight - bounds.minLeft);
+    const popoverWidth = Math.min(360, Math.max(180, availableWidth));
+    const popoverHeight = popover.hidden ? 480 : Math.min(popover.offsetHeight || 480, window.innerHeight - padding * 2);
+    let left = buttonRect.left;
+    let top = buttonRect.bottom + gap;
+
+    if (left + popoverWidth > bounds.maxRight) {
+      left = bounds.maxRight - popoverWidth;
+    }
+    if (top + popoverHeight > bounds.maxBottom) {
+      top = buttonRect.top - popoverHeight - gap;
+    }
+    if (top < bounds.minTop) top = bounds.minTop;
+    if (left < bounds.minLeft) left = bounds.minLeft;
+
+    popover.style.left = `${Math.round(left)}px`;
+    popover.style.top = `${Math.round(top)}px`;
+    popover.style.width = `${Math.round(popoverWidth)}px`;
   }
 
   setSidebarTab(tab) {
@@ -287,6 +564,7 @@ class DevFileViewerApp {
     event.preventDefault();
     const nextWidth = this.resizeDrag.startWidth + event.clientX - this.resizeDrag.startX;
     this.applySidebarWidth(nextWidth);
+    this.reflowFloatingTocPosition();
   }
 
   async finishSidebarResize(event) {
@@ -302,6 +580,7 @@ class DevFileViewerApp {
     this.elements.app.classList.remove('sidebar-resizing');
     await this.persistSidebarWidth();
     await nextFrame();
+    this.reflowFloatingTocPosition();
   }
 
   async handleSidebarResizeKey(event) {
@@ -319,11 +598,13 @@ class DevFileViewerApp {
     }
 
     await this.persistSidebarWidth();
+    this.reflowFloatingTocPosition();
   }
 
   async resetSidebarWidth() {
     this.applySidebarWidth(DEFAULT_SIDEBAR_WIDTH);
     await this.persistSidebarWidth();
+    this.reflowFloatingTocPosition();
   }
 
   async restoreSidebarState() {
@@ -347,8 +628,8 @@ class DevFileViewerApp {
       await chrome.storage.local.set({ [SIDEBAR_COLLAPSED_KEY]: this.sidebarCollapsed });
     }
 
-    this.updateFloatingOutlineState();
     await nextFrame();
+    this.updateFloatingOutlineState();
   }
 
   async restoreScrollSettings() {
@@ -631,7 +912,7 @@ class DevFileViewerApp {
         event.preventDefault();
         this.scrollToAnchor(heading.id, { smooth: true, updateHash: true });
         this.saveCurrentScrollPosition().catch(() => {});
-        if (context === 'popover') this.closeTocPopover();
+        if (context === 'popover' && !this.tocPopoverPinned) this.closeTocPopover();
       });
       list.append(item);
       this.registerTocItem(heading.id, item);
@@ -699,6 +980,7 @@ class DevFileViewerApp {
     this.elements.tocPopoverFilter.value = '';
     this.renderTocEmpty('Open a Markdown document to show its outline.');
     this.elements.outlineTab.textContent = 'Outline';
+    this.outlinePopoutEnabled = false;
     this.updateTocFilterVisibility();
     this.updateTocTitle(null);
     this.updateFloatingOutlineState();

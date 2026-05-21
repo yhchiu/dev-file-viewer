@@ -9,7 +9,7 @@
   <body>
     <div id="app" class="app-shell">
       <button id="btn-sidebar-restore" class="sidebar-restore" type="button" aria-label="Show sidebar" title="Show sidebar" hidden>☰</button>
-      <button id="btn-floating-outline" class="floating-outline" type="button" aria-label="Open document outline" aria-expanded="false" title="Open document outline" hidden>Outline</button>
+      <button id="btn-floating-outline" class="floating-outline" type="button" aria-label="Open document outline" aria-expanded="false" title="Click to open outline. Drag to move." hidden>Outline</button>
       <aside id="sidebar" class="sidebar" aria-label="Directory sidebar">
         <div class="brand">
           <img class="brand-mark" src="../assets/icons/icon48.png" srcset="../assets/icons/icon48.png 1x, ../assets/icons/icon128.png 2x" width="42" height="42" alt="" aria-hidden="true" />
@@ -63,9 +63,18 @@
           <span class="info-dot" tabindex="0" aria-label="Uses local session storage only. Positions are deleted when the browser session ends and are never sent anywhere." title="Uses local session storage only. Positions are deleted when the browser session ends and are never sent anywhere.">?</span>
         </section>
 
-        <div class="sidebar-tabs" role="tablist" aria-label="Sidebar navigation">
-          <button id="tab-files" class="sidebar-tab active" type="button" role="tab" aria-selected="true" aria-controls="files-panel" data-sidebar-tab="files">Files</button>
-          <button id="tab-outline" class="sidebar-tab" type="button" role="tab" aria-selected="false" aria-controls="outline-panel" data-sidebar-tab="outline" tabindex="-1">Outline</button>
+        <div class="sidebar-tabs-row">
+          <div class="sidebar-tabs" role="tablist" aria-label="Sidebar navigation">
+            <button id="tab-files" class="sidebar-tab active" type="button" role="tab" aria-selected="true" aria-controls="files-panel" data-sidebar-tab="files">Files</button>
+            <button id="tab-outline" class="sidebar-tab" type="button" role="tab" aria-selected="false" aria-controls="outline-panel" data-sidebar-tab="outline" tabindex="-1">Outline</button>
+          </div>
+          <button id="btn-popout-outline" class="sidebar-popout-outline icon-button" type="button" aria-label="Pop out outline" aria-pressed="false" title="No headings in this document" disabled>
+            <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <rect x="6" y="8" width="10" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2" />
+              <path d="M10 6h8v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M18 6l-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            </svg>
+          </button>
         </div>
 
         <section id="files-panel" class="sidebar-panel" role="tabpanel" aria-labelledby="tab-files">
@@ -100,7 +109,17 @@
       <section id="toc-popover" class="toc-popover" aria-label="Table of contents popover" hidden>
         <div class="toc-popover-header">
           <div class="toc-popover-title"><span>On this page</span> <span id="toc-popover-file-name" class="toc-file-name"></span></div>
-          <button id="btn-close-toc-popover" class="toc-popover-close" type="button" aria-label="Close outline">×</button>
+          <div class="toc-popover-actions">
+            <button id="btn-pin-toc-popover" class="toc-popover-pin icon-button" type="button" aria-label="Pin outline popover" aria-pressed="false" title="Pin outline popover">
+              <svg class="button-icon pin-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <circle cx="12" cy="7.5" r="2.75" fill="currentColor" />
+                <path d="M12 10.5v7.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                <path d="M8.5 12.5h7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                <path d="M12 18l-2 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+            </button>
+            <button id="btn-close-toc-popover" class="toc-popover-close" type="button" aria-label="Close outline">×</button>
+          </div>
         </div>
         <div id="toc-popover-filter-row" class="toc-filter-row" hidden>
           <input id="toc-popover-filter" type="search" placeholder="Filter headings..." aria-label="Filter headings" autocomplete="off" />
@@ -120,7 +139,7 @@
         </header>
 
         <section id="status" class="status info">
-V2.1 adds a low-distraction Outline popover. Open a document and use Files / Outline to switch between folder navigation and section navigation.
+V2.1.5 uses SVG controls for Outline pop-out/pin and places the floating Outline control in the viewer area.
         </section>
 
         <article id="preview" class="markdown-body" tabindex="0"></article>
