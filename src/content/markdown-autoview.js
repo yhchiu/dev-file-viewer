@@ -44,6 +44,32 @@
     return pre?.innerText ?? document.body?.innerText ?? document.documentElement?.innerText ?? '';
   }
 
+
+function looksLikeHtmlSource(text = '', mimeType = '') {
+  const value = String(text || '').trimStart();
+  if (!value || /^\s*(?:<\?xml\b|<svg\b|<rss\b|<feed\b)/i.test(value)) return false;
+  const sample = value.slice(0, 12000);
+  if (/^\s*(?:<!doctype\s+html\b|<html\b|<head\b|<body\b|<meta\b|<title\b|<link\b|<script\b|<style\b|<div\b|<span\b|<main\b|<section\b|<article\b|<template\b)/i.test(sample)) return true;
+  if (/(?:<!doctype\s+html\b|<html\b[\s>]|<\/html>|<head\b[\s>]|<\/head>|<body\b[\s>]|<\/body>|<script\b[\s>]|<\/script>|<style\b[\s>]|<\/style>)/i.test(sample)) return true;
+  return /^text\/html/i.test(String(mimeType || ''));
+}
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message?.type !== 'DETECT_HTML_SOURCE_DOCUMENT') return false;
+
+  const text = getDocumentText();
+  const mimeType = document.contentType || '';
+  sendResponse({
+    ok: true,
+    isHtmlSource: looksLikeHtmlSource(text, mimeType),
+    url: location.href,
+    title: document.title || '',
+    mimeType,
+    text
+  });
+  return true;
+});
+
   if (!shouldOpenInViewer()) return;
 
   sessionStorage.setItem(REDIRECT_FLAG, '1');

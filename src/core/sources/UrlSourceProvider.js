@@ -1,4 +1,5 @@
-import { detectFormat, displayNameFromUrl } from '../format/fileTypes.js';
+import { FORMAT_IDS, detectFormat, displayNameFromUrl } from '../format/fileTypes.js';
+import { looksLikeHtmlSource } from '../format/htmlSourceDetection.js';
 
 export class UrlSourceProvider {
   async load(url) {
@@ -17,6 +18,8 @@ export class UrlSourceProvider {
     const mimeType = response.headers.get('content-type') || '';
     const text = await response.text();
 
+    const isHtmlSource = looksLikeHtmlSource(text, { mimeType, url });
+
     return {
       id: url,
       name: displayNameFromUrl(url),
@@ -24,7 +27,8 @@ export class UrlSourceProvider {
       baseUrl: url,
       url,
       mimeType,
-      format: detectFormat({ url, mimeType }),
+      format: isHtmlSource ? FORMAT_IDS.SOURCE_CODE : detectFormat({ url, mimeType }),
+      language: isHtmlSource ? 'html' : undefined,
       text
     };
   }

@@ -744,7 +744,8 @@ resolveTheme() {
       baseUrl: snapshot.url || '',
       url: snapshot.url || '',
       mimeType: snapshot.mimeType || '',
-      format: detectFormat({ url: snapshot.url || '', mimeType: snapshot.mimeType || '' }),
+      format: snapshot.format || detectFormat({ url: snapshot.url || '', mimeType: snapshot.mimeType || '' }),
+      language: snapshot.language || '',
       text: snapshot.text || ''
     };
 
@@ -838,8 +839,10 @@ resolveTheme() {
 
     if (format === FORMAT_IDS.SOURCE_CODE) {
       if (!this.sourceRenderer) this.sourceRenderer = new SourceCodeRenderer();
+      const sourceLanguage = doc.language || sourceLanguageFromPath(doc.name || doc.url || doc.path || '');
+      if (sourceLanguage === 'html') this.elements.format.textContent = 'HTML';
       this.sourceRenderer.render(doc.text, this.elements.preview, {
-        language: sourceLanguageFromPath(doc.name || doc.url || doc.path || ''),
+        language: sourceLanguage,
         name: doc.name || '',
         url: doc.url || '',
         path: doc.path || ''

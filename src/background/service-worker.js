@@ -58,6 +58,8 @@ async function openViewerForSnapshot(message, sender) {
       url: message.url || '',
       title: message.title || '',
       mimeType: message.mimeType || '',
+      format: message.format || '',
+      language: message.language || '',
       text: message.text || '',
       createdAt: Date.now()
     }
