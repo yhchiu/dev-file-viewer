@@ -24,7 +24,7 @@ export const features = Object.freeze({
   },
   themes: {
     light: true,
-    dark: false
+    dark: true
   },
   shortcuts: false
 });

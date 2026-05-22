@@ -17,11 +17,14 @@ const SCROLL_POSITIONS_KEY = 'devFileViewer:scrollPositions';
 const SIDEBAR_COLLAPSED_KEY = 'devFileViewer:sidebarCollapsed';
 const SIDEBAR_WIDTH_KEY = 'devFileViewer:sidebarWidth';
 const CONTENT_WIDTH_KEY = 'devFileViewer:contentWidth';
+const THEME_KEY = 'devFileViewer:theme';
 const TOC_POPOVER_PINNED_KEY = 'devFileViewer:tocPopoverPinned';
 const DEFAULT_SIDEBAR_WIDTH = 310;
 const MIN_SIDEBAR_WIDTH = 240;
 const MAX_SIDEBAR_WIDTH = 560;
 const DEFAULT_CONTENT_WIDTH = 'comfortable';
+const DEFAULT_THEME = 'system';
+const THEME_OPTIONS = new Set(['light', 'dark', 'system']);
 const CONTENT_WIDTHS = {
   narrow: '760px',
   comfortable: '920px',
@@ -67,6 +70,7 @@ class DevFileViewerApp {
       copySettingsLink: document.querySelector('#btn-copy-settings-link'),
       useOpenFile: document.querySelector('#btn-use-open-file'),
       contentWidth: document.querySelector('#content-width-select'),
+      theme: document.querySelector('#theme-select'),
       sidebarTabs: document.querySelectorAll('[data-sidebar-tab]'),
       filesTab: document.querySelector('#tab-files'),
       outlineTab: document.querySelector('#tab-outline'),
@@ -106,6 +110,8 @@ class DevFileViewerApp {
     this.sidebarWidth = DEFAULT_SIDEBAR_WIDTH;
     this.resizeDrag = null;
     this.contentWidth = DEFAULT_CONTENT_WIDTH;
+    this.themePreference = DEFAULT_THEME;
+    this.themeMediaQuery = window.matchMedia?.('(prefers-color-scheme: dark)') || null;
     this.activeSidebarTab = 'files';
     this.outlineType = 'markdown';
     this.headings = [];
@@ -126,6 +132,7 @@ class DevFileViewerApp {
 
   async start() {
     await this.plugins.init();
+    await this.restoreTheme();
     await this.restoreContentWidth();
     await this.restoreSidebarWidth();
     await this.restoreSidebarState();
@@ -171,6 +178,10 @@ class DevFileViewerApp {
     this.elements.useOpenFile.addEventListener('click', () => this.openLocalFile());
     this.elements.rememberScroll.addEventListener('change', () => this.setRememberScroll(this.elements.rememberScroll.checked));
     this.elements.contentWidth.addEventListener('change', () => this.setContentWidth(this.elements.contentWidth.value));
+    this.elements.theme?.addEventListener('change', () => this.setThemePreference(this.elements.theme.value));
+    this.themeMediaQuery?.addEventListener?.('change', () => {
+      if (this.themePreference === 'system') this.applyTheme();
+    });
     this.elements.tocDepth.addEventListener('change', () => this.setTocDepth(this.elements.tocDepth.value));
     this.elements.tocPopoverDepth.addEventListener('change', () => this.setTocDepth(this.elements.tocPopoverDepth.value));
     this.elements.tocFilter.addEventListener('input', () => this.setTocFilter(this.elements.tocFilter.value));
@@ -508,6 +519,39 @@ class DevFileViewerApp {
     this.elements.filesPanel.hidden = nextTab !== 'files';
     this.elements.outlinePanel.hidden = nextTab !== 'outline';
   }
+
+async restoreTheme() {
+  const stored = await chrome.storage.local.get(THEME_KEY);
+  this.themePreference = THEME_OPTIONS.has(stored[THEME_KEY]) ? stored[THEME_KEY] : DEFAULT_THEME;
+  if (this.elements.theme) this.elements.theme.value = this.themePreference;
+  this.applyTheme();
+}
+
+async setThemePreference(value) {
+  this.themePreference = THEME_OPTIONS.has(value) ? value : DEFAULT_THEME;
+  if (this.elements.theme && this.elements.theme.value !== this.themePreference) {
+    this.elements.theme.value = this.themePreference;
+  }
+  await chrome.storage.local.set({ [THEME_KEY]: this.themePreference });
+  this.applyTheme();
+  this.setStatus(`Theme set to ${themeLabel(this.themePreference)}.`, 'success');
+}
+
+applyTheme() {
+  const resolved = this.resolveTheme();
+  document.documentElement.dataset.theme = resolved;
+  document.documentElement.dataset.themePreference = this.themePreference;
+  document.documentElement.style.colorScheme = resolved;
+  document.body?.setAttribute('data-theme', resolved);
+  this.elements.app?.setAttribute('data-theme', resolved);
+}
+
+resolveTheme() {
+  if (this.themePreference === 'system') {
+    return this.themeMediaQuery?.matches ? 'dark' : 'light';
+  }
+  return this.themePreference === 'dark' ? 'dark' : 'light';
+}
 
   async restoreContentWidth() {
     const stored = await chrome.storage.local.get(CONTENT_WIDTH_KEY);
@@ -1379,6 +1423,16 @@ function tocIconSvg(kind) {
     <path d="M4 2.25h5.1L12 5.15v8.6H4V2.25Z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" />
     <path d="M9 2.25V5.3h3" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" />
   </svg>`;
+}
+
+function themeLabel(value) {
+  switch (value) {
+    case 'dark': return 'Dark';
+    case 'system': return 'System';
+    case 'light':
+    default:
+      return 'Light';
+  }
 }
 
 function contentWidthLabel(value) {
