@@ -830,6 +830,7 @@ resolveTheme() {
 
   async renderDocument(doc, options = {}) {
     await this.saveCurrentScrollPosition();
+    this.clearSourceLineHighlight();
 
     const format = doc.format || detectFormat(doc);
     this.elements.title.textContent = doc.name || 'Untitled';
@@ -1159,6 +1160,7 @@ renderTocContainer(container, context) {
       item.addEventListener('click', event => {
         event.preventDefault();
         this.scrollToAnchor(anchorId, { smooth: true, updateHash: true });
+        this.highlightSourceLine(anchorId);
         this.saveCurrentScrollPosition().catch(() => {});
         if (context === 'popover' && !this.tocPopoverPinned) this.closeTocPopover();
       });
@@ -1475,6 +1477,22 @@ collectTocDescendantIds(node, targetSet) {
       this.setStatus(`Copied settings link: ${url}`, 'success');
     } catch (error) {
       this.setStatus(error?.message || String(error), 'error');
+    }
+  }
+
+  highlightSourceLine(anchorId) {
+    this.clearSourceLineHighlight();
+
+    if (!anchorId) return;
+    const target = this.elements.preview.querySelector(`#${CSS.escape(anchorId)}`);
+    if (!target?.classList?.contains('source-line')) return;
+
+    target.classList.add('is-symbol-highlighted');
+  }
+
+  clearSourceLineHighlight() {
+    for (const line of this.elements.preview.querySelectorAll('.source-line.is-symbol-highlighted')) {
+      line.classList.remove('is-symbol-highlighted');
     }
   }
 
