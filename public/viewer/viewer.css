@@ -662,7 +662,7 @@ body.markdown-width-full .diff-body,
 }
 
 
-/* V2.7.4 GitHub-like diff table reset.
+/* V2.8.0 GitHub-like diff table reset.
    Diff tables must not inherit Markdown table/card styles. */
 .markdown-body.diff-body {
   padding: 0;
@@ -772,7 +772,7 @@ body.markdown-width-full .diff-body,
 }
 
 
-/* V2.7.4 diff outline tree */
+/* V2.8.0 diff outline tree */
 .toc-directory-item {
   width: 100%;
   border: 0;
@@ -1030,7 +1030,7 @@ body.markdown-width-full .diff-body,
 }
 
 
-/* V2.7.4 theme change binding fix / defensive theme targets */
+/* V2.8.0 theme change binding fix / defensive theme targets */
 body[data-theme="dark"],
 .app-shell[data-theme="dark"] {
   color: var(--fg);
@@ -1059,7 +1059,7 @@ body[data-theme="dark"],
 }
 
 
-/* V2.7.4 dark theme interaction polish */
+/* V2.8.0 dark theme interaction polish */
 :root[data-theme="dark"] button:hover,
 :root[data-theme="dark"] .secondary-action:hover {
   color: var(--accent);
@@ -1247,7 +1247,7 @@ body[data-theme="dark"],
 }
 
 
-/* V2.7.4 source symbol line highlight */
+/* V2.8.0 source symbol line highlight */
 .source-line.is-symbol-highlighted {
   background: #fff8c5;
   box-shadow:
@@ -1264,6 +1264,107 @@ body[data-theme="dark"],
 
 .source-line.is-symbol-highlighted:target {
   background: #fff3a3;
+}
+
+:root[data-theme="dark"] .source-line.is-symbol-highlighted:target {
+  background: rgba(250, 204, 21, .24);
+}
+
+
+/* V2.8 source line numbers */
+.source-code-pre {
+  padding: 0;
+  overflow: auto;
+}
+
+.source-code-lines {
+  display: block;
+  min-width: max-content;
+  counter-reset: none;
+}
+
+.source-line {
+  display: grid;
+  grid-template-columns: 4px minmax(44px, calc(var(--source-line-number-width, 3ch) + 24px)) max-content;
+  min-height: 1.45em;
+  scroll-margin-top: 24px;
+  white-space: pre;
+}
+
+.source-line-marker {
+  display: block;
+  width: 4px;
+  background: transparent;
+}
+
+.source-line-number {
+  display: block;
+  padding: 0 12px 0 8px;
+  color: #8a94a6;
+  background: #f6f8fa;
+  border-right: 1px solid var(--line);
+  text-align: right;
+  user-select: none;
+}
+
+.source-line-code {
+  display: block;
+  padding: 0 12px;
+  white-space: pre;
+}
+
+.source-line:hover .source-line-number {
+  color: var(--accent);
+}
+
+.source-line:target {
+  background: var(--accent-soft);
+}
+
+.source-line.is-symbol-highlighted {
+  background: #fff8c5;
+  box-shadow: inset 0 0 0 1px rgba(245, 158, 11, .22);
+}
+
+.source-line.is-symbol-highlighted .source-line-marker {
+  background: #f59e0b;
+}
+
+.source-line.is-symbol-highlighted .source-line-number {
+  color: #92400e;
+  background: #fff3a3;
+}
+
+.source-line.is-symbol-highlighted:target {
+  background: #fff3a3;
+}
+
+:root[data-theme="dark"] .source-line-number {
+  color: #94a3b8;
+  background: #111827;
+  border-right-color: var(--line);
+}
+
+:root[data-theme="dark"] .source-line:hover .source-line-number {
+  color: var(--accent);
+}
+
+:root[data-theme="dark"] .source-line:target {
+  background: var(--accent-soft);
+}
+
+:root[data-theme="dark"] .source-line.is-symbol-highlighted {
+  background: rgba(250, 204, 21, .18);
+  box-shadow: inset 0 0 0 1px rgba(250, 204, 21, .24);
+}
+
+:root[data-theme="dark"] .source-line.is-symbol-highlighted .source-line-marker {
+  background: #facc15;
+}
+
+:root[data-theme="dark"] .source-line.is-symbol-highlighted .source-line-number {
+  color: #fde68a;
+  background: rgba(250, 204, 21, .14);
 }
 
 :root[data-theme="dark"] .source-line.is-symbol-highlighted:target {
