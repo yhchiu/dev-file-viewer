@@ -1,6 +1,6 @@
 {
   "name": "dev-file-viewer",
-  "version": "2.7.1",
+  "version": "2.7.2",
   "private": true,
   "description": "Privacy-first Chrome extension for Markdown, diff, source, and other developer file preview. V2 includes Markdown Table of Contents / Outline navigation with a low-distraction TOC popover.",
   "type": "module",

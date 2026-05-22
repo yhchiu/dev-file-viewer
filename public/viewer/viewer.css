@@ -662,7 +662,7 @@ body.markdown-width-full .diff-body,
 }
 
 
-/* V2.7.1 GitHub-like diff table reset.
+/* V2.7.2 GitHub-like diff table reset.
    Diff tables must not inherit Markdown table/card styles. */
 .markdown-body.diff-body {
   padding: 0;
@@ -772,7 +772,7 @@ body.markdown-width-full .diff-body,
 }
 
 
-/* V2.7.1 diff outline tree */
+/* V2.7.2 diff outline tree */
 .toc-directory-item {
   width: 100%;
   border: 0;
@@ -1030,7 +1030,7 @@ body.markdown-width-full .diff-body,
 }
 
 
-/* V2.7.1 theme change binding fix / defensive theme targets */
+/* V2.7.2 theme change binding fix / defensive theme targets */
 body[data-theme="dark"],
 .app-shell[data-theme="dark"] {
   color: var(--fg);
@@ -1059,7 +1059,7 @@ body[data-theme="dark"],
 }
 
 
-/* V2.7.1 dark theme interaction polish */
+/* V2.7.2 dark theme interaction polish */
 :root[data-theme="dark"] button:hover,
 :root[data-theme="dark"] .secondary-action:hover {
   color: var(--accent);

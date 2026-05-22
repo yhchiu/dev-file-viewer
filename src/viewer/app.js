@@ -1376,18 +1376,46 @@ collectTocDescendantIds(node, targetSet) {
   }
 
   updateActiveHeading() {
-    if (!this.headings.length) return;
-
-    const rootTop = this.elements.viewerMain.getBoundingClientRect().top;
-    const activationLine = rootTop + 110;
-    let active = this.headings[0];
-
-    for (const heading of this.headings) {
-      if (heading.element.getBoundingClientRect().top <= activationLine) active = heading;
-      else break;
+    if (!this.headings.length) {
+      this.clearActiveHeading();
+      return;
     }
 
-    this.setActiveHeading(active.id);
+    const rootRect = this.elements.viewerMain.getBoundingClientRect();
+    const activationLine = rootRect.top + 110;
+    let active = null;
+
+    for (const heading of this.headings) {
+      const rect = heading.element.getBoundingClientRect();
+      if (rect.top <= activationLine) {
+        active = heading;
+        continue;
+      }
+      break;
+    }
+
+    if (!active) {
+      const first = this.headings[0];
+      const firstRect = first.element.getBoundingClientRect();
+      const firstIsVisible = firstRect.top < rootRect.bottom && firstRect.bottom > rootRect.top;
+      if (firstIsVisible) active = first;
+    }
+
+    if (active) {
+      this.setActiveHeading(active.id);
+    } else {
+      this.clearActiveHeading();
+    }
+  }
+
+  clearActiveHeading() {
+    if (!this.activeHeadingId) return;
+    const currentItems = this.tocItems.get(this.activeHeadingId) || [];
+    for (const current of currentItems) {
+      current.classList.remove('is-active');
+      current.removeAttribute('aria-current');
+    }
+    this.activeHeadingId = '';
   }
 
   setActiveHeading(id) {
