@@ -7,6 +7,7 @@ export class DirectorySourceProvider {
   constructor() {
     this.fileProvider = new FilePickerSourceProvider();
     this.rootHandle = null;
+    this.rootEntry = null;
     this.tree = null;
     this.fileIndex = new Map();
   }
@@ -16,23 +17,34 @@ export class DirectorySourceProvider {
       throw new Error('This browser does not support folder picker. Use Chrome or Chromium-based browsers.');
     }
 
-    this.rootHandle = await window.showDirectoryPicker({ mode: 'read' });
-    this.tree = await this.buildTree(this.rootHandle);
-    this.fileIndex = new Map();
-    this.indexTree(this.tree);
-    return { rootHandle: this.rootHandle, tree: this.tree };
+    const directoryHandle = await window.showDirectoryPicker({ mode: 'read' });
+    return this.loadDirectoryHandle(directoryHandle);
   }
 
-  async reloadDirectory() {
-    if (!this.rootHandle) {
-      throw new Error('No folder is currently open.');
-    }
 
-    this.tree = await this.buildTree(this.rootHandle);
-    this.fileIndex = new Map();
-    this.indexTree(this.tree);
-    return { rootHandle: this.rootHandle, tree: this.tree };
-  }
+async loadDirectoryHandle(directoryHandle) {
+  this.rootHandle = directoryHandle;
+  this.rootEntry = null;
+  this.tree = await this.buildTree(directoryHandle);
+  this.fileIndex = new Map();
+  this.indexTree(this.tree);
+  return { rootHandle: this.rootHandle, tree: this.tree };
+}
+
+async loadDirectoryEntry(directoryEntry) {
+  this.rootHandle = null;
+  this.rootEntry = directoryEntry;
+  this.tree = await this.buildEntryTree(directoryEntry);
+  this.fileIndex = new Map();
+  this.indexTree(this.tree);
+  return { rootEntry: this.rootEntry, tree: this.tree };
+}
+
+async reloadDirectory() {
+  if (this.rootHandle) return this.loadDirectoryHandle(this.rootHandle);
+  if (this.rootEntry) return this.loadDirectoryEntry(this.rootEntry);
+  throw new Error('No folder is currently open.');
+}
 
   async buildTree(directoryHandle, path = '') {
     const node = {
@@ -68,6 +80,41 @@ export class DirectorySourceProvider {
     return node;
   }
 
+async buildEntryTree(directoryEntry, path = '') {
+  const node = {
+    type: 'directory',
+    name: directoryEntry.name,
+    path,
+    entry: directoryEntry,
+    children: []
+  };
+
+  const entries = await readDirectoryEntries(directoryEntry);
+  let count = 0;
+  for (const entry of entries) {
+    if (count++ >= MAX_FILES) break;
+    if (entry.name.startsWith('.')) continue;
+
+    const childPath = path ? `${path}/${entry.name}` : entry.name;
+    if (entry.isDirectory) {
+      node.children.push(await this.buildEntryTree(entry, childPath));
+    } else if (entry.isFile && isSupportedViewerFile(entry.name)) {
+      node.children.push({
+        type: 'file',
+        name: entry.name,
+        path: childPath,
+        entry
+      });
+    }
+  }
+
+  node.children.sort((a, b) => {
+    if (a.type !== b.type) return a.type === 'directory' ? -1 : 1;
+    return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+  });
+  return node;
+}
+
   indexTree(node) {
     if (!node) return;
     if (node.type === 'file') {
@@ -78,7 +125,13 @@ export class DirectorySourceProvider {
   }
 
   async loadFileNode(fileNode) {
-    return this.fileProvider.loadFromHandle(fileNode.handle);
+    if (fileNode.handle) return this.fileProvider.loadFromHandle(fileNode.handle);
+    if (fileNode.file) return this.fileProvider.loadFromFile(fileNode.file);
+    if (fileNode.entry) {
+      const file = await fileFromEntry(fileNode.entry);
+      return this.fileProvider.loadFromFile(file);
+    }
+    throw new Error(`Unable to load file: ${fileNode?.name || 'unknown'}`);
   }
 
   async loadPath(path) {
@@ -113,6 +166,32 @@ export class DirectorySourceProvider {
     }
     return parts.join('/');
   }
+}
+
+function readDirectoryEntries(directoryEntry) {
+  return new Promise((resolve, reject) => {
+    const reader = directoryEntry.createReader();
+    const entries = [];
+
+    const readBatch = () => {
+      reader.readEntries(batch => {
+        if (!batch.length) {
+          resolve(entries);
+          return;
+        }
+        entries.push(...batch);
+        readBatch();
+      }, reject);
+    };
+
+    readBatch();
+  });
+}
+
+function fileFromEntry(fileEntry) {
+  return new Promise((resolve, reject) => {
+    fileEntry.file(resolve, reject);
+  });
 }
 
 function stripQueryAndHash(value) {

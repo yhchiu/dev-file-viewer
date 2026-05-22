@@ -1,10 +1,10 @@
-# Dev File Viewer V2.8.6
+# Dev File Viewer V2.9.3
 
 ![Dev File Viewer brand mark](public/assets/brand/brand-mark.png)
 
-Dev File Viewer is a Chrome Extension for previewing local and remote developer-oriented files. The product subtitle is **Markdown, Diff & Source Viewer**. V2.8.6 continues the V2 roadmap with collapsible TOC / Outline heading groups. The Outline now builds a navigable H1-H3 tree with SVG disclosure controls, shared collapsed state between sidebar and floating popover, active-section auto-expansion, and filter-aware visibility while keeping the existing Markdown, Mermaid, table, link, local-folder, sidebar, content-width, scroll-memory, and `file://` preview features.
+Dev File Viewer is a Chrome Extension for previewing local and remote developer-oriented files. The product subtitle is **Markdown, Diff & Source Viewer**. V2.9.3 continues the V2 roadmap with collapsible TOC / Outline heading groups. The Outline now builds a navigable H1-H3 tree with SVG disclosure controls, shared collapsed state between sidebar and floating popover, active-section auto-expansion, and filter-aware visibility while keeping the existing Markdown, Mermaid, table, link, local-folder, sidebar, content-width, scroll-memory, and `file://` preview features.
 
-## V2.8.6 scope
+## V2.9.3 scope
 
 - Collapsible Outline heading groups for H1-H3 headings.
 - SVG chevron controls for headings with children.
@@ -97,7 +97,7 @@ flowchart TD
 ````
 
 
-## V2.8.6 notes
+## V2.9.3 notes
 
 - Refined **TOC Phase 2** with SVG-based pop-out and pin controls instead of emoji glyphs.
 - Dragging the floating **Outline** button moves both the button and the TOC popover. This position is runtime-only and is not stored in `chrome.storage.local`.
@@ -163,6 +163,6 @@ V2 should add new format renderers without changing the viewer shell:
 See `PRIVACY.md`.
 
 
-## V2.8.6 fix
+## V2.9.3 fix
 
 - Fix source code viewer crash: initialize `SourceCodeRenderer` before rendering source files.

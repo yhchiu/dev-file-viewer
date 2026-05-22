@@ -662,7 +662,7 @@ body.markdown-width-full .diff-body,
 }
 
 
-/* V2.8.6 GitHub-like diff table reset.
+/* V2.9.3 GitHub-like diff table reset.
    Diff tables must not inherit Markdown table/card styles. */
 .markdown-body.diff-body {
   padding: 0;
@@ -772,7 +772,7 @@ body.markdown-width-full .diff-body,
 }
 
 
-/* V2.8.6 diff outline tree */
+/* V2.9.3 diff outline tree */
 .toc-directory-item {
   width: 100%;
   border: 0;
@@ -1030,7 +1030,7 @@ body.markdown-width-full .diff-body,
 }
 
 
-/* V2.8.6 theme change binding fix / defensive theme targets */
+/* V2.9.3 theme change binding fix / defensive theme targets */
 body[data-theme="dark"],
 .app-shell[data-theme="dark"] {
   color: var(--fg);
@@ -1059,7 +1059,7 @@ body[data-theme="dark"],
 }
 
 
-/* V2.8.6 dark theme interaction polish */
+/* V2.9.3 dark theme interaction polish */
 :root[data-theme="dark"] button:hover,
 :root[data-theme="dark"] .secondary-action:hover {
   color: var(--accent);
@@ -1247,7 +1247,7 @@ body[data-theme="dark"],
 }
 
 
-/* V2.8.6 source symbol line highlight */
+/* V2.9.3 source symbol line highlight */
 .source-line.is-symbol-highlighted {
   background: #fff8c5;
   box-shadow:
@@ -1372,7 +1372,7 @@ body[data-theme="dark"],
 }
 
 
-/* V2.8.6 markdown code copy button */
+/* V2.9.3 markdown code copy button */
 .markdown-body pre.has-code-copy-button {
   position: relative;
 }
@@ -1453,7 +1453,7 @@ body[data-theme="dark"],
 
 
 
-/* V2.8.6 markdown code toolbar polish */
+/* V2.9.3 markdown code toolbar polish */
 .markdown-body pre.has-code-copy-button {
   position: relative;
   padding-right: 112px;
@@ -1517,7 +1517,7 @@ body[data-theme="dark"],
 }
 
 
-/* V2.8.6 folder reload action */
+/* V2.9.3 folder reload action */
 .files-section-title {
   display: flex;
   align-items: center;
@@ -1567,7 +1567,7 @@ body[data-theme="dark"],
 }
 
 
-/* V2.8.6 document reload action */
+/* V2.9.3 document reload action */
 .doc-heading {
   min-width: 0;
 }
@@ -1625,4 +1625,69 @@ body[data-theme="dark"],
   color: var(--accent);
   background: var(--accent-soft);
   border-color: #3b82f6;
+}
+
+
+/* V2.9 full-window drag and drop */
+.drop-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, .28);
+  backdrop-filter: blur(3px);
+  pointer-events: none;
+}
+
+.drop-overlay[hidden] {
+  display: none;
+}
+
+.drop-overlay-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+  width: min(480px, 100%);
+  padding: 22px;
+  border: 2px dashed var(--accent);
+  border-radius: 22px;
+  color: var(--fg);
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
+  box-shadow: var(--shadow);
+}
+
+.drop-overlay-icon {
+  width: 48px;
+  height: 48px;
+  color: var(--accent);
+}
+
+.drop-overlay-card strong {
+  display: block;
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+.drop-overlay-card span {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.app-shell.is-dragging-file {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+:root[data-theme="dark"] .drop-overlay {
+  background: rgba(2, 6, 23, .52);
+}
+
+:root[data-theme="dark"] .drop-overlay-card {
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
 }

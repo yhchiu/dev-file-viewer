@@ -12,6 +12,7 @@ import { PluginRegistry } from '../plugins/PluginRegistry.js';
 import { mermaidPlugin } from '../plugins/mermaidPlugin.js';
 import { copyExtensionSettingsUrl, isFileUrlAccessAllowed, openExtensionSettings } from '../core/browser/fileUrlAccess.js';
 import { buildHeadingIndex, buildHeadingTree, ensureHeadingAnchors } from '../core/toc/headingIndex.js';
+import { isLikelyBinaryFile } from '../core/format/binarySniff.js';
 
 const SCROLL_ENABLED_KEY = 'devFileViewer:rememberScrollEnabled';
 const SCROLL_POSITIONS_KEY = 'devFileViewer:scrollPositions';
@@ -92,7 +93,8 @@ class DevFileViewerApp {
       tocPopoverDepthRow: document.querySelector('#toc-popover-depth-row'),
       tocPopoverDepth: document.querySelector('#toc-popover-depth-select'),
       tocPopoverFilterRow: document.querySelector('#toc-popover-filter-row'),
-      tocPopoverFilter: document.querySelector('#toc-popover-filter')
+      tocPopoverFilter: document.querySelector('#toc-popover-filter'),
+      dropOverlay: document.querySelector('#drop-overlay')
     };
 
     this.plugins = new PluginRegistry([mermaidPlugin]);
@@ -132,6 +134,7 @@ class DevFileViewerApp {
     this.floatingTocPosition = null;
     this.floatingOutlineDrag = null;
     this.ignoreNextFloatingOutlineClick = false;
+    this.dragDepth = 0;
   }
 
   async start() {
@@ -157,6 +160,7 @@ class DevFileViewerApp {
         event.preventDefault();
         event.stopPropagation();
         this.ignoreNextFloatingOutlineClick = false;
+    this.dragDepth = 0;
         return;
       }
       this.toggleTocPopover();
@@ -188,6 +192,10 @@ class DevFileViewerApp {
     this.themeMediaQuery?.addEventListener?.('change', () => {
       if (this.themePreference === 'system') this.applyTheme();
     });
+    window.addEventListener('dragenter', event => this.handleWindowDragEnter(event));
+    window.addEventListener('dragover', event => this.handleWindowDragOver(event));
+    window.addEventListener('dragleave', event => this.handleWindowDragLeave(event));
+    window.addEventListener('drop', event => this.handleWindowDrop(event));
     this.elements.tocDepth.addEventListener('change', () => this.setTocDepth(this.elements.tocDepth.value));
     this.elements.tocPopoverDepth.addEventListener('change', () => this.setTocDepth(this.elements.tocPopoverDepth.value));
     this.elements.tocFilter.addEventListener('input', () => this.setTocFilter(this.elements.tocFilter.value));
@@ -396,6 +404,7 @@ class DevFileViewerApp {
       this.ignoreNextFloatingOutlineClick = true;
       window.setTimeout(() => {
         this.ignoreNextFloatingOutlineClick = false;
+    this.dragDepth = 0;
       }, 250);
     }
   }
@@ -721,6 +730,196 @@ resolveTheme() {
     }
   }
 
+handleWindowDragEnter(event) {
+  if (!this.dragEventHasFiles(event)) return;
+  event.preventDefault();
+  event.stopPropagation();
+  this.dragDepth += 1;
+  this.setDropOverlayVisible(true);
+}
+
+handleWindowDragOver(event) {
+  if (!this.dragEventHasFiles(event)) return;
+  event.preventDefault();
+  event.stopPropagation();
+  event.dataTransfer.dropEffect = 'copy';
+  this.setDropOverlayVisible(true);
+}
+
+handleWindowDragLeave(event) {
+  if (!this.dragEventHasFiles(event)) return;
+  event.preventDefault();
+  event.stopPropagation();
+  this.dragDepth = Math.max(0, this.dragDepth - 1);
+  if (this.dragDepth === 0) this.setDropOverlayVisible(false);
+}
+
+async handleWindowDrop(event) {
+  if (!this.dragEventHasFiles(event)) return;
+  event.preventDefault();
+  event.stopPropagation();
+  this.dragDepth = 0;
+  this.setDropOverlayVisible(false);
+
+  try {
+    this.setStatus('Opening dropped item ...', 'info');
+    const item = await this.resolveDroppedItem(event.dataTransfer);
+    if (!item) {
+      this.setStatus('No supported file or folder was dropped.', 'warning');
+      return;
+    }
+
+    if (item.kind === 'directory-handle') {
+      await this.openDroppedDirectoryHandle(item.handle);
+      return;
+    }
+
+    if (item.kind === 'directory-entry') {
+      await this.openDroppedDirectoryEntry(item.entry);
+      return;
+    }
+
+    if (item.kind === 'file-handle') {
+      const file = await item.handle.getFile();
+      const doc = await this.loadDroppedFileDocument(file, {
+        handle: item.handle,
+        forcePlainText: item.forcePlainText,
+        displayPath: item.handle.name
+      });
+      await this.renderDocument(doc);
+      return;
+    }
+
+    if (item.kind === 'file-entry') {
+      const file = await fileFromDroppedEntry(item.entry);
+      const doc = await this.loadDroppedFileDocument(file, {
+        forcePlainText: item.forcePlainText,
+        path: normalizeDroppedEntryPath(item.entry.fullPath || item.entry.name || file.name)
+      });
+      await this.renderDocument(doc);
+      return;
+    }
+
+    if (item.kind === 'file') {
+      const relativePath = item.file.webkitRelativePath || '';
+      const doc = await this.loadDroppedFileDocument(item.file, {
+        forcePlainText: item.forcePlainText,
+        relativePath,
+        displayPath: relativePath || item.file.name
+      });
+      await this.renderDocument(doc);
+      return;
+    }
+
+    this.setStatus('No supported file or folder was dropped.', 'warning');
+  } catch (error) {
+    this.setStatus(error?.message || String(error), 'error');
+  }
+}
+
+dragEventHasFiles(event) {
+  return Array.from(event.dataTransfer?.types || []).includes('Files');
+}
+
+setDropOverlayVisible(visible) {
+  if (!this.elements.dropOverlay) return;
+  this.elements.dropOverlay.hidden = !visible;
+  this.elements.dropOverlay.setAttribute('aria-hidden', String(!visible));
+  this.elements.app.classList.toggle('is-dragging-file', Boolean(visible));
+}
+
+async resolveDroppedItem(dataTransfer) {
+  const items = Array.from(dataTransfer?.items || []).filter(item => item.kind === 'file');
+
+  for (const item of items) {
+    if (typeof item.getAsFileSystemHandle === 'function') {
+      try {
+        const handle = await item.getAsFileSystemHandle();
+        if (handle?.kind === 'directory') return { kind: 'directory-handle', handle };
+        if (handle?.kind === 'file') {
+          return {
+            kind: 'file-handle',
+            handle,
+            forcePlainText: !isSupportedDroppedName(handle.name)
+          };
+        }
+      } catch {
+        // Fall through to older APIs.
+      }
+    }
+
+    if (typeof item.webkitGetAsEntry === 'function') {
+      const entry = item.webkitGetAsEntry();
+      if (entry?.isDirectory) return { kind: 'directory-entry', entry };
+      if (entry?.isFile) {
+        return {
+          kind: 'file-entry',
+          entry,
+          forcePlainText: !isSupportedDroppedName(entry.name)
+        };
+      }
+    }
+
+    const file = item.getAsFile?.();
+    if (file) {
+      return {
+        kind: 'file',
+        file,
+        forcePlainText: !isSupportedDroppedName(file.name)
+      };
+    }
+  }
+
+  const files = Array.from(dataTransfer?.files || []);
+  const supportedFile = files.find(candidate => isSupportedDroppedName(candidate.name));
+  if (supportedFile) return { kind: 'file', file: supportedFile, forcePlainText: false };
+  const firstFile = files[0];
+  return firstFile ? { kind: 'file', file: firstFile, forcePlainText: true } : null;
+}
+
+async loadDroppedFileDocument(file, options = {}) {
+  if (options.forcePlainText && await isLikelyBinaryFile(file)) {
+    throw new Error(`Dropped file appears to be binary and cannot be opened as text: ${file.name}`);
+  }
+
+  const doc = await this.fileSource.loadFromFile(file, options.handle ? { handle: options.handle } : {});
+  doc.sourceType = 'dropped-file';
+  doc.relativePath = options.relativePath || '';
+  doc.displayPath = options.displayPath || doc.relativePath || file.name || doc.name;
+
+  if (options.path) doc.path = options.path;
+
+  if (options.forcePlainText) {
+    doc.format = FORMAT_IDS.SOURCE_CODE;
+    doc.language = 'plaintext';
+    doc.mimeType = file.type || 'text/plain';
+  }
+
+  return doc;
+}
+
+async openDroppedDirectoryHandle(handle) {
+  const { tree } = await this.directorySource.loadDirectoryHandle(handle);
+  this.renderDirectoryTree(tree);
+  this.currentFolderLoaded = true;
+  this.setFolderReloadEnabled(true);
+  this.elements.sidebarTools.open = false;
+  this.elements.scrollMemoryCard.hidden = false;
+  this.applySidebarTab('files');
+  this.setStatus('Dropped folder loaded. Select a supported developer file from the sidebar.', 'success');
+}
+
+async openDroppedDirectoryEntry(entry) {
+  const { tree } = await this.directorySource.loadDirectoryEntry(entry);
+  this.renderDirectoryTree(tree);
+  this.currentFolderLoaded = true;
+  this.setFolderReloadEnabled(true);
+  this.elements.sidebarTools.open = false;
+  this.elements.scrollMemoryCard.hidden = false;
+  this.applySidebarTab('files');
+  this.setStatus('Dropped folder loaded. Select a supported developer file from the sidebar.', 'success');
+}
+
   async loadFromLaunchParams() {
     const params = new URLSearchParams(window.location.search);
     const snapshotId = params.get('snapshot');
@@ -786,6 +985,7 @@ resolveTheme() {
       this.renderDirectoryTree(tree);
       this.currentFolderLoaded = true;
       this.setFolderReloadEnabled(true);
+      this.clearViewerForFolder('Folder loaded. Select a supported developer file from the sidebar.');
       this.elements.sidebarTools.open = false;
       this.elements.scrollMemoryCard.hidden = false;
       this.applySidebarTab('files');
@@ -798,6 +998,20 @@ resolveTheme() {
       this.setStatus(error?.message || String(error), 'error');
     }
   }
+
+clearViewerForFolder(message = 'Select a supported developer file from the sidebar.') {
+  this.currentDoc = null;
+  this.currentDocKey = '';
+  this.clearSourceLineHighlight();
+  this.clearToc();
+  this.setDocumentReloadEnabled(false);
+  this.elements.title.textContent = 'No file selected';
+  this.elements.source.textContent = message;
+  this.elements.format.textContent = 'Folder';
+  this.elements.preview.classList.remove('source-code-body', 'diff-body');
+  this.elements.preview.textContent = '';
+  this.elements.viewerMain.scrollTop = 0;
+}
 
   renderDirectoryTree(tree) {
     this.directoryTree.render(tree, async fileNode => {
@@ -944,7 +1158,7 @@ setDocumentReloadEnabled(enabled) {
 
     const format = doc.format || detectFormat(doc);
     this.elements.title.textContent = doc.name || 'Untitled';
-    this.elements.source.textContent = doc.url || doc.path || doc.sourceType || '';
+    this.elements.source.textContent = this.getDocumentSourceLabel(doc);
     this.elements.format.textContent = formatLabel(format);
     this.elements.preview.classList.toggle('source-code-body', format === FORMAT_IDS.SOURCE_CODE);
     this.elements.preview.classList.toggle('diff-body', format === FORMAT_IDS.DIFF);
@@ -1028,6 +1242,25 @@ setDocumentReloadEnabled(enabled) {
     if (doc?.path) return `path:${doc.path}`;
     if (doc?.name) return `file:${doc.name}`;
     return '';
+  }
+
+  getDocumentSourceLabel(doc) {
+    if (!doc) return '';
+
+    if (doc.url) return doc.url;
+    if (doc.path) return doc.path;
+    if (doc.relativePath) return doc.relativePath;
+    if (doc.displayPath) return doc.displayPath;
+
+    if (doc.sourceType === 'dropped-file') {
+      return doc.name ? `Dropped file: ${doc.name}` : 'Dropped file';
+    }
+
+    if (doc.sourceType === 'file') {
+      return doc.name ? `Local file: ${doc.name}` : 'Local file';
+    }
+
+    return doc.sourceType || '';
   }
 
   scheduleSaveScrollPosition() {
@@ -1652,6 +1885,43 @@ function tocIconSvg(kind) {
     <path d="M4 2.25h5.1L12 5.15v8.6H4V2.25Z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" />
     <path d="M9 2.25V5.3h3" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" />
   </svg>`;
+}
+
+function normalizeDroppedEntryPath(path = '') {
+  const value = String(path || '').replace(/\\/g, '/');
+  return value.startsWith('/') ? value.slice(1) : value;
+}
+
+function isSupportedDroppedName(name = '') {
+  const value = String(name || '').toLowerCase();
+  return Boolean(value) && (
+    value.endsWith('.md') || value.endsWith('.mkd') || value.endsWith('.mdx') || value.endsWith('.markdown') ||
+    value.endsWith('.diff') || value.endsWith('.patch') ||
+    value.endsWith('.js') || value.endsWith('.mjs') || value.endsWith('.cjs') || value.endsWith('.jsx') ||
+    value.endsWith('.ts') || value.endsWith('.tsx') ||
+    value.endsWith('.html') || value.endsWith('.htm') || value.endsWith('.css') ||
+    value.endsWith('.json') || value.endsWith('.jsonc') || value.endsWith('.yaml') || value.endsWith('.yml') ||
+    value.endsWith('.toml') || value.endsWith('.ini') || value.endsWith('.xml') || value.endsWith('.svg') ||
+    value.endsWith('.sh') || value.endsWith('.bash') || value.endsWith('.zsh') || value.endsWith('.ps1') ||
+    value.endsWith('.py') || value.endsWith('.go') || value.endsWith('.java') ||
+    value.endsWith('.c') || value.endsWith('.h') || value.endsWith('.cpp') || value.endsWith('.cc') ||
+    value.endsWith('.cxx') || value.endsWith('.hpp') || value.endsWith('.hh') || value.endsWith('.hxx') ||
+    value.endsWith('.rs') || value.endsWith('.cs') || value.endsWith('.php') || value.endsWith('.rb') ||
+    value.endsWith('.sql') || value.endsWith('.swift') || value.endsWith('.kt') || value.endsWith('.kts') ||
+    value.endsWith('.scala') || value.endsWith('.dart') || value.endsWith('.lua') || value.endsWith('.r') ||
+    value.endsWith('.pl') || value.endsWith('.pm') || value.endsWith('.ex') || value.endsWith('.exs') ||
+    value.endsWith('.erl') || value.endsWith('.hrl') || value.endsWith('.clj') || value.endsWith('.cljs') ||
+    value.endsWith('.groovy') || value.endsWith('.gradle') || value.endsWith('.vue') || value.endsWith('.svelte') ||
+    value.endsWith('.dockerfile') || value.endsWith('.makefile') || value.endsWith('.cmake') ||
+    ['makefile', 'dockerfile', 'cmakelists.txt', 'gemfile', 'rakefile', 'justfile', 'procfile'].includes(value) ||
+    value.startsWith('.gitignore') || value.startsWith('.gitattributes') || value.startsWith('.env')
+  );
+}
+
+function fileFromDroppedEntry(fileEntry) {
+  return new Promise((resolve, reject) => {
+    fileEntry.file(resolve, reject);
+  });
 }
 
 function themeLabel(value) {

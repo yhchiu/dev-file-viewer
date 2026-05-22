@@ -193,12 +193,26 @@
         </header>
 
         <section id="status" class="status info">
-V2.8.6 uses SVG controls for Outline pop-out/pin and places the floating Outline control in the viewer area.
+V2.9.3 uses SVG controls for Outline pop-out/pin and places the floating Outline control in the viewer area.
         </section>
 
         <article id="preview" class="markdown-body" tabindex="0"></article>
       </main>
     </div>
+<div id="drop-overlay" class="drop-overlay" hidden aria-hidden="true">
+  <div class="drop-overlay-card">
+    <svg class="drop-overlay-icon" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+      <path d="M24 7v23" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" />
+      <path d="M14.5 20.5 24 30l9.5-9.5" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+      <path d="M9 35.5h30" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" />
+      <path d="M9 35.5v5h30v-5" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+    <div>
+      <strong>Drop file or folder to open</strong>
+      <span>Dev File Viewer will open supported developer files locally.</span>
+    </div>
+  </div>
+</div>
     <script type="module" src="app.js"></script>
   </body>
 </html>
