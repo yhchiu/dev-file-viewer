@@ -662,7 +662,7 @@ body.markdown-width-full .diff-body,
 }
 
 
-/* V2.6.3 GitHub-like diff table reset.
+/* V2.7.1 GitHub-like diff table reset.
    Diff tables must not inherit Markdown table/card styles. */
 .markdown-body.diff-body {
   padding: 0;
@@ -772,7 +772,7 @@ body.markdown-width-full .diff-body,
 }
 
 
-/* V2.6.3 diff outline tree */
+/* V2.7.1 diff outline tree */
 .toc-directory-item {
   width: 100%;
   border: 0;
@@ -1030,7 +1030,7 @@ body.markdown-width-full .diff-body,
 }
 
 
-/* V2.6.3 theme change binding fix / defensive theme targets */
+/* V2.7.1 theme change binding fix / defensive theme targets */
 body[data-theme="dark"],
 .app-shell[data-theme="dark"] {
   color: var(--fg);
@@ -1059,7 +1059,7 @@ body[data-theme="dark"],
 }
 
 
-/* V2.6.3 dark theme interaction polish */
+/* V2.7.1 dark theme interaction polish */
 :root[data-theme="dark"] button:hover,
 :root[data-theme="dark"] .secondary-action:hover {
   color: var(--accent);
@@ -1158,4 +1158,90 @@ body[data-theme="dark"],
 :root[data-theme="dark"] .url-box input:focus {
   outline: 2px solid var(--accent-soft);
   border-color: var(--accent);
+}
+
+
+/* V2.7 source symbols outline */
+.source-code-lines {
+  display: block;
+  counter-reset: source-line;
+}
+
+.source-line {
+  display: block;
+  min-height: 1.45em;
+  scroll-margin-top: 24px;
+  white-space: pre;
+}
+
+.source-line:target {
+  background: var(--accent-soft);
+}
+
+.toc-kind-source-symbol .toc-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.toc-symbol-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 34px;
+  height: 18px;
+  padding: 0 5px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  background: var(--panel-2);
+  font-size: 10px;
+  font-weight: 850;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+}
+
+.toc-symbol-line {
+  justify-self: end;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.toc-kind-source-symbol .toc-item:hover .toc-symbol-badge,
+.toc-kind-source-symbol .toc-item.is-active .toc-symbol-badge {
+  color: var(--accent);
+  border-color: #bfdbfe;
+  background: var(--accent-soft);
+}
+
+.toc-kind-source-symbol .toc-item:hover .toc-symbol-line,
+.toc-kind-source-symbol .toc-item.is-active .toc-symbol-line {
+  color: var(--accent);
+}
+
+:root[data-theme="dark"] .source-line:target {
+  background: var(--accent-soft);
+}
+
+:root[data-theme="dark"] .toc-symbol-badge {
+  color: var(--muted);
+  background: var(--panel);
+  border-color: var(--line);
+}
+
+:root[data-theme="dark"] .toc-kind-source-symbol .toc-item:hover .toc-symbol-badge,
+:root[data-theme="dark"] .toc-kind-source-symbol .toc-item.is-active .toc-symbol-badge {
+  color: var(--accent);
+  border-color: #3b82f6;
+  background: var(--accent-soft);
+}
+
+:root[data-theme="dark"] .toc-kind-source-symbol .toc-item:hover .toc-symbol-line,
+:root[data-theme="dark"] .toc-kind-source-symbol .toc-item.is-active .toc-symbol-line {
+  color: var(--accent);
 }

@@ -40,20 +40,36 @@ const LANGUAGE_MODULES = {
   bash,
   c,
   cpp,
+  csharp,
+  clojure,
+  cmake,
   css,
+  dart,
   diff,
+  dockerfile,
+  elixir,
+  erlang,
   go,
+  gradle,
+  groovy,
   ini,
   java,
   javascript,
   json,
+  kotlin,
+  lua,
+  makefile,
   markdown,
+  perl,
   php,
   powershell,
   python,
+  r,
   ruby,
   rust,
+  scala,
   sql,
+  swift,
   typescript,
   xml,
   yaml
@@ -85,6 +101,7 @@ const LANGUAGE_ALIASES = new Map([
   ['hxx', 'cpp'],
   ['h', 'c'],
   ['rs', 'rust'],
+  ['cs', 'csharp'],
   ['rb', 'ruby'],
   ['md', 'markdown'],
   ['mkd', 'markdown'],
@@ -94,6 +111,29 @@ const LANGUAGE_ALIASES = new Map([
   ['text', 'plaintext'],
   ['txt', 'plaintext'],
   ['plain', 'plaintext'],
+  ['docker', 'dockerfile'],
+  ['dockerfile', 'dockerfile'],
+  ['make', 'makefile'],
+  ['makefile', 'makefile'],
+  ['cmake', 'cmake'],
+  ['kt', 'kotlin'],
+  ['kts', 'kotlin'],
+  ['swift', 'swift'],
+  ['scala', 'scala'],
+  ['dart', 'dart'],
+  ['lua', 'lua'],
+  ['r', 'r'],
+  ['perl', 'perl'],
+  ['pl', 'perl'],
+  ['pm', 'perl'],
+  ['ex', 'elixir'],
+  ['exs', 'elixir'],
+  ['erl', 'erlang'],
+  ['hrl', 'erlang'],
+  ['clj', 'clojure'],
+  ['cljs', 'clojure'],
+  ['groovy', 'groovy'],
+  ['gradle', 'gradle'],
   ['mermaid', 'mermaid']
 ]);
 
@@ -156,4 +196,32 @@ export function highlightMarkdownCodeBlocks(root) {
       code.dataset.language = rawLanguage || 'plain text';
     }
   }
+}
+
+
+export function highlightCodeToHtml(sourceText = '', languageName = '') {
+  registerLanguages();
+
+  const language = normalizeLanguageName(languageName);
+  if (!language || language === 'plaintext' || language === 'mermaid' || !hljs.getLanguage(language)) {
+    return escapeHtml(sourceText);
+  }
+
+  try {
+    return hljs.highlight(String(sourceText || ''), {
+      language,
+      ignoreIllegals: true
+    }).value;
+  } catch {
+    return escapeHtml(sourceText);
+  }
+}
+
+function escapeHtml(value = '') {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }

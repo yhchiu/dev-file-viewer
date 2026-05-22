@@ -1,5 +1,6 @@
 import { MarkdownEngine } from '../core/markdown/MarkdownEngine.js';
 import { SourceCodeRenderer } from '../core/source/SourceCodeRenderer.js';
+import { buildSourceSymbolTree, extractSourceSymbols } from '../core/source/sourceSymbols.js';
 import { DiffRenderer } from '../core/diff/DiffRenderer.js';
 import { buildDiffOutlineTree } from '../core/diff/diffOutlineTree.js';
 import { FORMAT_IDS, detectFormat, displayNameFromUrl, formatLabel, sourceLanguageFromPath } from '../core/format/fileTypes.js';
@@ -847,8 +848,11 @@ resolveTheme() {
         url: doc.url || '',
         path: doc.path || ''
       });
-      this.clearToc();
-      this.updateTocTitle(doc);
+      this.buildSourceSymbols(doc, sourceLanguage);
+      if (doc.sourceType !== 'directory-file' && this.headings.length) {
+        this.applySidebarTab('outline');
+        this.elements.sidebarTools.open = false;
+      }
       this.currentDoc = doc;
       this.currentDocKey = this.getDocumentKey(doc);
       await this.restoreOrResetScroll(doc, options);
@@ -1039,6 +1043,42 @@ buildDiffOutline(files, doc) {
   this.scheduleActiveHeadingUpdate();
 }
 
+buildSourceSymbols(doc, language) {
+  this.outlineType = 'source';
+  const symbols = extractSourceSymbols(doc.text || '', { language, name: doc.name || doc.url || doc.path || '' });
+  this.headingTree = buildSourceSymbolTree(symbols, this.elements.preview);
+  this.headings = this.headingTree.symbolNodes;
+  this.tocCollapsedIds = new Set();
+  this.tocItems = new Map();
+  this.activeHeadingId = '';
+  this.tocFilterQuery = '';
+  this.elements.tocTree.innerHTML = '';
+  this.elements.tocPopoverTree.innerHTML = '';
+  this.elements.tocFilter.value = '';
+  this.elements.tocPopoverFilter.value = '';
+  this.updateTocTitle(doc, 'Symbols');
+  this.elements.tocDepthRow.hidden = true;
+  this.elements.tocPopoverDepthRow.hidden = true;
+
+  if (!this.headingTree.nodes.length) {
+    this.renderTocEmpty('No symbols found in this source file.');
+    this.elements.outlineTab.textContent = 'Symbols';
+    this.outlinePopoutEnabled = false;
+    this.updateTocFilterVisibility();
+    this.updateFloatingOutlineState();
+    return;
+  }
+
+  this.renderTocContainer(this.elements.tocTree, 'panel');
+  this.renderTocContainer(this.elements.tocPopoverTree, 'popover');
+  this.elements.outlineTab.textContent = `Symbols (${this.headings.length})`;
+  this.updateTocFilterVisibility();
+  this.applyTocFilter();
+  this.updateFloatingOutlineState();
+  this.scheduleActiveHeadingUpdate();
+}
+
+
 
 renderTocContainer(container, context) {
   const list = document.createElement('div');
@@ -1050,6 +1090,7 @@ renderTocContainer(container, context) {
     row.className = `toc-row toc-level-${heading.level}`;
     row.classList.toggle('toc-kind-diff-directory', heading.kind === 'diff-directory');
     row.classList.toggle('toc-kind-diff-file', heading.kind === 'diff-file');
+    row.classList.toggle('toc-kind-source-symbol', heading.kind === 'source-symbol');
     row.dataset.headingId = heading.id;
     row.dataset.parentIds = heading.parentIds.join(' ');
     row.dataset.tocText = `${heading.text || ''} ${heading.path || ''} ${heading.filePath || ''}`.toLowerCase();
@@ -1110,6 +1151,18 @@ renderTocContainer(container, context) {
         if (context === 'popover' && !this.tocPopoverPinned) this.closeTocPopover();
       });
       this.registerTocItem(heading.id, item);
+    } else if (heading.kind === 'source-symbol') {
+      const anchorId = heading.anchorId || `L${heading.line}`;
+      item.href = `#${encodeURIComponent(anchorId)}`;
+      item.innerHTML = `<span class="toc-symbol-badge">${symbolKindLabel(heading.symbolKind)}</span><span class="toc-item-label"></span><span class="toc-symbol-line">L${heading.line}</span>`;
+      item.querySelector('.toc-item-label').textContent = heading.text;
+      item.addEventListener('click', event => {
+        event.preventDefault();
+        this.scrollToAnchor(anchorId, { smooth: true, updateHash: true });
+        this.saveCurrentScrollPosition().catch(() => {});
+        if (context === 'popover' && !this.tocPopoverPinned) this.closeTocPopover();
+      });
+      this.registerTocItem(heading.id, item);
     } else {
       item.href = `#${encodeURIComponent(heading.id)}`;
       item.textContent = heading.text;
@@ -1128,7 +1181,7 @@ renderTocContainer(container, context) {
 
   const noMatch = document.createElement('div');
   noMatch.className = 'toc-empty toc-no-matches';
-  noMatch.textContent = this.outlineType === 'diff' ? 'No matching files.' : 'No matching headings.';
+  noMatch.textContent = this.outlineType === 'diff' ? 'No matching files.' : this.outlineType === 'source' ? 'No matching symbols.' : 'No matching headings.';
   noMatch.hidden = true;
 
   container.append(list, noMatch);
@@ -1293,7 +1346,7 @@ collectTocDescendantIds(node, targetSet) {
     this.tocFilterQuery = '';
     this.elements.tocFilter.value = '';
     this.elements.tocPopoverFilter.value = '';
-    this.renderTocEmpty('Open a Markdown document or diff file to show an outline.');
+    this.renderTocEmpty('Open a Markdown, source, or diff file to show an outline.');
     this.elements.outlineTab.textContent = 'Outline';
     this.updateTocDepthVisibility();
     this.outlinePopoutEnabled = false;
@@ -1414,6 +1467,19 @@ collectTocDescendantIds(node, targetSet) {
   }
 }
 
+
+function symbolKindLabel(kind) {
+  switch (kind) {
+    case 'class': return 'class';
+    case 'interface': return 'iface';
+    case 'method': return 'meth';
+    case 'function': return 'fn';
+    case 'type': return 'type';
+    case 'enum': return 'enum';
+    case 'module': return 'mod';
+    default: return 'sym';
+  }
+}
 
 function tocIconSvg(kind) {
   if (kind === 'folder') {
