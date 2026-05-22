@@ -3,6 +3,7 @@ import DOMPurify from 'dompurify';
 import { features } from '../config/features.js';
 import { rewriteLinks } from '../security/linkPolicy.js';
 import { highlightMarkdownCodeBlocks } from '../highlight/syntaxHighlighter.js';
+import { installMarkdownCodeCopyButtons } from './codeCopyButtons.js';
 
 export class MarkdownEngine {
   constructor(pluginRegistry) {
@@ -15,7 +16,7 @@ export class MarkdownEngine {
     });
   }
 
-  render(markdownText, targetElement, context = {}) {
+  async render(markdownText, targetElement, context = {}) {
     const dirtyHtml = marked.parse(markdownText || '');
     const cleanHtml = DOMPurify.sanitize(dirtyHtml, {
       USE_PROFILES: { html: true },
@@ -26,6 +27,7 @@ export class MarkdownEngine {
     targetElement.innerHTML = cleanHtml;
     highlightMarkdownCodeBlocks(targetElement);
     rewriteLinks(targetElement, context.baseUrl, context.onOpenDocumentLink);
-    return this.pluginRegistry.runAfterRender(targetElement, context);
+    await this.pluginRegistry.runAfterRender(targetElement, context);
+    installMarkdownCodeCopyButtons(targetElement);
   }
 }

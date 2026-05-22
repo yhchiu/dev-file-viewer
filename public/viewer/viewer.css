@@ -662,7 +662,7 @@ body.markdown-width-full .diff-body,
 }
 
 
-/* V2.8.0 GitHub-like diff table reset.
+/* V2.8.3 GitHub-like diff table reset.
    Diff tables must not inherit Markdown table/card styles. */
 .markdown-body.diff-body {
   padding: 0;
@@ -772,7 +772,7 @@ body.markdown-width-full .diff-body,
 }
 
 
-/* V2.8.0 diff outline tree */
+/* V2.8.3 diff outline tree */
 .toc-directory-item {
   width: 100%;
   border: 0;
@@ -1030,7 +1030,7 @@ body.markdown-width-full .diff-body,
 }
 
 
-/* V2.8.0 theme change binding fix / defensive theme targets */
+/* V2.8.3 theme change binding fix / defensive theme targets */
 body[data-theme="dark"],
 .app-shell[data-theme="dark"] {
   color: var(--fg);
@@ -1059,7 +1059,7 @@ body[data-theme="dark"],
 }
 
 
-/* V2.8.0 dark theme interaction polish */
+/* V2.8.3 dark theme interaction polish */
 :root[data-theme="dark"] button:hover,
 :root[data-theme="dark"] .secondary-action:hover {
   color: var(--accent);
@@ -1247,7 +1247,7 @@ body[data-theme="dark"],
 }
 
 
-/* V2.8.0 source symbol line highlight */
+/* V2.8.3 source symbol line highlight */
 .source-line.is-symbol-highlighted {
   background: #fff8c5;
   box-shadow:
@@ -1369,4 +1369,149 @@ body[data-theme="dark"],
 
 :root[data-theme="dark"] .source-line.is-symbol-highlighted:target {
   background: rgba(250, 204, 21, .24);
+}
+
+
+/* V2.8.3 markdown code copy button */
+.markdown-body pre.has-code-copy-button {
+  position: relative;
+}
+
+.markdown-code-copy {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 8px;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--panel) 88%, transparent);
+  border: 1px solid var(--line);
+  box-shadow: 0 4px 12px rgba(16, 24, 40, .08);
+  opacity: .76;
+}
+
+.markdown-code-copy:hover,
+.markdown-code-copy:focus-visible {
+  color: var(--accent);
+  background: var(--panel);
+  border-color: var(--accent);
+  opacity: 1;
+}
+
+.markdown-code-copy.is-copied {
+  color: var(--success);
+  border-color: rgba(2, 122, 72, .35);
+  background: #ecfdf3;
+  opacity: 1;
+}
+
+.markdown-code-copy.is-copy-failed {
+  color: var(--danger);
+  border-color: rgba(180, 35, 24, .35);
+  background: #fff1f0;
+  opacity: 1;
+}
+
+.code-copy-icon {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+:root[data-theme="dark"] .markdown-code-copy {
+  color: var(--muted);
+  background: rgba(17, 24, 39, .86);
+  border-color: var(--line);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .28);
+}
+
+:root[data-theme="dark"] .markdown-code-copy:hover,
+:root[data-theme="dark"] .markdown-code-copy:focus-visible {
+  color: var(--accent);
+  background: var(--panel);
+  border-color: var(--accent);
+}
+
+:root[data-theme="dark"] .markdown-code-copy.is-copied {
+  color: var(--success);
+  border-color: rgba(134, 239, 172, .35);
+  background: rgba(34, 197, 94, .14);
+}
+
+:root[data-theme="dark"] .markdown-code-copy.is-copy-failed {
+  color: var(--danger);
+  border-color: rgba(252, 165, 165, .35);
+  background: rgba(248, 113, 113, .14);
+}
+
+
+
+
+
+/* V2.8.3 markdown code toolbar polish */
+.markdown-body pre.has-code-copy-button {
+  position: relative;
+  padding-right: 112px;
+}
+
+.markdown-body pre.has-code-copy-button:has(.markdown-code-language[hidden]) {
+  padding-right: 56px;
+}
+
+.markdown-code-toolbar {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.markdown-code-language {
+  display: inline-grid;
+  place-items: center;
+  height: 24px;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--panel) 88%, transparent);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  box-shadow: 0 4px 12px rgba(16, 24, 40, .06);
+  user-select: none;
+}
+
+.markdown-code-language[hidden] {
+  display: none;
+}
+
+.markdown-body pre.has-code-copy-button > code.hljs[data-language]::before {
+  content: none;
+  display: none;
+}
+
+.markdown-code-toolbar .markdown-code-copy {
+  position: static;
+  top: auto;
+  right: auto;
+  bottom: auto;
+  flex: 0 0 auto;
+}
+
+:root[data-theme="dark"] .markdown-code-language {
+  color: var(--muted);
+  background: rgba(17, 24, 39, .86);
+  border-color: var(--line);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .22);
 }
