@@ -1,3 +1,5 @@
+import { t } from '../../core/i18n/i18n.js';
+
 export class DirectoryTreeView {
   constructor(container) {
     this.container = container;
@@ -20,7 +22,7 @@ export class DirectoryTreeView {
     if (node.type === 'directory') {
       const label = document.createElement('div');
       label.className = 'tree-folder';
-      label.textContent = `▾ ${node.name || 'Folder'}`;
+      label.textContent = `▾ ${node.name || t('treeFolderFallback')}`;
       item.append(label);
 
       const children = document.createElement('ul');

@@ -1,3 +1,5 @@
+import { t } from '../core/i18n/i18n.js';
+
 const DOCUMENT_EXTENSIONS = [
     '.md', '.mkd', '.mdx', '.markdown',
     '.diff', '.patch',
@@ -77,12 +79,12 @@ chrome.runtime.onInstalled.addListener(details => {
   chrome.contextMenus.removeAll(() => {
     chrome.contextMenus.create({
       id: 'open-dev-file-viewer-page',
-      title: 'Open page with Dev File Viewer',
+      title: t('ctxOpenPage'),
       contexts: ['page']
     });
     chrome.contextMenus.create({
       id: 'open-dev-file-viewer-link',
-      title: 'Open link with Dev File Viewer',
+      title: t('ctxOpenLink'),
       contexts: ['link']
     });
   });

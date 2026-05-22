@@ -1,9 +1,10 @@
 {
   "manifest_version": 3,
-  "name": "Dev File Viewer",
-  "short_name": "Dev Viewer",
+  "default_locale": "en",
+  "name": "__MSG_appName__",
+  "short_name": "__MSG_appShortName__",
   "version": "2.9.3",
-  "description": "Markdown, Diff & Source Viewer. V2 includes Markdown Table of Contents / Outline navigation.",
+  "description": "__MSG_appDesc__",
   "minimum_chrome_version": "116",
   "icons": {
     "16": "assets/icons/icon16.png",
@@ -12,7 +13,7 @@
     "128": "assets/icons/icon128.png"
   },
   "action": {
-    "default_title": "Dev File Viewer",
+    "default_title": "__MSG_appName__",
     "default_popup": "popup/index.html",
     "default_icon": {
       "16": "assets/icons/icon16.png",

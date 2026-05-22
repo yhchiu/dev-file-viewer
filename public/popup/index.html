@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Dev File Viewer</title>
+    <title data-i18n="appName">Dev File Viewer</title>
     <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
@@ -11,26 +11,26 @@
       <header>
         <img class="logo" src="../assets/icons/icon48.png" srcset="../assets/icons/icon48.png 1x, ../assets/icons/icon128.png 2x" width="38" height="38" alt="Dev File Viewer" />
         <div>
-          <h1>Dev File Viewer</h1>
-          <p>Markdown, Diff & Source Viewer</p>
+          <h1 data-i18n="appName">Dev File Viewer</h1>
+          <p data-i18n="appTagline">Markdown, Diff & Source Viewer</p>
         </div>
       </header>
 
-      <button id="open-current" type="button">Open current tab</button>
-      <button id="open-viewer" type="button">Open viewer</button>
+      <button id="open-current" type="button" data-i18n="popupOpenCurrent">Open current tab</button>
+      <button id="open-viewer" type="button" data-i18n="popupOpenViewer">Open viewer</button>
 
       <section id="file-url-card" class="file-url-card">
-        <strong>file:// URL access</strong>
-        <span id="file-url-status">Checking...</span>
+        <strong data-i18n="fileUrlAccessTitle">file:// URL access</strong>
+        <span id="file-url-status" data-i18n="popupChecking">Checking...</span>
         <div class="file-url-actions">
-          <button id="open-settings" type="button">Open Settings</button>
-          <button id="copy-settings-link" type="button">Copy Link</button>
+          <button id="open-settings" type="button" data-i18n="commonOpenSettings">Open Settings</button>
+          <button id="copy-settings-link" type="button" data-i18n="commonCopyLink">Copy Link</button>
         </div>
       </section>
 
       <section class="hint">
-        <strong>Recommended for local files</strong>
-        <span>Use Open File or Open Folder in the viewer. No extra Chrome setting is required.</span>
+        <strong data-i18n="popupRecommendedTitle">Recommended for local files</strong>
+        <span data-i18n="popupRecommendedBody">Use Open File or Open Folder in the viewer. No extra Chrome setting is required.</span>
       </section>
     </main>
     <script src="popup.js"></script>

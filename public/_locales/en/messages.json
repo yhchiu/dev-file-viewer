@@ -1,0 +1,246 @@
+{
+  "appName": { "message": "Dev File Viewer" },
+  "appShortName": { "message": "Dev Viewer" },
+  "appDesc": { "message": "Markdown, Diff & Source Viewer. V2 includes Markdown Table of Contents / Outline navigation." },
+  "appTagline": { "message": "Markdown, Diff & Source Viewer" },
+
+  "ctxOpenPage": { "message": "Open page with Dev File Viewer" },
+  "ctxOpenLink": { "message": "Open link with Dev File Viewer" },
+
+  "commonOpenSettings": { "message": "Open Settings" },
+  "commonCopyLink": { "message": "Copy Link" },
+  "commonDocument": { "message": "document" },
+  "commonSourceFile": { "message": "source file" },
+  "commonDiffFile": { "message": "diff file" },
+  "commonSection": { "message": "section" },
+  "fileUrlAccessTitle": { "message": "file:// URL access" },
+  "outline": { "message": "Outline" },
+  "tabFiles": { "message": "Files" },
+
+  "statusCopied": {
+    "message": "Copied: $URL$",
+    "placeholders": { "url": { "content": "$1", "example": "chrome://extensions/?id=..." } }
+  },
+
+  "popupOpenCurrent": { "message": "Open current tab" },
+  "popupOpenViewer": { "message": "Open viewer" },
+  "popupChecking": { "message": "Checking..." },
+  "popupRecommendedTitle": { "message": "Recommended for local files" },
+  "popupRecommendedBody": { "message": "Use Open File or Open Folder in the viewer. No extra Chrome setting is required." },
+  "popupFileUrlEnabled": { "message": "Enabled. file:// Markdown and source links can open automatically." },
+  "popupFileUrlDisabled": { "message": "Not enabled. Use Open File/Open Folder, or enable this for automatic file:// links." },
+
+  "a11yShowSidebar": { "message": "Show sidebar" },
+  "a11yHideSidebar": { "message": "Hide sidebar" },
+  "a11yOpenOutline": { "message": "Open document outline" },
+  "floatingOutlineHint": { "message": "Click to open outline. Drag to move." },
+  "a11yDirectorySidebar": { "message": "Directory sidebar" },
+  "sidebarToolsSummary": { "message": "Open & Settings" },
+  "viewerOpenFile": { "message": "Open File" },
+  "viewerOpenFolder": { "message": "Open Folder" },
+  "viewerOpenUrl": { "message": "Open URL" },
+  "urlPlaceholder": { "message": "https://example.com/README.md" },
+  "viewerLoad": { "message": "Load" },
+  "a11yFileUrlAccessStatus": { "message": "file URL access status" },
+  "fileUrlCheckingStatus": { "message": "Checking permission status..." },
+  "viewerUseOpenFileInstead": { "message": "Use Open File instead" },
+  "a11yContentWidthSetting": { "message": "Content width setting" },
+  "contentWidthLabel": { "message": "Content Width" },
+  "a11yContentWidth": { "message": "Content width" },
+  "contentWidthNarrow": { "message": "Narrow" },
+  "contentWidthComfortable": { "message": "Comfortable" },
+  "contentWidthWide": { "message": "Wide" },
+  "contentWidthFull": { "message": "Full width" },
+  "a11yThemeSetting": { "message": "Theme setting" },
+  "themeLabel": { "message": "Theme" },
+  "themeLight": { "message": "Light" },
+  "themeDark": { "message": "Dark" },
+  "themeSystem": { "message": "System" },
+  "themeStoredNote": { "message": "Theme preference is stored locally in this browser." },
+  "scrollMemoryTooltip": { "message": "Uses local session storage only. Positions are deleted when the browser session ends and are never sent anywhere." },
+  "rememberScrollLabel": { "message": "Remember scroll position" },
+  "a11ySidebarNavigation": { "message": "Sidebar navigation" },
+  "a11yPopOutOutline": { "message": "Pop out outline" },
+  "popoutNoHeadings": { "message": "No headings in this document" },
+  "filesDirectory": { "message": "Directory" },
+  "a11yReloadFolder": { "message": "Reload folder" },
+  "treeEmptySelectFolder": { "message": "Select a folder to show supported files." },
+  "tocOnThisPage": { "message": "On this page" },
+  "outlineDepthLabel": { "message": "Outline depth" },
+  "depthH1H2": { "message": "H1-H2" },
+  "depthH1H3": { "message": "H1-H3" },
+  "depthH1H4": { "message": "H1-H4" },
+  "depthH1H5": { "message": "H1-H5" },
+  "depthH1H6": { "message": "H1-H6" },
+  "filterHeadingsPlaceholder": { "message": "Filter headings..." },
+  "a11yFilterHeadings": { "message": "Filter headings" },
+  "a11yTableOfContents": { "message": "Table of contents" },
+  "tocEmptyMarkdown": { "message": "Open a Markdown document to show its outline. Source files do not have an outline yet." },
+  "a11yResizeSidebar": { "message": "Resize sidebar" },
+  "resizeSidebarHint": { "message": "Drag to resize sidebar. Double-click to reset." },
+  "a11yTableOfContentsPopover": { "message": "Table of contents popover" },
+  "a11yPinOutlinePopover": { "message": "Pin outline popover" },
+  "a11yUnpinOutlinePopover": { "message": "Unpin outline popover" },
+  "a11yCloseOutline": { "message": "Close outline" },
+  "a11yReloadDocument": { "message": "Reload document" },
+  "docSourceEmpty": { "message": "Open a Markdown or source file, folder, or URL." },
+  "formatMarkdown": { "message": "Markdown" },
+  "viewerInitialStatus": { "message": "V2.9.3 uses SVG controls for Outline pop-out/pin and places the floating Outline control in the viewer area." },
+  "dropOverlayTitle": { "message": "Drop file or folder to open" },
+  "dropOverlayBody": { "message": "Dev File Viewer will open supported developer files locally." },
+
+  "statusThemeSet": {
+    "message": "Theme set to $THEME$.",
+    "placeholders": { "theme": { "content": "$1", "example": "Dark" } }
+  },
+  "statusContentWidthSet": {
+    "message": "Content width set to $WIDTH$.",
+    "placeholders": { "width": { "content": "$1", "example": "Comfortable" } }
+  },
+  "statusScrollEnabled": { "message": "Scroll position memory is enabled for this browser session only." },
+  "statusScrollDisabled": { "message": "Scroll position memory is disabled. Files will open at the first line." },
+  "statusOpeningDropped": { "message": "Opening dropped item ..." },
+  "statusNoSupportedDropped": { "message": "No supported file or folder was dropped." },
+  "errorDroppedBinary": {
+    "message": "Dropped file appears to be binary and cannot be opened as text: $NAME$",
+    "placeholders": { "name": { "content": "$1", "example": "image.png" } }
+  },
+  "statusDroppedFolderLoaded": { "message": "Dropped folder loaded. Select a supported developer file from the sidebar." },
+  "statusOpeningFolder": { "message": "Opening folder ..." },
+  "statusFolderLoaded": { "message": "Folder loaded. Select a supported developer file from the sidebar." },
+  "statusFolderCouldNotOpen": { "message": "Folder could not be opened." },
+  "statusSelectFromSidebar": { "message": "Select a supported developer file from the sidebar." },
+  "titleNoFileSelected": { "message": "No file selected" },
+  "formatFolder": { "message": "Folder" },
+  "statusNoFolderOpen": { "message": "No folder is currently open." },
+  "statusReloadingFolder": { "message": "Reloading folder ..." },
+  "statusFolderReloaded": { "message": "Folder reloaded." },
+  "statusNoDocumentLoaded": { "message": "No document is currently loaded." },
+  "statusReloadingDocument": {
+    "message": "Reloading $NAME$ ...",
+    "placeholders": { "name": { "content": "$1", "example": "README.md" } }
+  },
+  "statusReloadedDocument": {
+    "message": "Reloaded $NAME$.",
+    "placeholders": { "name": { "content": "$1", "example": "README.md" } }
+  },
+  "errorCannotReload": { "message": "This document cannot be reloaded. Open the file, folder, or URL again." },
+  "errorSnapshotUnavailable": { "message": "The captured document is no longer available. Reopen the Markdown file or use Open File." },
+  "statusLoadingUrl": {
+    "message": "Loading $URL$ ...",
+    "placeholders": { "url": { "content": "$1", "example": "https://example.com/README.md" } }
+  },
+  "statusLoaded": {
+    "message": "Loaded $NAME$.",
+    "placeholders": { "name": { "content": "$1", "example": "README.md" } }
+  },
+  "statusUnsupportedFormat": {
+    "message": "Unsupported format: $FORMAT$.",
+    "placeholders": { "format": { "content": "$1", "example": "binary" } }
+  },
+  "docTitleUntitled": { "message": "Untitled" },
+  "sourceDroppedFile": {
+    "message": "Dropped file: $NAME$",
+    "placeholders": { "name": { "content": "$1", "example": "README.md" } }
+  },
+  "sourceDroppedFileGeneric": { "message": "Dropped file" },
+  "sourceLocalFile": {
+    "message": "Local file: $NAME$",
+    "placeholders": { "name": { "content": "$1", "example": "README.md" } }
+  },
+  "sourceLocalFileGeneric": { "message": "Local file" },
+  "tocNoHeadingsFound": { "message": "No headings found in this document." },
+  "outlineTabCount": {
+    "message": "Outline ($COUNT$)",
+    "placeholders": { "count": { "content": "$1", "example": "12" } }
+  },
+  "tocChangedFiles": { "message": "Changed files" },
+  "tocNoChangedFiles": { "message": "No changed files found in this diff." },
+  "changesTabCount": {
+    "message": "Changes ($COUNT$)",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "symbolsTitle": { "message": "Symbols" },
+  "tocNoSymbols": { "message": "No symbols found in this source file." },
+  "symbolsTabCount": {
+    "message": "Symbols ($COUNT$)",
+    "placeholders": { "count": { "content": "$1", "example": "8" } }
+  },
+  "a11yCollapseSection": {
+    "message": "Collapse $NAME$",
+    "placeholders": { "name": { "content": "$1", "example": "Getting Started" } }
+  },
+  "a11yExpandSection": {
+    "message": "Expand $NAME$",
+    "placeholders": { "name": { "content": "$1", "example": "Getting Started" } }
+  },
+  "tocNoMatchingFiles": { "message": "No matching files." },
+  "tocNoMatchingSymbols": { "message": "No matching symbols." },
+  "tocNoMatchingHeadings": { "message": "No matching headings." },
+  "tocEmptyGeneric": { "message": "Open a Markdown, source, or diff file to show an outline." },
+  "a11yFloatingOutlinePinned": { "message": "Floating outline is pinned" },
+  "a11yHideFloatingOutline": { "message": "Hide floating outline" },
+  "fileUrlEnabledViewer": { "message": "Enabled. file:// Markdown URLs can be opened automatically." },
+  "fileUrlDisabledViewer": { "message": "Not enabled. Recommended: use Open File/Open Folder. Advanced: enable Chrome file URL access." },
+  "statusSettingsOpened": { "message": "Chrome opened the extension settings page. Enable “Allow access to file URLs”, then return here." },
+  "statusCopiedSettingsLink": {
+    "message": "Copied settings link: $URL$",
+    "placeholders": { "url": { "content": "$1", "example": "chrome://extensions/?id=..." } }
+  },
+  "errorFileUrlBlocked": {
+    "message": "$MESSAGE$\n\nChrome blocks file:// URL access until you enable “Allow access to file URLs”. You can also use Open File or Open Folder without changing this Chrome setting.",
+    "placeholders": { "message": { "content": "$1", "example": "Failed to fetch" } }
+  },
+
+  "symbolClass": { "message": "class" },
+  "symbolInterface": { "message": "iface" },
+  "symbolMethod": { "message": "meth" },
+  "symbolFunction": { "message": "fn" },
+  "symbolType": { "message": "type" },
+  "symbolEnum": { "message": "enum" },
+  "symbolModule": { "message": "mod" },
+  "symbolGeneric": { "message": "sym" },
+
+  "diffNoContent": { "message": "No diff content found." },
+  "diffNoHunks": { "message": "No hunks in this diff file." },
+  "diffFileFallback": { "message": "Diff file" },
+
+  "treeFolderFallback": { "message": "Folder" },
+
+  "a11yCopyCode": { "message": "Copy code" },
+  "a11yCopied": { "message": "Copied" },
+  "a11yCopyFailed": { "message": "Copy failed" },
+
+  "onboardingPageTitle": { "message": "Welcome to Dev File Viewer" },
+  "onboardingImgAlt": { "message": "Dev File Viewer — Markdown, Diff & Source Viewer" },
+  "onboardingEyebrow": { "message": "Dev File Viewer V2.9.3" },
+  "onboardingHeroTitle": { "message": "Preview Markdown and source files without sending your files anywhere." },
+  "onboardingLead": { "message": "Use Open File or Open Folder for local Markdown and source files. Enable file:// URL access only when you want Chrome to automatically open local developer file links with this extension." },
+  "onboardingOpenViewer": { "message": "Open Viewer" },
+  "onboardingOpenSettings": { "message": "Open Extension Settings" },
+  "onboardingBadgeRecommended": { "message": "Recommended" },
+  "onboardingRecommendedTitle": { "message": "Open File / Open Folder" },
+  "onboardingRecommendedBody": { "message": "This is the easiest local-file workflow. The user chooses a file or folder, then Dev File Viewer reads only that selected content." },
+  "onboardingRecommendedLi1": { "message": "No file:// setting required" },
+  "onboardingRecommendedLi2": { "message": "Works well for non-technical users" },
+  "onboardingRecommendedLi3": { "message": "Best fit for privacy-first local preview" },
+  "onboardingBadgeAdvanced": { "message": "Advanced" },
+  "onboardingAdvancedTitle": { "message": "Automatic file:// URL preview" },
+  "onboardingAdvancedStatus": { "message": "Checking current permission status..." },
+  "onboardingStep1": { "message": "Open the extension settings page." },
+  "onboardingStep2Pre": { "message": "Enable " },
+  "onboardingAllowFileUrls": { "message": "Allow access to file URLs" },
+  "onboardingStep2Post": { "message": "." },
+  "onboardingStep3": { "message": "Open a local supported Markdown or source file link again." },
+  "onboardingCopySettingsLink": { "message": "Copy Settings Link" },
+  "onboardingFeaturesTitle": { "message": "V2.9.3 includes" },
+  "featureMarkdownRender": { "message": "Markdown render" },
+  "featureSourceViewer": { "message": "Source code viewer" },
+  "featureMarkdownTables": { "message": "Markdown tables" },
+  "featureMermaid": { "message": "Mermaid diagrams" },
+  "featureFolderSidebar": { "message": "Local folder sidebar" },
+  "featureOffline": { "message": "Offline-only runtime" },
+  "featureNoTracking": { "message": "No tracking" },
+  "onboardingFileUrlEnabled": { "message": "Enabled. Dev File Viewer can automatically preview supported file:// Markdown URLs." },
+  "onboardingFileUrlDisabled": { "message": "Not enabled. This is optional; Open File and Open Folder work without this setting." }
+}

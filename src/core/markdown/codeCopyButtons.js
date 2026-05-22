@@ -1,3 +1,5 @@
+import { t } from '../i18n/i18n.js';
+
 const COPY_ICON = `
   <svg class="code-copy-icon code-copy-icon-copy" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
     <rect x="5.25" y="3.25" width="7.5" height="9.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.4" />
@@ -31,8 +33,8 @@ export function installMarkdownCodeCopyButtons(root) {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'markdown-code-copy';
-    button.title = 'Copy code';
-    button.setAttribute('aria-label', 'Copy code');
+    button.title = t('a11yCopyCode');
+    button.setAttribute('aria-label', t('a11yCopyCode'));
     button.innerHTML = COPY_ICON;
 
     button.addEventListener('click', async event => {
@@ -92,15 +94,15 @@ async function copyText(text) {
 function setCopiedState(button) {
   button.classList.remove('is-copy-failed');
   button.classList.add('is-copied');
-  button.title = 'Copied';
-  button.setAttribute('aria-label', 'Copied');
+  button.title = t('a11yCopied');
+  button.setAttribute('aria-label', t('a11yCopied'));
   button.innerHTML = CHECK_ICON;
 
   window.clearTimeout(button._copyTimer);
   button._copyTimer = window.setTimeout(() => {
     button.classList.remove('is-copied');
-    button.title = 'Copy code';
-    button.setAttribute('aria-label', 'Copy code');
+    button.title = t('a11yCopyCode');
+    button.setAttribute('aria-label', t('a11yCopyCode'));
     button.innerHTML = COPY_ICON;
   }, 1400);
 }
@@ -108,14 +110,14 @@ function setCopiedState(button) {
 function setCopyFailedState(button) {
   button.classList.remove('is-copied');
   button.classList.add('is-copy-failed');
-  button.title = 'Copy failed';
-  button.setAttribute('aria-label', 'Copy failed');
+  button.title = t('a11yCopyFailed');
+  button.setAttribute('aria-label', t('a11yCopyFailed'));
 
   window.clearTimeout(button._copyTimer);
   button._copyTimer = window.setTimeout(() => {
     button.classList.remove('is-copy-failed');
-    button.title = 'Copy code';
-    button.setAttribute('aria-label', 'Copy code');
+    button.title = t('a11yCopyCode');
+    button.setAttribute('aria-label', t('a11yCopyCode'));
     button.innerHTML = COPY_ICON;
   }, 1800);
 }

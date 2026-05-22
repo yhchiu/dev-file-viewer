@@ -1,0 +1,246 @@
+{
+  "appName": { "message": "Dev File Viewer" },
+  "appShortName": { "message": "Dev Viewer" },
+  "appDesc": { "message": "Markdown、Diff 與原始碼檢視器。V2 新增 Markdown 目錄／大綱導覽。" },
+  "appTagline": { "message": "Markdown、Diff 與原始碼檢視器" },
+
+  "ctxOpenPage": { "message": "以 Dev File Viewer 開啟頁面" },
+  "ctxOpenLink": { "message": "以 Dev File Viewer 開啟連結" },
+
+  "commonOpenSettings": { "message": "開啟設定" },
+  "commonCopyLink": { "message": "複製連結" },
+  "commonDocument": { "message": "文件" },
+  "commonSourceFile": { "message": "原始碼檔案" },
+  "commonDiffFile": { "message": "Diff 檔案" },
+  "commonSection": { "message": "區段" },
+  "fileUrlAccessTitle": { "message": "file:// 網址存取" },
+  "outline": { "message": "大綱" },
+  "tabFiles": { "message": "檔案" },
+
+  "statusCopied": {
+    "message": "已複製：$URL$",
+    "placeholders": { "url": { "content": "$1", "example": "chrome://extensions/?id=..." } }
+  },
+
+  "popupOpenCurrent": { "message": "開啟目前分頁" },
+  "popupOpenViewer": { "message": "開啟檢視器" },
+  "popupChecking": { "message": "檢查中…" },
+  "popupRecommendedTitle": { "message": "本機檔案建議用法" },
+  "popupRecommendedBody": { "message": "在檢視器中使用「開啟檔案」或「開啟資料夾」，無須額外的 Chrome 設定。" },
+  "popupFileUrlEnabled": { "message": "已啟用。file:// 的 Markdown 與原始碼連結可自動開啟。" },
+  "popupFileUrlDisabled": { "message": "未啟用。請使用「開啟檔案／開啟資料夾」，或啟用此項以自動開啟 file:// 連結。" },
+
+  "a11yShowSidebar": { "message": "顯示側邊欄" },
+  "a11yHideSidebar": { "message": "隱藏側邊欄" },
+  "a11yOpenOutline": { "message": "開啟文件大綱" },
+  "floatingOutlineHint": { "message": "點擊以開啟大綱，拖曳可移動。" },
+  "a11yDirectorySidebar": { "message": "目錄側邊欄" },
+  "sidebarToolsSummary": { "message": "開啟與設定" },
+  "viewerOpenFile": { "message": "開啟檔案" },
+  "viewerOpenFolder": { "message": "開啟資料夾" },
+  "viewerOpenUrl": { "message": "開啟網址" },
+  "urlPlaceholder": { "message": "https://example.com/README.md" },
+  "viewerLoad": { "message": "載入" },
+  "a11yFileUrlAccessStatus": { "message": "file 網址存取狀態" },
+  "fileUrlCheckingStatus": { "message": "正在檢查權限狀態…" },
+  "viewerUseOpenFileInstead": { "message": "改用「開啟檔案」" },
+  "a11yContentWidthSetting": { "message": "內容寬度設定" },
+  "contentWidthLabel": { "message": "內容寬度" },
+  "a11yContentWidth": { "message": "內容寬度" },
+  "contentWidthNarrow": { "message": "窄" },
+  "contentWidthComfortable": { "message": "適中" },
+  "contentWidthWide": { "message": "寬" },
+  "contentWidthFull": { "message": "全寬" },
+  "a11yThemeSetting": { "message": "主題設定" },
+  "themeLabel": { "message": "主題" },
+  "themeLight": { "message": "淺色" },
+  "themeDark": { "message": "深色" },
+  "themeSystem": { "message": "跟隨系統" },
+  "themeStoredNote": { "message": "主題偏好僅儲存在這個瀏覽器本機。" },
+  "scrollMemoryTooltip": { "message": "僅使用本機工作階段儲存空間。位置會在瀏覽器工作階段結束時刪除，且絕不會傳送至任何地方。" },
+  "rememberScrollLabel": { "message": "記住捲動位置" },
+  "a11ySidebarNavigation": { "message": "側邊欄導覽" },
+  "a11yPopOutOutline": { "message": "彈出大綱" },
+  "popoutNoHeadings": { "message": "此文件沒有標題" },
+  "filesDirectory": { "message": "目錄" },
+  "a11yReloadFolder": { "message": "重新載入資料夾" },
+  "treeEmptySelectFolder": { "message": "選擇資料夾以顯示支援的檔案。" },
+  "tocOnThisPage": { "message": "本頁內容" },
+  "outlineDepthLabel": { "message": "大綱深度" },
+  "depthH1H2": { "message": "H1-H2" },
+  "depthH1H3": { "message": "H1-H3" },
+  "depthH1H4": { "message": "H1-H4" },
+  "depthH1H5": { "message": "H1-H5" },
+  "depthH1H6": { "message": "H1-H6" },
+  "filterHeadingsPlaceholder": { "message": "篩選標題…" },
+  "a11yFilterHeadings": { "message": "篩選標題" },
+  "a11yTableOfContents": { "message": "目錄" },
+  "tocEmptyMarkdown": { "message": "開啟 Markdown 文件以顯示其大綱。原始碼檔案目前尚無大綱。" },
+  "a11yResizeSidebar": { "message": "調整側邊欄寬度" },
+  "resizeSidebarHint": { "message": "拖曳以調整側邊欄寬度，按兩下可重設。" },
+  "a11yTableOfContentsPopover": { "message": "目錄彈出視窗" },
+  "a11yPinOutlinePopover": { "message": "釘選大綱彈出視窗" },
+  "a11yUnpinOutlinePopover": { "message": "取消釘選大綱彈出視窗" },
+  "a11yCloseOutline": { "message": "關閉大綱" },
+  "a11yReloadDocument": { "message": "重新載入文件" },
+  "docSourceEmpty": { "message": "開啟 Markdown、原始碼檔案、資料夾或網址。" },
+  "formatMarkdown": { "message": "Markdown" },
+  "viewerInitialStatus": { "message": "V2.9.3 使用 SVG 控制項處理大綱彈出／釘選，並將浮動的大綱控制項置於檢視器區域。" },
+  "dropOverlayTitle": { "message": "拖放檔案或資料夾以開啟" },
+  "dropOverlayBody": { "message": "Dev File Viewer 將在本機開啟支援的開發者檔案。" },
+
+  "statusThemeSet": {
+    "message": "主題已設為 $THEME$。",
+    "placeholders": { "theme": { "content": "$1", "example": "深色" } }
+  },
+  "statusContentWidthSet": {
+    "message": "內容寬度已設為 $WIDTH$。",
+    "placeholders": { "width": { "content": "$1", "example": "適中" } }
+  },
+  "statusScrollEnabled": { "message": "捲動位置記憶僅在本次瀏覽器工作階段啟用。" },
+  "statusScrollDisabled": { "message": "捲動位置記憶已停用。檔案將從第一行開啟。" },
+  "statusOpeningDropped": { "message": "正在開啟拖放的項目…" },
+  "statusNoSupportedDropped": { "message": "未拖放支援的檔案或資料夾。" },
+  "errorDroppedBinary": {
+    "message": "拖放的檔案似乎是二進位檔，無法以文字開啟：$NAME$",
+    "placeholders": { "name": { "content": "$1", "example": "image.png" } }
+  },
+  "statusDroppedFolderLoaded": { "message": "已載入拖放的資料夾。請從側邊欄選擇支援的開發者檔案。" },
+  "statusOpeningFolder": { "message": "正在開啟資料夾…" },
+  "statusFolderLoaded": { "message": "已載入資料夾。請從側邊欄選擇支援的開發者檔案。" },
+  "statusFolderCouldNotOpen": { "message": "無法開啟資料夾。" },
+  "statusSelectFromSidebar": { "message": "請從側邊欄選擇支援的開發者檔案。" },
+  "titleNoFileSelected": { "message": "未選擇檔案" },
+  "formatFolder": { "message": "資料夾" },
+  "statusNoFolderOpen": { "message": "目前沒有開啟的資料夾。" },
+  "statusReloadingFolder": { "message": "正在重新載入資料夾…" },
+  "statusFolderReloaded": { "message": "資料夾已重新載入。" },
+  "statusNoDocumentLoaded": { "message": "目前沒有載入的文件。" },
+  "statusReloadingDocument": {
+    "message": "正在重新載入 $NAME$…",
+    "placeholders": { "name": { "content": "$1", "example": "README.md" } }
+  },
+  "statusReloadedDocument": {
+    "message": "已重新載入 $NAME$。",
+    "placeholders": { "name": { "content": "$1", "example": "README.md" } }
+  },
+  "errorCannotReload": { "message": "此文件無法重新載入。請重新開啟檔案、資料夾或網址。" },
+  "errorSnapshotUnavailable": { "message": "擷取的文件已不再可用。請重新開啟 Markdown 檔案或使用「開啟檔案」。" },
+  "statusLoadingUrl": {
+    "message": "正在載入 $URL$…",
+    "placeholders": { "url": { "content": "$1", "example": "https://example.com/README.md" } }
+  },
+  "statusLoaded": {
+    "message": "已載入 $NAME$。",
+    "placeholders": { "name": { "content": "$1", "example": "README.md" } }
+  },
+  "statusUnsupportedFormat": {
+    "message": "不支援的格式：$FORMAT$。",
+    "placeholders": { "format": { "content": "$1", "example": "binary" } }
+  },
+  "docTitleUntitled": { "message": "未命名" },
+  "sourceDroppedFile": {
+    "message": "拖放的檔案：$NAME$",
+    "placeholders": { "name": { "content": "$1", "example": "README.md" } }
+  },
+  "sourceDroppedFileGeneric": { "message": "拖放的檔案" },
+  "sourceLocalFile": {
+    "message": "本機檔案：$NAME$",
+    "placeholders": { "name": { "content": "$1", "example": "README.md" } }
+  },
+  "sourceLocalFileGeneric": { "message": "本機檔案" },
+  "tocNoHeadingsFound": { "message": "此文件中找不到標題。" },
+  "outlineTabCount": {
+    "message": "大綱（$COUNT$）",
+    "placeholders": { "count": { "content": "$1", "example": "12" } }
+  },
+  "tocChangedFiles": { "message": "已變更的檔案" },
+  "tocNoChangedFiles": { "message": "此 Diff 中找不到已變更的檔案。" },
+  "changesTabCount": {
+    "message": "變更（$COUNT$）",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "symbolsTitle": { "message": "符號" },
+  "tocNoSymbols": { "message": "此原始碼檔案中找不到符號。" },
+  "symbolsTabCount": {
+    "message": "符號（$COUNT$）",
+    "placeholders": { "count": { "content": "$1", "example": "8" } }
+  },
+  "a11yCollapseSection": {
+    "message": "收合 $NAME$",
+    "placeholders": { "name": { "content": "$1", "example": "Getting Started" } }
+  },
+  "a11yExpandSection": {
+    "message": "展開 $NAME$",
+    "placeholders": { "name": { "content": "$1", "example": "Getting Started" } }
+  },
+  "tocNoMatchingFiles": { "message": "沒有符合的檔案。" },
+  "tocNoMatchingSymbols": { "message": "沒有符合的符號。" },
+  "tocNoMatchingHeadings": { "message": "沒有符合的標題。" },
+  "tocEmptyGeneric": { "message": "開啟 Markdown、原始碼或 Diff 檔案以顯示大綱。" },
+  "a11yFloatingOutlinePinned": { "message": "浮動大綱已釘選" },
+  "a11yHideFloatingOutline": { "message": "隱藏浮動大綱" },
+  "fileUrlEnabledViewer": { "message": "已啟用。file:// 的 Markdown 網址可自動開啟。" },
+  "fileUrlDisabledViewer": { "message": "未啟用。建議：使用「開啟檔案／開啟資料夾」。進階：啟用 Chrome 檔案網址存取。" },
+  "statusSettingsOpened": { "message": "Chrome 已開啟擴充功能設定頁面。請啟用「允許存取檔案網址」，然後返回此處。" },
+  "statusCopiedSettingsLink": {
+    "message": "已複製設定連結：$URL$",
+    "placeholders": { "url": { "content": "$1", "example": "chrome://extensions/?id=..." } }
+  },
+  "errorFileUrlBlocked": {
+    "message": "$MESSAGE$\n\nChrome 會封鎖 file:// 網址存取，直到您啟用「允許存取檔案網址」為止。您也可以使用「開啟檔案」或「開啟資料夾」，無須變更此 Chrome 設定。",
+    "placeholders": { "message": { "content": "$1", "example": "Failed to fetch" } }
+  },
+
+  "symbolClass": { "message": "類別" },
+  "symbolInterface": { "message": "介面" },
+  "symbolMethod": { "message": "方法" },
+  "symbolFunction": { "message": "函式" },
+  "symbolType": { "message": "型別" },
+  "symbolEnum": { "message": "列舉" },
+  "symbolModule": { "message": "模組" },
+  "symbolGeneric": { "message": "符號" },
+
+  "diffNoContent": { "message": "找不到 Diff 內容。" },
+  "diffNoHunks": { "message": "此 Diff 檔案中沒有變更區塊。" },
+  "diffFileFallback": { "message": "Diff 檔案" },
+
+  "treeFolderFallback": { "message": "資料夾" },
+
+  "a11yCopyCode": { "message": "複製程式碼" },
+  "a11yCopied": { "message": "已複製" },
+  "a11yCopyFailed": { "message": "複製失敗" },
+
+  "onboardingPageTitle": { "message": "歡迎使用 Dev File Viewer" },
+  "onboardingImgAlt": { "message": "Dev File Viewer — Markdown、Diff 與原始碼檢視器" },
+  "onboardingEyebrow": { "message": "Dev File Viewer V2.9.3" },
+  "onboardingHeroTitle": { "message": "預覽 Markdown 與原始碼檔案，無須將檔案傳送至任何地方。" },
+  "onboardingLead": { "message": "本機 Markdown 與原始碼檔案請使用「開啟檔案」或「開啟資料夾」。只有當您希望 Chrome 自動以此擴充功能開啟本機開發者檔案連結時，才需啟用 file:// 網址存取。" },
+  "onboardingOpenViewer": { "message": "開啟檢視器" },
+  "onboardingOpenSettings": { "message": "開啟擴充功能設定" },
+  "onboardingBadgeRecommended": { "message": "建議" },
+  "onboardingRecommendedTitle": { "message": "開啟檔案／開啟資料夾" },
+  "onboardingRecommendedBody": { "message": "這是最簡單的本機檔案流程。使用者選擇檔案或資料夾後，Dev File Viewer 僅讀取所選的內容。" },
+  "onboardingRecommendedLi1": { "message": "無須 file:// 設定" },
+  "onboardingRecommendedLi2": { "message": "適合非技術使用者" },
+  "onboardingRecommendedLi3": { "message": "最適合注重隱私的本機預覽" },
+  "onboardingBadgeAdvanced": { "message": "進階" },
+  "onboardingAdvancedTitle": { "message": "自動 file:// 網址預覽" },
+  "onboardingAdvancedStatus": { "message": "正在檢查目前的權限狀態…" },
+  "onboardingStep1": { "message": "開啟擴充功能設定頁面。" },
+  "onboardingStep2Pre": { "message": "啟用" },
+  "onboardingAllowFileUrls": { "message": "允許存取檔案網址" },
+  "onboardingStep2Post": { "message": "。" },
+  "onboardingStep3": { "message": "再次開啟本機支援的 Markdown 或原始碼檔案連結。" },
+  "onboardingCopySettingsLink": { "message": "複製設定連結" },
+  "onboardingFeaturesTitle": { "message": "V2.9.3 包含" },
+  "featureMarkdownRender": { "message": "Markdown 渲染" },
+  "featureSourceViewer": { "message": "原始碼檢視器" },
+  "featureMarkdownTables": { "message": "Markdown 表格" },
+  "featureMermaid": { "message": "Mermaid 圖表" },
+  "featureFolderSidebar": { "message": "本機資料夾側邊欄" },
+  "featureOffline": { "message": "純離線執行" },
+  "featureNoTracking": { "message": "無追蹤" },
+  "onboardingFileUrlEnabled": { "message": "已啟用。Dev File Viewer 可自動預覽支援的 file:// Markdown 網址。" },
+  "onboardingFileUrlDisabled": { "message": "未啟用。此為選用項目；「開啟檔案」與「開啟資料夾」無須此設定即可運作。" }
+}

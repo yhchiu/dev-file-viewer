@@ -1,0 +1,246 @@
+{
+  "appName": { "message": "Dev File Viewer" },
+  "appShortName": { "message": "Dev Viewer" },
+  "appDesc": { "message": "Markdown、Diff 与源代码查看器。V2 新增 Markdown 目录／大纲导航。" },
+  "appTagline": { "message": "Markdown、Diff 与源代码查看器" },
+
+  "ctxOpenPage": { "message": "用 Dev File Viewer 打开页面" },
+  "ctxOpenLink": { "message": "用 Dev File Viewer 打开链接" },
+
+  "commonOpenSettings": { "message": "打开设置" },
+  "commonCopyLink": { "message": "复制链接" },
+  "commonDocument": { "message": "文档" },
+  "commonSourceFile": { "message": "源代码文件" },
+  "commonDiffFile": { "message": "Diff 文件" },
+  "commonSection": { "message": "区段" },
+  "fileUrlAccessTitle": { "message": "file:// 网址访问" },
+  "outline": { "message": "大纲" },
+  "tabFiles": { "message": "文件" },
+
+  "statusCopied": {
+    "message": "已复制：$URL$",
+    "placeholders": { "url": { "content": "$1", "example": "chrome://extensions/?id=..." } }
+  },
+
+  "popupOpenCurrent": { "message": "打开当前标签页" },
+  "popupOpenViewer": { "message": "打开查看器" },
+  "popupChecking": { "message": "检查中…" },
+  "popupRecommendedTitle": { "message": "本地文件推荐用法" },
+  "popupRecommendedBody": { "message": "在查看器中使用“打开文件”或“打开文件夹”，无需额外的 Chrome 设置。" },
+  "popupFileUrlEnabled": { "message": "已启用。file:// 的 Markdown 与源代码链接可自动打开。" },
+  "popupFileUrlDisabled": { "message": "未启用。请使用“打开文件／打开文件夹”，或启用此项以自动打开 file:// 链接。" },
+
+  "a11yShowSidebar": { "message": "显示侧边栏" },
+  "a11yHideSidebar": { "message": "隐藏侧边栏" },
+  "a11yOpenOutline": { "message": "打开文档大纲" },
+  "floatingOutlineHint": { "message": "点击以打开大纲，拖动可移动。" },
+  "a11yDirectorySidebar": { "message": "目录侧边栏" },
+  "sidebarToolsSummary": { "message": "打开与设置" },
+  "viewerOpenFile": { "message": "打开文件" },
+  "viewerOpenFolder": { "message": "打开文件夹" },
+  "viewerOpenUrl": { "message": "打开网址" },
+  "urlPlaceholder": { "message": "https://example.com/README.md" },
+  "viewerLoad": { "message": "加载" },
+  "a11yFileUrlAccessStatus": { "message": "file 网址访问状态" },
+  "fileUrlCheckingStatus": { "message": "正在检查权限状态…" },
+  "viewerUseOpenFileInstead": { "message": "改用“打开文件”" },
+  "a11yContentWidthSetting": { "message": "内容宽度设置" },
+  "contentWidthLabel": { "message": "内容宽度" },
+  "a11yContentWidth": { "message": "内容宽度" },
+  "contentWidthNarrow": { "message": "窄" },
+  "contentWidthComfortable": { "message": "适中" },
+  "contentWidthWide": { "message": "宽" },
+  "contentWidthFull": { "message": "全宽" },
+  "a11yThemeSetting": { "message": "主题设置" },
+  "themeLabel": { "message": "主题" },
+  "themeLight": { "message": "浅色" },
+  "themeDark": { "message": "深色" },
+  "themeSystem": { "message": "跟随系统" },
+  "themeStoredNote": { "message": "主题偏好仅保存在此浏览器本地。" },
+  "scrollMemoryTooltip": { "message": "仅使用本地会话存储。位置会在浏览器会话结束时删除，且绝不会发送到任何地方。" },
+  "rememberScrollLabel": { "message": "记住滚动位置" },
+  "a11ySidebarNavigation": { "message": "侧边栏导航" },
+  "a11yPopOutOutline": { "message": "弹出大纲" },
+  "popoutNoHeadings": { "message": "此文档没有标题" },
+  "filesDirectory": { "message": "目录" },
+  "a11yReloadFolder": { "message": "重新加载文件夹" },
+  "treeEmptySelectFolder": { "message": "选择文件夹以显示支持的文件。" },
+  "tocOnThisPage": { "message": "本页内容" },
+  "outlineDepthLabel": { "message": "大纲深度" },
+  "depthH1H2": { "message": "H1-H2" },
+  "depthH1H3": { "message": "H1-H3" },
+  "depthH1H4": { "message": "H1-H4" },
+  "depthH1H5": { "message": "H1-H5" },
+  "depthH1H6": { "message": "H1-H6" },
+  "filterHeadingsPlaceholder": { "message": "筛选标题…" },
+  "a11yFilterHeadings": { "message": "筛选标题" },
+  "a11yTableOfContents": { "message": "目录" },
+  "tocEmptyMarkdown": { "message": "打开 Markdown 文档以显示其大纲。源代码文件目前尚无大纲。" },
+  "a11yResizeSidebar": { "message": "调整侧边栏宽度" },
+  "resizeSidebarHint": { "message": "拖动以调整侧边栏宽度，双击可重置。" },
+  "a11yTableOfContentsPopover": { "message": "目录弹出窗口" },
+  "a11yPinOutlinePopover": { "message": "固定大纲弹出窗口" },
+  "a11yUnpinOutlinePopover": { "message": "取消固定大纲弹出窗口" },
+  "a11yCloseOutline": { "message": "关闭大纲" },
+  "a11yReloadDocument": { "message": "重新加载文档" },
+  "docSourceEmpty": { "message": "打开 Markdown、源代码文件、文件夹或网址。" },
+  "formatMarkdown": { "message": "Markdown" },
+  "viewerInitialStatus": { "message": "V2.9.3 使用 SVG 控件处理大纲弹出／固定，并将浮动的大纲控件放置在查看器区域。" },
+  "dropOverlayTitle": { "message": "拖放文件或文件夹以打开" },
+  "dropOverlayBody": { "message": "Dev File Viewer 将在本地打开支持的开发者文件。" },
+
+  "statusThemeSet": {
+    "message": "主题已设为 $THEME$。",
+    "placeholders": { "theme": { "content": "$1", "example": "深色" } }
+  },
+  "statusContentWidthSet": {
+    "message": "内容宽度已设为 $WIDTH$。",
+    "placeholders": { "width": { "content": "$1", "example": "适中" } }
+  },
+  "statusScrollEnabled": { "message": "滚动位置记忆仅在本次浏览器会话中启用。" },
+  "statusScrollDisabled": { "message": "滚动位置记忆已禁用。文件将从第一行打开。" },
+  "statusOpeningDropped": { "message": "正在打开拖放的项目…" },
+  "statusNoSupportedDropped": { "message": "未拖放支持的文件或文件夹。" },
+  "errorDroppedBinary": {
+    "message": "拖放的文件似乎是二进制文件，无法以文本打开：$NAME$",
+    "placeholders": { "name": { "content": "$1", "example": "image.png" } }
+  },
+  "statusDroppedFolderLoaded": { "message": "已加载拖放的文件夹。请从侧边栏选择支持的开发者文件。" },
+  "statusOpeningFolder": { "message": "正在打开文件夹…" },
+  "statusFolderLoaded": { "message": "已加载文件夹。请从侧边栏选择支持的开发者文件。" },
+  "statusFolderCouldNotOpen": { "message": "无法打开文件夹。" },
+  "statusSelectFromSidebar": { "message": "请从侧边栏选择支持的开发者文件。" },
+  "titleNoFileSelected": { "message": "未选择文件" },
+  "formatFolder": { "message": "文件夹" },
+  "statusNoFolderOpen": { "message": "当前没有打开的文件夹。" },
+  "statusReloadingFolder": { "message": "正在重新加载文件夹…" },
+  "statusFolderReloaded": { "message": "文件夹已重新加载。" },
+  "statusNoDocumentLoaded": { "message": "当前没有加载的文档。" },
+  "statusReloadingDocument": {
+    "message": "正在重新加载 $NAME$…",
+    "placeholders": { "name": { "content": "$1", "example": "README.md" } }
+  },
+  "statusReloadedDocument": {
+    "message": "已重新加载 $NAME$。",
+    "placeholders": { "name": { "content": "$1", "example": "README.md" } }
+  },
+  "errorCannotReload": { "message": "此文档无法重新加载。请重新打开文件、文件夹或网址。" },
+  "errorSnapshotUnavailable": { "message": "捕获的文档已不再可用。请重新打开 Markdown 文件或使用“打开文件”。" },
+  "statusLoadingUrl": {
+    "message": "正在加载 $URL$…",
+    "placeholders": { "url": { "content": "$1", "example": "https://example.com/README.md" } }
+  },
+  "statusLoaded": {
+    "message": "已加载 $NAME$。",
+    "placeholders": { "name": { "content": "$1", "example": "README.md" } }
+  },
+  "statusUnsupportedFormat": {
+    "message": "不支持的格式：$FORMAT$。",
+    "placeholders": { "format": { "content": "$1", "example": "binary" } }
+  },
+  "docTitleUntitled": { "message": "未命名" },
+  "sourceDroppedFile": {
+    "message": "拖放的文件：$NAME$",
+    "placeholders": { "name": { "content": "$1", "example": "README.md" } }
+  },
+  "sourceDroppedFileGeneric": { "message": "拖放的文件" },
+  "sourceLocalFile": {
+    "message": "本地文件：$NAME$",
+    "placeholders": { "name": { "content": "$1", "example": "README.md" } }
+  },
+  "sourceLocalFileGeneric": { "message": "本地文件" },
+  "tocNoHeadingsFound": { "message": "此文档中找不到标题。" },
+  "outlineTabCount": {
+    "message": "大纲（$COUNT$）",
+    "placeholders": { "count": { "content": "$1", "example": "12" } }
+  },
+  "tocChangedFiles": { "message": "已更改的文件" },
+  "tocNoChangedFiles": { "message": "此 Diff 中找不到已更改的文件。" },
+  "changesTabCount": {
+    "message": "更改（$COUNT$）",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "symbolsTitle": { "message": "符号" },
+  "tocNoSymbols": { "message": "此源代码文件中找不到符号。" },
+  "symbolsTabCount": {
+    "message": "符号（$COUNT$）",
+    "placeholders": { "count": { "content": "$1", "example": "8" } }
+  },
+  "a11yCollapseSection": {
+    "message": "折叠 $NAME$",
+    "placeholders": { "name": { "content": "$1", "example": "Getting Started" } }
+  },
+  "a11yExpandSection": {
+    "message": "展开 $NAME$",
+    "placeholders": { "name": { "content": "$1", "example": "Getting Started" } }
+  },
+  "tocNoMatchingFiles": { "message": "没有匹配的文件。" },
+  "tocNoMatchingSymbols": { "message": "没有匹配的符号。" },
+  "tocNoMatchingHeadings": { "message": "没有匹配的标题。" },
+  "tocEmptyGeneric": { "message": "打开 Markdown、源代码或 Diff 文件以显示大纲。" },
+  "a11yFloatingOutlinePinned": { "message": "浮动大纲已固定" },
+  "a11yHideFloatingOutline": { "message": "隐藏浮动大纲" },
+  "fileUrlEnabledViewer": { "message": "已启用。file:// 的 Markdown 网址可自动打开。" },
+  "fileUrlDisabledViewer": { "message": "未启用。建议：使用“打开文件／打开文件夹”。高级：启用 Chrome 文件网址访问。" },
+  "statusSettingsOpened": { "message": "Chrome 已打开扩展程序设置页面。请启用“允许访问文件网址”，然后返回此处。" },
+  "statusCopiedSettingsLink": {
+    "message": "已复制设置链接：$URL$",
+    "placeholders": { "url": { "content": "$1", "example": "chrome://extensions/?id=..." } }
+  },
+  "errorFileUrlBlocked": {
+    "message": "$MESSAGE$\n\nChrome 会阻止 file:// 网址访问，直到您启用“允许访问文件网址”为止。您也可以使用“打开文件”或“打开文件夹”，无需更改此 Chrome 设置。",
+    "placeholders": { "message": { "content": "$1", "example": "Failed to fetch" } }
+  },
+
+  "symbolClass": { "message": "类" },
+  "symbolInterface": { "message": "接口" },
+  "symbolMethod": { "message": "方法" },
+  "symbolFunction": { "message": "函数" },
+  "symbolType": { "message": "类型" },
+  "symbolEnum": { "message": "枚举" },
+  "symbolModule": { "message": "模块" },
+  "symbolGeneric": { "message": "符号" },
+
+  "diffNoContent": { "message": "找不到 Diff 内容。" },
+  "diffNoHunks": { "message": "此 Diff 文件中没有更改块。" },
+  "diffFileFallback": { "message": "Diff 文件" },
+
+  "treeFolderFallback": { "message": "文件夹" },
+
+  "a11yCopyCode": { "message": "复制代码" },
+  "a11yCopied": { "message": "已复制" },
+  "a11yCopyFailed": { "message": "复制失败" },
+
+  "onboardingPageTitle": { "message": "欢迎使用 Dev File Viewer" },
+  "onboardingImgAlt": { "message": "Dev File Viewer — Markdown、Diff 与源代码查看器" },
+  "onboardingEyebrow": { "message": "Dev File Viewer V2.9.3" },
+  "onboardingHeroTitle": { "message": "预览 Markdown 与源代码文件，无需将文件发送到任何地方。" },
+  "onboardingLead": { "message": "本地 Markdown 与源代码文件请使用“打开文件”或“打开文件夹”。只有当您希望 Chrome 自动用此扩展程序打开本地开发者文件链接时，才需要启用 file:// 网址访问。" },
+  "onboardingOpenViewer": { "message": "打开查看器" },
+  "onboardingOpenSettings": { "message": "打开扩展程序设置" },
+  "onboardingBadgeRecommended": { "message": "推荐" },
+  "onboardingRecommendedTitle": { "message": "打开文件／打开文件夹" },
+  "onboardingRecommendedBody": { "message": "这是最简单的本地文件流程。用户选择文件或文件夹后，Dev File Viewer 仅读取所选的内容。" },
+  "onboardingRecommendedLi1": { "message": "无需 file:// 设置" },
+  "onboardingRecommendedLi2": { "message": "适合非技术用户" },
+  "onboardingRecommendedLi3": { "message": "最适合注重隐私的本地预览" },
+  "onboardingBadgeAdvanced": { "message": "高级" },
+  "onboardingAdvancedTitle": { "message": "自动 file:// 网址预览" },
+  "onboardingAdvancedStatus": { "message": "正在检查当前的权限状态…" },
+  "onboardingStep1": { "message": "打开扩展程序设置页面。" },
+  "onboardingStep2Pre": { "message": "启用" },
+  "onboardingAllowFileUrls": { "message": "允许访问文件网址" },
+  "onboardingStep2Post": { "message": "。" },
+  "onboardingStep3": { "message": "再次打开本地支持的 Markdown 或源代码文件链接。" },
+  "onboardingCopySettingsLink": { "message": "复制设置链接" },
+  "onboardingFeaturesTitle": { "message": "V2.9.3 包含" },
+  "featureMarkdownRender": { "message": "Markdown 渲染" },
+  "featureSourceViewer": { "message": "源代码查看器" },
+  "featureMarkdownTables": { "message": "Markdown 表格" },
+  "featureMermaid": { "message": "Mermaid 图表" },
+  "featureFolderSidebar": { "message": "本地文件夹侧边栏" },
+  "featureOffline": { "message": "纯离线运行" },
+  "featureNoTracking": { "message": "无跟踪" },
+  "onboardingFileUrlEnabled": { "message": "已启用。Dev File Viewer 可自动预览支持的 file:// Markdown 网址。" },
+  "onboardingFileUrlDisabled": { "message": "未启用。此为可选项；“打开文件”与“打开文件夹”无需此设置即可运行。" }
+}

@@ -1,4 +1,7 @@
 import { copyExtensionSettingsUrl, isFileUrlAccessAllowed, openExtensionSettings } from '../core/browser/fileUrlAccess.js';
+import { localizeDocument, t } from '../core/i18n/i18n.js';
+
+localizeDocument();
 
 function viewerUrl() {
   return chrome.runtime.getURL('viewer/index.html');
@@ -11,8 +14,8 @@ async function refreshFileUrlStatus() {
 
   card.dataset.state = isAllowed ? 'enabled' : 'disabled';
   status.textContent = isAllowed
-    ? 'Enabled. Dev File Viewer can automatically preview supported file:// Markdown URLs.'
-    : 'Not enabled. This is optional; Open File and Open Folder work without this setting.';
+    ? t('onboardingFileUrlEnabled')
+    : t('onboardingFileUrlDisabled');
 }
 
 document.querySelector('#open-viewer').addEventListener('click', async () => {
@@ -25,7 +28,7 @@ document.querySelector('#copy-settings-link').addEventListener('click', async ()
   const status = document.querySelector('#file-url-status');
   try {
     const url = await copyExtensionSettingsUrl();
-    status.textContent = `Copied: ${url}`;
+    status.textContent = t('statusCopied', [url]);
   } catch (error) {
     status.textContent = error?.message || String(error);
   }

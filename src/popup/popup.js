@@ -1,4 +1,7 @@
 import { copyExtensionSettingsUrl, isFileUrlAccessAllowed, openExtensionSettings } from '../core/browser/fileUrlAccess.js';
+import { localizeDocument, t } from '../core/i18n/i18n.js';
+
+localizeDocument();
 
 const SNAPSHOT_PREFIX = 'sourceSnapshot:';
 
@@ -55,8 +58,8 @@ async function refreshFileUrlStatus() {
 
   card.dataset.state = isAllowed ? 'enabled' : 'disabled';
   status.textContent = isAllowed
-    ? 'Enabled. file:// Markdown and source links can open automatically.'
-    : 'Not enabled. Use Open File/Open Folder, or enable this for automatic file:// links.';
+    ? t('popupFileUrlEnabled')
+    : t('popupFileUrlDisabled');
 }
 
 document.querySelector('#open-current').addEventListener('click', async () => {
@@ -86,7 +89,7 @@ document.querySelector('#copy-settings-link').addEventListener('click', async ()
   const status = document.querySelector('#file-url-status');
   try {
     const url = await copyExtensionSettingsUrl();
-    status.textContent = `Copied: ${url}`;
+    status.textContent = t('statusCopied', [url]);
   } catch (error) {
     status.textContent = error?.message || String(error);
   }

@@ -1,3 +1,5 @@
+import { t } from '../i18n/i18n.js';
+
 export class DiffRenderer {
   render(diffText, targetElement) {
     targetElement.textContent = '';
@@ -11,7 +13,7 @@ export class DiffRenderer {
     if (!sections.length) {
       const empty = document.createElement('div');
       empty.className = 'diff-empty';
-      empty.textContent = 'No diff content found.';
+      empty.textContent = t('diffNoContent');
       wrapper.append(empty);
       targetElement.append(wrapper);
       return { files: [] };
@@ -141,7 +143,7 @@ export class DiffRenderer {
     if (!section.hunks.length) {
       const empty = document.createElement('div');
       empty.className = 'diff-empty';
-      empty.textContent = 'No hunks in this diff file.';
+      empty.textContent = t('diffNoHunks');
       root.append(empty);
       return {
         element: root,
@@ -233,7 +235,7 @@ function displayFileTitle(section) {
     const parts = gitLine.trim().split(/\s+/);
     return normalizeFileLabel(parts.at(-1) || gitLine.replace(/^diff --git\s+/, ''));
   }
-  return 'Diff file';
+  return t('diffFileFallback');
 }
 
 function parseHunkStart(header, sign) {

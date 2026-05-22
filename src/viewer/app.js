@@ -13,6 +13,7 @@ import { mermaidPlugin } from '../plugins/mermaidPlugin.js';
 import { copyExtensionSettingsUrl, isFileUrlAccessAllowed, openExtensionSettings } from '../core/browser/fileUrlAccess.js';
 import { buildHeadingIndex, buildHeadingTree, ensureHeadingAnchors } from '../core/toc/headingIndex.js';
 import { isLikelyBinaryFile } from '../core/format/binarySniff.js';
+import { localizeDocument, t } from '../core/i18n/i18n.js';
 
 const SCROLL_ENABLED_KEY = 'devFileViewer:rememberScrollEnabled';
 const SCROLL_POSITIONS_KEY = 'devFileViewer:scrollPositions';
@@ -138,6 +139,7 @@ class DevFileViewerApp {
   }
 
   async start() {
+    localizeDocument();
     await this.plugins.init();
     await this.restoreTheme();
     await this.restoreContentWidth();
@@ -310,17 +312,17 @@ class DevFileViewerApp {
     button.setAttribute('aria-pressed', String(hasHeadings && floatingVisible));
 
     if (!hasHeadings) {
-      button.title = 'No headings in this document';
-      button.setAttribute('aria-label', 'No headings in this document');
+      button.title = t('popoutNoHeadings');
+      button.setAttribute('aria-label', t('popoutNoHeadings'));
     } else if (this.tocPopoverPinned) {
-      button.title = 'Floating outline is pinned';
-      button.setAttribute('aria-label', 'Floating outline is pinned');
+      button.title = t('a11yFloatingOutlinePinned');
+      button.setAttribute('aria-label', t('a11yFloatingOutlinePinned'));
     } else if (this.outlinePopoutEnabled) {
-      button.title = 'Hide floating outline';
-      button.setAttribute('aria-label', 'Hide floating outline');
+      button.title = t('a11yHideFloatingOutline');
+      button.setAttribute('aria-label', t('a11yHideFloatingOutline'));
     } else {
-      button.title = 'Pop out outline';
-      button.setAttribute('aria-label', 'Pop out outline');
+      button.title = t('a11yPopOutOutline');
+      button.setAttribute('aria-label', t('a11yPopOutOutline'));
     }
   }
 
@@ -341,8 +343,8 @@ class DevFileViewerApp {
     this.elements.pinTocPopover.classList.toggle('is-active', this.tocPopoverPinned);
     this.elements.pinTocPopover.setAttribute('aria-pressed', String(this.tocPopoverPinned));
     this.elements.pinTocPopover.title = this.tocPopoverPinned
-      ? 'Unpin outline popover'
-      : 'Pin outline popover';
+      ? t('a11yUnpinOutlinePopover')
+      : t('a11yPinOutlinePopover');
     this.elements.pinTocPopover.setAttribute('aria-label', this.elements.pinTocPopover.title);
     this.updateOutlinePopoutControl();
   }
@@ -549,7 +551,7 @@ async setThemePreference(value) {
   }
   await chrome.storage.local.set({ [THEME_KEY]: this.themePreference });
   this.applyTheme();
-  this.setStatus(`Theme set to ${themeLabel(this.themePreference)}.`, 'success');
+  this.setStatus(t('statusThemeSet', [themeLabel(this.themePreference)]), 'success');
 }
 
 applyTheme() {
@@ -584,7 +586,7 @@ resolveTheme() {
   async setContentWidth(value) {
     this.applyContentWidth(value);
     await chrome.storage.local.set({ [CONTENT_WIDTH_KEY]: this.contentWidth });
-    this.setStatus(`Content width set to ${contentWidthLabel(this.contentWidth)}.`, 'info');
+    this.setStatus(t('statusContentWidthSet', [contentWidthLabel(this.contentWidth)]), 'info');
     await nextFrame();
   }
 
@@ -698,8 +700,8 @@ resolveTheme() {
     this.elements.sidebarResizer.setAttribute('aria-hidden', String(this.sidebarCollapsed));
     this.elements.sidebarResizer.tabIndex = this.sidebarCollapsed ? -1 : 0;
     this.elements.sidebarToggle.setAttribute('aria-expanded', String(!this.sidebarCollapsed));
-    this.elements.sidebarToggle.setAttribute('aria-label', this.sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar');
-    this.elements.sidebarToggle.title = this.sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar';
+    this.elements.sidebarToggle.setAttribute('aria-label', this.sidebarCollapsed ? t('a11yShowSidebar') : t('a11yHideSidebar'));
+    this.elements.sidebarToggle.title = this.sidebarCollapsed ? t('a11yShowSidebar') : t('a11yHideSidebar');
     this.elements.sidebar.setAttribute('aria-hidden', String(this.sidebarCollapsed));
 
     if (shouldPersist) {
@@ -724,9 +726,9 @@ resolveTheme() {
 
     if (this.rememberScrollEnabled) {
       await this.saveCurrentScrollPosition();
-      this.setStatus('Scroll position memory is enabled for this browser session only.', 'info');
+      this.setStatus(t('statusScrollEnabled'), 'info');
     } else {
-      this.setStatus('Scroll position memory is disabled. Files will open at the first line.', 'info');
+      this.setStatus(t('statusScrollDisabled'), 'info');
     }
   }
 
@@ -762,10 +764,10 @@ async handleWindowDrop(event) {
   this.setDropOverlayVisible(false);
 
   try {
-    this.setStatus('Opening dropped item ...', 'info');
+    this.setStatus(t('statusOpeningDropped'), 'info');
     const item = await this.resolveDroppedItem(event.dataTransfer);
     if (!item) {
-      this.setStatus('No supported file or folder was dropped.', 'warning');
+      this.setStatus(t('statusNoSupportedDropped'), 'warning');
       return;
     }
 
@@ -811,7 +813,7 @@ async handleWindowDrop(event) {
       return;
     }
 
-    this.setStatus('No supported file or folder was dropped.', 'warning');
+    this.setStatus(t('statusNoSupportedDropped'), 'warning');
   } catch (error) {
     this.setStatus(error?.message || String(error), 'error');
   }
@@ -879,7 +881,7 @@ async resolveDroppedItem(dataTransfer) {
 
 async loadDroppedFileDocument(file, options = {}) {
   if (options.forcePlainText && await isLikelyBinaryFile(file)) {
-    throw new Error(`Dropped file appears to be binary and cannot be opened as text: ${file.name}`);
+    throw new Error(t('errorDroppedBinary', [file.name]));
   }
 
   const doc = await this.fileSource.loadFromFile(file, options.handle ? { handle: options.handle } : {});
@@ -906,7 +908,7 @@ async openDroppedDirectoryHandle(handle) {
   this.elements.sidebarTools.open = false;
   this.elements.scrollMemoryCard.hidden = false;
   this.applySidebarTab('files');
-  this.setStatus('Dropped folder loaded. Select a supported developer file from the sidebar.', 'success');
+  this.setStatus(t('statusDroppedFolderLoaded'), 'success');
 }
 
 async openDroppedDirectoryEntry(entry) {
@@ -917,7 +919,7 @@ async openDroppedDirectoryEntry(entry) {
   this.elements.sidebarTools.open = false;
   this.elements.scrollMemoryCard.hidden = false;
   this.applySidebarTab('files');
-  this.setStatus('Dropped folder loaded. Select a supported developer file from the sidebar.', 'success');
+  this.setStatus(t('statusDroppedFolderLoaded'), 'success');
 }
 
   async loadFromLaunchParams() {
@@ -939,7 +941,7 @@ async openDroppedDirectoryEntry(entry) {
     const snapshot = stored[key];
 
     if (!snapshot) {
-      throw new Error('The captured document is no longer available. Reopen the Markdown file or use Open File.');
+      throw new Error(t('errorSnapshotUnavailable'));
     }
 
     const doc = {
@@ -960,7 +962,7 @@ async openDroppedDirectoryEntry(entry) {
   async openUrl(url, options = {}) {
     if (!url) return;
     try {
-      this.setStatus(`Loading ${url} ...`, 'info');
+      this.setStatus(t('statusLoadingUrl', [url]), 'info');
       const doc = await this.urlSource.load(url);
       await this.renderDocument(doc, { anchor: options.anchor || extractHash(url) });
     } catch (error) {
@@ -980,34 +982,34 @@ async openDroppedDirectoryEntry(entry) {
 
   async openLocalFolder() {
     try {
-      this.setStatus('Opening folder ...', 'info');
+      this.setStatus(t('statusOpeningFolder'), 'info');
       const { tree } = await this.directorySource.pickDirectory();
       this.renderDirectoryTree(tree);
       this.currentFolderLoaded = true;
       this.setFolderReloadEnabled(true);
-      this.clearViewerForFolder('Folder loaded. Select a supported developer file from the sidebar.');
+      this.clearViewerForFolder(t('statusFolderLoaded'));
       this.elements.sidebarTools.open = false;
       this.elements.scrollMemoryCard.hidden = false;
       this.applySidebarTab('files');
-      this.setStatus('Folder loaded. Select a supported developer file from the sidebar.', 'success');
+      this.setStatus(t('statusFolderLoaded'), 'success');
     } catch (error) {
       if (error?.name === 'AbortError') return;
       this.currentFolderLoaded = false;
       this.setFolderReloadEnabled(false);
-      this.directoryTree.showEmpty('Folder could not be opened.');
+      this.directoryTree.showEmpty(t('statusFolderCouldNotOpen'));
       this.setStatus(error?.message || String(error), 'error');
     }
   }
 
-clearViewerForFolder(message = 'Select a supported developer file from the sidebar.') {
+clearViewerForFolder(message = t('statusSelectFromSidebar')) {
   this.currentDoc = null;
   this.currentDocKey = '';
   this.clearSourceLineHighlight();
   this.clearToc();
   this.setDocumentReloadEnabled(false);
-  this.elements.title.textContent = 'No file selected';
+  this.elements.title.textContent = t('titleNoFileSelected');
   this.elements.source.textContent = message;
-  this.elements.format.textContent = 'Folder';
+  this.elements.format.textContent = t('formatFolder');
   this.elements.preview.classList.remove('source-code-body', 'diff-body');
   this.elements.preview.textContent = '';
   this.elements.viewerMain.scrollTop = 0;
@@ -1026,7 +1028,7 @@ clearViewerForFolder(message = 'Select a supported developer file from the sideb
 
   async reloadCurrentFolder() {
     if (!this.currentFolderLoaded || !this.directorySource.rootHandle) {
-      this.setStatus('No folder is currently open.', 'info');
+      this.setStatus(t('statusNoFolderOpen'), 'info');
       return;
     }
 
@@ -1034,7 +1036,7 @@ clearViewerForFolder(message = 'Select a supported developer file from the sideb
 
     try {
       this.setFolderReloadEnabled(false);
-      this.setStatus('Reloading folder ...', 'info');
+      this.setStatus(t('statusReloadingFolder'), 'info');
       const { tree } = await this.directorySource.reloadDirectory();
       this.renderDirectoryTree(tree);
       this.currentFolderLoaded = true;
@@ -1044,7 +1046,7 @@ clearViewerForFolder(message = 'Select a supported developer file from the sideb
         this.directoryTree.markActivePath(activePath);
       }
 
-      this.setStatus('Folder reloaded.', 'success');
+      this.setStatus(t('statusFolderReloaded'), 'success');
     } catch (error) {
       this.currentFolderLoaded = Boolean(this.directorySource.rootHandle);
       this.setFolderReloadEnabled(this.currentFolderLoaded);
@@ -1060,7 +1062,7 @@ clearViewerForFolder(message = 'Select a supported developer file from the sideb
 
 async reloadCurrentDocument() {
   if (!this.currentDoc) {
-    this.setStatus('No document is currently loaded.', 'info');
+    this.setStatus(t('statusNoDocumentLoaded'), 'info');
     return;
   }
 
@@ -1070,7 +1072,7 @@ async reloadCurrentDocument() {
 
   try {
     this.setDocumentReloadEnabled(false);
-    this.setStatus(`Reloading ${previousDoc.name || 'document'} ...`, 'info');
+    this.setStatus(t('statusReloadingDocument', [previousDoc.name || t('commonDocument')]), 'info');
 
     const doc = await this.reloadDocumentSource(previousDoc);
     await this.renderDocument(doc, hashAnchor ? { anchor: hashAnchor } : {});
@@ -1081,7 +1083,7 @@ async reloadCurrentDocument() {
       this.scheduleActiveHeadingUpdate();
     }
 
-    this.setStatus(`Reloaded ${doc.name || 'document'}.`, 'success');
+    this.setStatus(t('statusReloadedDocument', [doc.name || t('commonDocument')]), 'success');
   } catch (error) {
     this.currentDoc = previousDoc;
     this.setDocumentReloadEnabled(true);
@@ -1112,7 +1114,7 @@ async reloadDocumentSource(doc) {
     return this.urlSource.load(doc.url);
   }
 
-  throw new Error('This document cannot be reloaded. Open the file, folder, or URL again.');
+  throw new Error(t('errorCannotReload'));
 }
 
 setDocumentReloadEnabled(enabled) {
@@ -1157,7 +1159,7 @@ setDocumentReloadEnabled(enabled) {
     this.clearSourceLineHighlight();
 
     const format = doc.format || detectFormat(doc);
-    this.elements.title.textContent = doc.name || 'Untitled';
+    this.elements.title.textContent = doc.name || t('docTitleUntitled');
     this.elements.source.textContent = this.getDocumentSourceLabel(doc);
     this.elements.format.textContent = formatLabel(format);
     this.elements.preview.classList.toggle('source-code-body', format === FORMAT_IDS.SOURCE_CODE);
@@ -1182,7 +1184,7 @@ setDocumentReloadEnabled(enabled) {
       this.currentDocKey = this.getDocumentKey(doc);
       this.setDocumentReloadEnabled(true);
       await this.restoreOrResetScroll(doc, options);
-      this.setStatus(`Loaded ${doc.name || 'source file'}.`, 'success');
+      this.setStatus(t('statusLoaded', [doc.name || t('commonSourceFile')]), 'success');
       return;
     }
 
@@ -1202,7 +1204,7 @@ setDocumentReloadEnabled(enabled) {
       this.currentDocKey = this.getDocumentKey(doc);
       this.setDocumentReloadEnabled(true);
       await this.restoreOrResetScroll(doc, options);
-      this.setStatus(`Loaded ${doc.name || 'diff file'}.`, 'success');
+      this.setStatus(t('statusLoaded', [doc.name || t('commonDiffFile')]), 'success');
       return;
     }
 
@@ -1213,7 +1215,7 @@ setDocumentReloadEnabled(enabled) {
       this.currentDocKey = this.getDocumentKey(doc);
       this.setDocumentReloadEnabled(true);
       await this.restoreOrResetScroll(doc, options);
-      this.setStatus(`Unsupported format: ${format}.`, 'error');
+      this.setStatus(t('statusUnsupportedFormat', [format]), 'error');
       return;
     }
 
@@ -1233,7 +1235,7 @@ setDocumentReloadEnabled(enabled) {
     this.currentDocKey = this.getDocumentKey(doc);
     this.setDocumentReloadEnabled(true);
     await this.restoreOrResetScroll(doc, options);
-    this.setStatus(`Loaded ${doc.name || 'document'}.`, 'success');
+    this.setStatus(t('statusLoaded', [doc.name || t('commonDocument')]), 'success');
   }
 
   getDocumentKey(doc) {
@@ -1253,11 +1255,11 @@ setDocumentReloadEnabled(enabled) {
     if (doc.displayPath) return doc.displayPath;
 
     if (doc.sourceType === 'dropped-file') {
-      return doc.name ? `Dropped file: ${doc.name}` : 'Dropped file';
+      return doc.name ? t('sourceDroppedFile', [doc.name]) : t('sourceDroppedFileGeneric');
     }
 
     if (doc.sourceType === 'file') {
-      return doc.name ? `Local file: ${doc.name}` : 'Local file';
+      return doc.name ? t('sourceLocalFile', [doc.name]) : t('sourceLocalFileGeneric');
     }
 
     return doc.sourceType || '';
@@ -1338,8 +1340,8 @@ setDocumentReloadEnabled(enabled) {
     this.syncTocDepthControls();
 
     if (!this.headings.length) {
-      this.renderTocEmpty('No headings found in this document.');
-      this.elements.outlineTab.textContent = 'Outline';
+      this.renderTocEmpty(t('tocNoHeadingsFound'));
+      this.elements.outlineTab.textContent = t('outline');
       this.updateTocDepthVisibility();
       this.updateTocFilterVisibility();
       this.updateFloatingOutlineState();
@@ -1348,7 +1350,7 @@ setDocumentReloadEnabled(enabled) {
 
     this.renderTocContainer(this.elements.tocTree, 'panel');
     this.renderTocContainer(this.elements.tocPopoverTree, 'popover');
-    this.elements.outlineTab.textContent = `Outline (${this.headings.length})`;
+    this.elements.outlineTab.textContent = t('outlineTabCount', [String(this.headings.length)]);
     this.updateTocDepthVisibility();
     this.updateTocFilterVisibility();
     this.applyTocFilter();
@@ -1369,13 +1371,13 @@ buildDiffOutline(files, doc) {
   this.elements.tocPopoverTree.innerHTML = '';
   this.elements.tocFilter.value = '';
   this.elements.tocPopoverFilter.value = '';
-  this.updateTocTitle(doc, 'Changed files');
+  this.updateTocTitle(doc, t('tocChangedFiles'));
   this.elements.tocDepthRow.hidden = true;
   this.elements.tocPopoverDepthRow.hidden = true;
 
   if (!this.headingTree.nodes.length) {
-    this.renderTocEmpty('No changed files found in this diff.');
-    this.elements.outlineTab.textContent = 'Files';
+    this.renderTocEmpty(t('tocNoChangedFiles'));
+    this.elements.outlineTab.textContent = t('tabFiles');
     this.outlinePopoutEnabled = false;
     this.updateTocFilterVisibility();
     this.updateFloatingOutlineState();
@@ -1384,7 +1386,7 @@ buildDiffOutline(files, doc) {
 
   this.renderTocContainer(this.elements.tocTree, 'panel');
   this.renderTocContainer(this.elements.tocPopoverTree, 'popover');
-  this.elements.outlineTab.textContent = `Changes (${this.headings.length})`;
+  this.elements.outlineTab.textContent = t('changesTabCount', [String(this.headings.length)]);
   this.updateTocFilterVisibility();
   this.applyTocFilter();
   this.updateFloatingOutlineState();
@@ -1404,13 +1406,13 @@ buildSourceSymbols(doc, language) {
   this.elements.tocPopoverTree.innerHTML = '';
   this.elements.tocFilter.value = '';
   this.elements.tocPopoverFilter.value = '';
-  this.updateTocTitle(doc, 'Symbols');
+  this.updateTocTitle(doc, t('symbolsTitle'));
   this.elements.tocDepthRow.hidden = true;
   this.elements.tocPopoverDepthRow.hidden = true;
 
   if (!this.headingTree.nodes.length) {
-    this.renderTocEmpty('No symbols found in this source file.');
-    this.elements.outlineTab.textContent = 'Symbols';
+    this.renderTocEmpty(t('tocNoSymbols'));
+    this.elements.outlineTab.textContent = t('symbolsTitle');
     this.outlinePopoutEnabled = false;
     this.updateTocFilterVisibility();
     this.updateFloatingOutlineState();
@@ -1419,7 +1421,7 @@ buildSourceSymbols(doc, language) {
 
   this.renderTocContainer(this.elements.tocTree, 'panel');
   this.renderTocContainer(this.elements.tocPopoverTree, 'popover');
-  this.elements.outlineTab.textContent = `Symbols (${this.headings.length})`;
+  this.elements.outlineTab.textContent = t('symbolsTabCount', [String(this.headings.length)]);
   this.updateTocFilterVisibility();
   this.applyTocFilter();
   this.updateFloatingOutlineState();
@@ -1449,7 +1451,7 @@ renderTocContainer(container, context) {
     toggle.className = 'toc-disclosure';
     toggle.dataset.headingId = heading.id;
     toggle.dataset.tocContext = context;
-    toggle.setAttribute('aria-label', `Collapse ${heading.text}`);
+    toggle.setAttribute('aria-label', t('a11yCollapseSection', [heading.text]));
     toggle.setAttribute('aria-expanded', 'true');
     toggle.innerHTML = `
       <svg class="button-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
@@ -1530,7 +1532,7 @@ renderTocContainer(container, context) {
 
   const noMatch = document.createElement('div');
   noMatch.className = 'toc-empty toc-no-matches';
-  noMatch.textContent = this.outlineType === 'diff' ? 'No matching files.' : this.outlineType === 'source' ? 'No matching symbols.' : 'No matching headings.';
+  noMatch.textContent = this.outlineType === 'diff' ? t('tocNoMatchingFiles') : this.outlineType === 'source' ? t('tocNoMatchingSymbols') : t('tocNoMatchingHeadings');
   noMatch.hidden = true;
 
   container.append(list, noMatch);
@@ -1680,7 +1682,7 @@ collectTocDescendantIds(node, targetSet) {
         const expanded = query ? matchedAncestorIds.has(id) || !this.tocCollapsedIds.has(id) : !this.tocCollapsedIds.has(id);
         toggle.setAttribute('aria-expanded', String(expanded));
         const node = this.headingTree.byId.get(id);
-        toggle.setAttribute('aria-label', `${expanded ? 'Collapse' : 'Expand'} ${node?.text || 'section'}`);
+        toggle.setAttribute('aria-label', t(expanded ? 'a11yCollapseSection' : 'a11yExpandSection', [node?.text || t('commonSection')]));
       }
     }
   }
@@ -1695,16 +1697,16 @@ collectTocDescendantIds(node, targetSet) {
     this.tocFilterQuery = '';
     this.elements.tocFilter.value = '';
     this.elements.tocPopoverFilter.value = '';
-    this.renderTocEmpty('Open a Markdown, source, or diff file to show an outline.');
-    this.elements.outlineTab.textContent = 'Outline';
+    this.renderTocEmpty(t('tocEmptyGeneric'));
+    this.elements.outlineTab.textContent = t('outline');
     this.updateTocDepthVisibility();
     this.outlinePopoutEnabled = false;
     this.updateTocFilterVisibility();
-    this.updateTocTitle(null, 'On this page');
+    this.updateTocTitle(null, t('tocOnThisPage'));
     this.updateFloatingOutlineState();
   }
 
-  updateTocTitle(doc, label = 'On this page') {
+  updateTocTitle(doc, label = t('tocOnThisPage')) {
     const name = doc?.name || '';
     for (const titleElement of [this.elements.tocTitleLabel, this.elements.tocPopoverTitleLabel]) {
       if (titleElement) titleElement.textContent = label;
@@ -1808,20 +1810,20 @@ collectTocDescendantIds(node, targetSet) {
     const allowed = await isFileUrlAccessAllowed();
     this.elements.fileUrlCard.dataset.state = allowed ? 'enabled' : 'disabled';
     this.elements.fileUrlStatus.textContent = allowed
-      ? 'Enabled. file:// Markdown URLs can be opened automatically.'
-      : 'Not enabled. Recommended: use Open File/Open Folder. Advanced: enable Chrome file URL access.';
+      ? t('fileUrlEnabledViewer')
+      : t('fileUrlDisabledViewer');
     return allowed;
   }
 
   async openExtensionSettingsPage() {
     await openExtensionSettings();
-    this.setStatus('Chrome opened the extension settings page. Enable “Allow access to file URLs”, then return here.', 'info');
+    this.setStatus(t('statusSettingsOpened'), 'info');
   }
 
   async copySettingsUrl() {
     try {
       const url = await copyExtensionSettingsUrl();
-      this.setStatus(`Copied settings link: ${url}`, 'success');
+      this.setStatus(t('statusCopiedSettingsLink', [url]), 'success');
     } catch (error) {
       this.setStatus(error?.message || String(error), 'error');
     }
@@ -1847,7 +1849,7 @@ collectTocDescendantIds(node, targetSet) {
     const message = String(error?.message || error);
     if (url?.startsWith('file://')) {
       await this.refreshFileUrlAccessStatus();
-      this.setStatus(`${message}\n\nChrome blocks file:// URL access until you enable “Allow access to file URLs”. You can also use Open File or Open Folder without changing this Chrome setting.`, 'error');
+      this.setStatus(t('errorFileUrlBlocked', [message]), 'error');
     } else {
       this.setStatus(message, 'error');
     }
@@ -1863,14 +1865,14 @@ collectTocDescendantIds(node, targetSet) {
 
 function symbolKindLabel(kind) {
   switch (kind) {
-    case 'class': return 'class';
-    case 'interface': return 'iface';
-    case 'method': return 'meth';
-    case 'function': return 'fn';
-    case 'type': return 'type';
-    case 'enum': return 'enum';
-    case 'module': return 'mod';
-    default: return 'sym';
+    case 'class': return t('symbolClass');
+    case 'interface': return t('symbolInterface');
+    case 'method': return t('symbolMethod');
+    case 'function': return t('symbolFunction');
+    case 'type': return t('symbolType');
+    case 'enum': return t('symbolEnum');
+    case 'module': return t('symbolModule');
+    default: return t('symbolGeneric');
   }
 }
 
@@ -1926,22 +1928,22 @@ function fileFromDroppedEntry(fileEntry) {
 
 function themeLabel(value) {
   switch (value) {
-    case 'dark': return 'Dark';
-    case 'system': return 'System';
+    case 'dark': return t('themeDark');
+    case 'system': return t('themeSystem');
     case 'light':
     default:
-      return 'Light';
+      return t('themeLight');
   }
 }
 
 function contentWidthLabel(value) {
   switch (value) {
-    case 'narrow': return 'Narrow';
-    case 'wide': return 'Wide';
-    case 'full': return 'Full width';
+    case 'narrow': return t('contentWidthNarrow');
+    case 'wide': return t('contentWidthWide');
+    case 'full': return t('contentWidthFull');
     case 'comfortable':
     default:
-      return 'Comfortable';
+      return t('contentWidthComfortable');
   }
 }
 
