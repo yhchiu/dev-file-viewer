@@ -88,7 +88,17 @@
         </div>
 
         <section id="files-panel" class="sidebar-panel" role="tabpanel" aria-labelledby="tab-files">
-          <div class="sidebar-section-title">Directory</div>
+          <div class="sidebar-section-title files-section-title">
+            <span>Directory</span>
+            <button id="btn-reload-folder" class="sidebar-title-action" type="button" title="Reload folder" aria-label="Reload folder" hidden disabled>
+              <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M20 7v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M4 17v-5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M18.4 9A7 7 0 0 0 6.2 6.6L4 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M5.6 15A7 7 0 0 0 17.8 17.4L20 15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button>
+          </div>
           <div id="directory-tree" class="directory-tree empty">Select a folder to show supported files.</div>
         </section>
 
@@ -163,9 +173,19 @@
 
       <main id="viewer-main" class="viewer-main">
         <header class="toolbar">
-          <div>
+          <div class="doc-heading">
             <h1 id="doc-title">Dev File Viewer</h1>
-            <p id="doc-source">Open a Markdown or source file, folder, or URL.</p>
+            <div class="doc-source-row">
+              <button id="btn-reload-document" class="doc-source-action" type="button" title="Reload document" aria-label="Reload document" hidden disabled>
+                <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M20 7v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M4 17v-5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M18.4 9A7 7 0 0 0 6.2 6.6L4 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M5.6 15A7 7 0 0 0 17.8 17.4L20 15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
+              <p id="doc-source">Open a Markdown or source file, folder, or URL.</p>
+            </div>
           </div>
           <div class="toolbar-meta">
             <span id="doc-format">Markdown</span>
@@ -173,7 +193,7 @@
         </header>
 
         <section id="status" class="status info">
-V2.8.3 uses SVG controls for Outline pop-out/pin and places the floating Outline control in the viewer area.
+V2.8.6 uses SVG controls for Outline pop-out/pin and places the floating Outline control in the viewer area.
         </section>
 
         <article id="preview" class="markdown-body" tabindex="0"></article>

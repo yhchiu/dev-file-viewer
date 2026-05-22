@@ -23,6 +23,17 @@ export class DirectorySourceProvider {
     return { rootHandle: this.rootHandle, tree: this.tree };
   }
 
+  async reloadDirectory() {
+    if (!this.rootHandle) {
+      throw new Error('No folder is currently open.');
+    }
+
+    this.tree = await this.buildTree(this.rootHandle);
+    this.fileIndex = new Map();
+    this.indexTree(this.tree);
+    return { rootHandle: this.rootHandle, tree: this.tree };
+  }
+
   async buildTree(directoryHandle, path = '') {
     const node = {
       type: 'directory',

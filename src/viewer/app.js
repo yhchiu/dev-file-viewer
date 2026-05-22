@@ -43,6 +43,7 @@ class DevFileViewerApp {
       sidebar: document.querySelector('#sidebar'),
       title: document.querySelector('#doc-title'),
       source: document.querySelector('#doc-source'),
+      reloadDocument: document.querySelector('#btn-reload-document'),
       format: document.querySelector('#doc-format'),
       status: document.querySelector('#status'),
       preview: document.querySelector('#preview'),
@@ -60,6 +61,7 @@ class DevFileViewerApp {
       rememberScroll: document.querySelector('#remember-scroll'),
       openFile: document.querySelector('#btn-open-file'),
       openFolder: document.querySelector('#btn-open-folder'),
+      reloadFolder: document.querySelector('#btn-reload-folder'),
       openUrl: document.querySelector('#btn-open-url'),
       urlBox: document.querySelector('#url-box'),
       urlInput: document.querySelector('#url-input'),
@@ -104,6 +106,7 @@ class DevFileViewerApp {
 
     this.currentDoc = null;
     this.currentDocKey = '';
+    this.currentFolderLoaded = false;
     this.rememberScrollEnabled = false;
     this.scrollPositions = {};
     this.scrollSaveTimer = 0;
@@ -165,7 +168,9 @@ class DevFileViewerApp {
     this.elements.sidebarResizer.addEventListener('keydown', event => this.handleSidebarResizeKey(event));
     this.elements.sidebarResizer.addEventListener('dblclick', () => this.resetSidebarWidth());
     this.elements.openFile.addEventListener('click', () => this.openLocalFile());
+    this.elements.reloadDocument.addEventListener('click', () => this.reloadCurrentDocument());
     this.elements.openFolder.addEventListener('click', () => this.openLocalFolder());
+    this.elements.reloadFolder.addEventListener('click', () => this.reloadCurrentFolder());
     this.elements.openUrl.addEventListener('click', () => {
       this.elements.urlBox.hidden = !this.elements.urlBox.hidden;
       if (!this.elements.urlBox.hidden) this.elements.urlInput.focus();
@@ -778,24 +783,129 @@ resolveTheme() {
     try {
       this.setStatus('Opening folder ...', 'info');
       const { tree } = await this.directorySource.pickDirectory();
-      this.directoryTree.render(tree, async fileNode => {
-        try {
-          const doc = await this.createDirectoryDocument(fileNode);
-          await this.renderDocument(doc);
-        } catch (error) {
-          this.setStatus(error?.message || String(error), 'error');
-        }
-      });
+      this.renderDirectoryTree(tree);
+      this.currentFolderLoaded = true;
+      this.setFolderReloadEnabled(true);
       this.elements.sidebarTools.open = false;
       this.elements.scrollMemoryCard.hidden = false;
       this.applySidebarTab('files');
       this.setStatus('Folder loaded. Select a supported developer file from the sidebar.', 'success');
     } catch (error) {
       if (error?.name === 'AbortError') return;
+      this.currentFolderLoaded = false;
+      this.setFolderReloadEnabled(false);
       this.directoryTree.showEmpty('Folder could not be opened.');
       this.setStatus(error?.message || String(error), 'error');
     }
   }
+
+  renderDirectoryTree(tree) {
+    this.directoryTree.render(tree, async fileNode => {
+      try {
+        const doc = await this.createDirectoryDocument(fileNode);
+        await this.renderDocument(doc);
+      } catch (error) {
+        this.setStatus(error?.message || String(error), 'error');
+      }
+    });
+  }
+
+  async reloadCurrentFolder() {
+    if (!this.currentFolderLoaded || !this.directorySource.rootHandle) {
+      this.setStatus('No folder is currently open.', 'info');
+      return;
+    }
+
+    const activePath = this.directoryTree.activePath;
+
+    try {
+      this.setFolderReloadEnabled(false);
+      this.setStatus('Reloading folder ...', 'info');
+      const { tree } = await this.directorySource.reloadDirectory();
+      this.renderDirectoryTree(tree);
+      this.currentFolderLoaded = true;
+      this.setFolderReloadEnabled(true);
+
+      if (activePath) {
+        this.directoryTree.markActivePath(activePath);
+      }
+
+      this.setStatus('Folder reloaded.', 'success');
+    } catch (error) {
+      this.currentFolderLoaded = Boolean(this.directorySource.rootHandle);
+      this.setFolderReloadEnabled(this.currentFolderLoaded);
+      this.setStatus(error?.message || String(error), 'error');
+    }
+  }
+
+  setFolderReloadEnabled(enabled) {
+    if (!this.elements.reloadFolder) return;
+    this.elements.reloadFolder.hidden = !enabled;
+    this.elements.reloadFolder.disabled = !enabled;
+  }
+
+async reloadCurrentDocument() {
+  if (!this.currentDoc) {
+    this.setStatus('No document is currently loaded.', 'info');
+    return;
+  }
+
+  const previousDoc = this.currentDoc;
+  const previousScrollTop = this.elements.viewerMain.scrollTop;
+  const hashAnchor = extractHash(window.location.hash);
+
+  try {
+    this.setDocumentReloadEnabled(false);
+    this.setStatus(`Reloading ${previousDoc.name || 'document'} ...`, 'info');
+
+    const doc = await this.reloadDocumentSource(previousDoc);
+    await this.renderDocument(doc, hashAnchor ? { anchor: hashAnchor } : {});
+
+    if (!hashAnchor) {
+      await nextFrame();
+      this.elements.viewerMain.scrollTop = previousScrollTop;
+      this.scheduleActiveHeadingUpdate();
+    }
+
+    this.setStatus(`Reloaded ${doc.name || 'document'}.`, 'success');
+  } catch (error) {
+    this.currentDoc = previousDoc;
+    this.setDocumentReloadEnabled(true);
+    this.setStatus(error?.message || String(error), 'error');
+  }
+}
+
+async reloadDocumentSource(doc) {
+  if (doc.sourceType === 'directory-file' && doc.path) {
+    const { doc: reloadedDoc, node } = await this.directorySource.loadPath(doc.path);
+    this.directoryTree.markActivePath(node.path);
+    return reloadedDoc;
+  }
+
+  if (doc.handle) {
+    const reloadedDoc = await this.fileSource.loadFromHandle(doc.handle);
+    reloadedDoc.sourceType = doc.sourceType || 'file';
+    return reloadedDoc;
+  }
+
+  if (doc.file) {
+    const reloadedDoc = await this.fileSource.loadFromFile(doc.file);
+    reloadedDoc.sourceType = doc.sourceType || 'file';
+    return reloadedDoc;
+  }
+
+  if (doc.url) {
+    return this.urlSource.load(doc.url);
+  }
+
+  throw new Error('This document cannot be reloaded. Open the file, folder, or URL again.');
+}
+
+setDocumentReloadEnabled(enabled) {
+  if (!this.elements.reloadDocument) return;
+  this.elements.reloadDocument.hidden = !enabled;
+  this.elements.reloadDocument.disabled = !enabled;
+}
 
   async createDirectoryDocument(fileNode) {
     const doc = await this.directorySource.loadFileNode(fileNode);
@@ -856,6 +966,7 @@ resolveTheme() {
       }
       this.currentDoc = doc;
       this.currentDocKey = this.getDocumentKey(doc);
+      this.setDocumentReloadEnabled(true);
       await this.restoreOrResetScroll(doc, options);
       this.setStatus(`Loaded ${doc.name || 'source file'}.`, 'success');
       return;
@@ -875,6 +986,7 @@ resolveTheme() {
       }
       this.currentDoc = doc;
       this.currentDocKey = this.getDocumentKey(doc);
+      this.setDocumentReloadEnabled(true);
       await this.restoreOrResetScroll(doc, options);
       this.setStatus(`Loaded ${doc.name || 'diff file'}.`, 'success');
       return;
@@ -885,6 +997,7 @@ resolveTheme() {
       this.clearToc();
       this.currentDoc = doc;
       this.currentDocKey = this.getDocumentKey(doc);
+      this.setDocumentReloadEnabled(true);
       await this.restoreOrResetScroll(doc, options);
       this.setStatus(`Unsupported format: ${format}.`, 'error');
       return;
@@ -904,6 +1017,7 @@ resolveTheme() {
 
     this.currentDoc = doc;
     this.currentDocKey = this.getDocumentKey(doc);
+    this.setDocumentReloadEnabled(true);
     await this.restoreOrResetScroll(doc, options);
     this.setStatus(`Loaded ${doc.name || 'document'}.`, 'success');
   }
