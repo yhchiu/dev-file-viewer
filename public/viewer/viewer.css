@@ -201,6 +201,10 @@ input, select { width: 100%; border: 1px solid var(--line); border-radius: 10px;
 .toc-disclosure.is-placeholder { visibility: hidden; pointer-events: none; }
 .toc-disclosure .button-icon { width: 14px; height: 14px; transition: transform .15s ease; }
 .toc-disclosure[aria-expanded="true"] .button-icon { transform: rotate(90deg); }
+/* Leaf sitting among chevroned siblings: show a subtle dot for equal visual weight. */
+.toc-disclosure.is-mixed-leaf { visibility: visible; }
+.toc-disclosure.is-mixed-leaf .button-icon { display: none; }
+.toc-disclosure.is-mixed-leaf::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: currentColor; opacity: .4; }
 .toc-item { display: block; min-width: 0; border-radius: 9px; padding: 6px 8px; color: var(--muted); text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.35; }
 .toc-item:hover { color: var(--accent); background: var(--accent-soft); text-decoration: none; }
 .toc-item.is-active { color: var(--accent); background: var(--accent-soft); font-weight: 800; }

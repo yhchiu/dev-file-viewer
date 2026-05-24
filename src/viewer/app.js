@@ -1435,6 +1435,14 @@ renderTocContainer(container, context) {
   list.className = 'toc-list toc-tree-list';
   list.dataset.tocContext = context;
 
+  // Parent ids that have at least one expandable (chevron) child. A childless
+  // heading sharing one of these parents sits among chevroned siblings, so it
+  // gets a leaf dot to keep equal visual weight (see immediateParentId()).
+  const parentsWithExpandableChild = new Set();
+  for (const node of this.headingTree.nodes) {
+    if (node.hasChildren) parentsWithExpandableChild.add(immediateParentId(node));
+  }
+
   for (const heading of this.headingTree.nodes) {
     const row = document.createElement('div');
     row.className = `toc-row toc-level-${heading.level}`;
@@ -1460,6 +1468,9 @@ renderTocContainer(container, context) {
     `;
     if (!heading.hasChildren) {
       toggle.classList.add('is-placeholder');
+      if (parentsWithExpandableChild.has(immediateParentId(heading))) {
+        toggle.classList.add('is-mixed-leaf');
+      }
       toggle.disabled = true;
       toggle.setAttribute('aria-hidden', 'true');
       toggle.removeAttribute('aria-label');
@@ -1862,6 +1873,11 @@ collectTocDescendantIds(node, targetSet) {
   }
 }
 
+
+function immediateParentId(node) {
+  const parentIds = node?.parentIds;
+  return parentIds?.length ? parentIds[parentIds.length - 1] : '';
+}
 
 function symbolKindLabel(kind) {
   switch (kind) {
