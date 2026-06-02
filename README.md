@@ -68,6 +68,32 @@ npm run build
 
 Then open `chrome://extensions`, enable **Developer mode**, click **Load unpacked**, and select the generated `dist/` folder.
 
+## Testing
+
+Install dependencies first:
+
+```bash
+npm install
+```
+
+Run the unit test suite:
+
+```bash
+npm test
+```
+
+Use watch mode while developing:
+
+```bash
+npm run test:watch
+```
+
+Generate a coverage report:
+
+```bash
+npm run test:coverage
+```
+
 ## Usage
 
 - Open a remote Markdown URL, then use the extension popup or context menu.
