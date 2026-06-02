@@ -116,8 +116,15 @@ input, select { width: 100%; border: 1px solid var(--line); border-radius: 10px;
 .directory-tree.empty { color: var(--muted); padding: 10px; border: 1px dashed var(--line); border-radius: 12px; }
 .tree-root, .tree-children { list-style: none; padding-left: 0; margin: 0; }
 .tree-children { padding-left: 14px; }
+.tree-children[hidden] { display: none; }
 .tree-node { margin: 2px 0; }
-.tree-folder { color: var(--muted); font-weight: 750; padding: 4px 0; }
+.tree-folder-row { display: grid; grid-template-columns: 22px minmax(0, 1fr); align-items: center; gap: 2px; min-width: 0; }
+.tree-disclosure { width: 22px; height: 28px; padding: 0; border: 0; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; background: transparent; color: var(--muted); cursor: pointer; }
+.tree-disclosure:hover { color: var(--accent); background: var(--accent-soft); }
+.tree-disclosure .button-icon { width: 14px; height: 14px; transition: transform .15s ease; }
+.tree-disclosure[aria-expanded="true"] .button-icon { transform: rotate(90deg); }
+.tree-folder { width: 100%; min-width: 0; display: block; text-align: left; border: 0; border-radius: 8px; padding: 5px 8px; background: transparent; color: var(--muted); font-weight: 750; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+.tree-folder:hover { color: var(--accent); background: var(--accent-soft); }
 .tree-file { width: 100%; display: block; text-align: left; border: 0; border-radius: 8px; padding: 5px 8px; background: transparent; color: var(--fg); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tree-file:hover, .tree-file.active { background: var(--accent-soft); color: var(--accent); }
 
@@ -1089,6 +1096,14 @@ body[data-theme="dark"],
 
 :root[data-theme="dark"] .tree-folder {
   color: var(--fg);
+  background: transparent;
+  border-color: transparent;
+}
+
+:root[data-theme="dark"] .tree-folder:hover {
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-color: #3b82f6;
 }
 
 :root[data-theme="dark"] .tree-file {
@@ -1104,6 +1119,7 @@ body[data-theme="dark"],
   border-color: #3b82f6;
 }
 
+:root[data-theme="dark"] .tree-disclosure:hover,
 :root[data-theme="dark"] .toc-disclosure:hover {
   color: var(--accent);
   background: var(--accent-soft);
