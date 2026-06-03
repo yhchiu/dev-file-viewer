@@ -30,8 +30,13 @@ describe('DirectoryTreeView', () => {
     expect(container.querySelector('.tree-disclosure[data-path="src"]').getAttribute('aria-expanded')).toBe('false');
     expect(container.querySelector('.tree-children[data-path=""]').hidden).toBe(false);
     expect(container.querySelector('.tree-children[data-path="src"]').hidden).toBe(true);
+    expect(container.querySelectorAll('.tree-arrow-icon')).toHaveLength(2);
+    expect(container.querySelectorAll('.tree-folder-icon-closed')).toHaveLength(2);
+    expect(container.querySelectorAll('.tree-folder-icon-open')).toHaveLength(2);
     const files = container.querySelectorAll('.tree-file');
     expect([...files].map(b => b.textContent)).toEqual(['a.js', 'README.md']);
+    expect(container.querySelectorAll('.tree-file-spacer')).toHaveLength(2);
+    expect(container.querySelectorAll('.tree-file-icon')).toHaveLength(2);
     expect(files[0].title).toBe('src/a.js');
   });
 
