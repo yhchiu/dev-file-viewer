@@ -270,13 +270,14 @@ class DevFileViewerApp {
     this.updateOutlinePopoutControl();
   }
 
-  updateFloatingOutlineState() {
+  updateFloatingOutlineState(options = {}) {
     const hasHeadings = this.headings.length > 0;
     if (!hasHeadings) {
       this.outlinePopoutEnabled = false;
     }
 
     const shouldShow = hasHeadings && (this.sidebarCollapsed || this.tocPopoverPinned || this.outlinePopoutEnabled);
+    const wasFloatingHidden = this.elements.floatingOutline.hidden;
     this.elements.floatingOutline.hidden = !shouldShow;
     this.updateOutlinePopoutControl();
 
@@ -286,7 +287,8 @@ class DevFileViewerApp {
     }
 
     this.reflowFloatingTocPosition();
-    if (this.tocPopoverPinned && !this.tocPopoverOpen) {
+    const shouldAutoOpen = options.openPopover || (this.sidebarCollapsed && wasFloatingHidden);
+    if ((this.tocPopoverPinned || shouldAutoOpen) && !this.tocPopoverOpen) {
       this.openTocPopover({ focus: false });
     }
   }
@@ -442,13 +444,10 @@ class DevFileViewerApp {
   getDefaultFloatingTocPosition() {
     const viewerRect = this.elements.viewerMain.getBoundingClientRect();
     const padding = 16;
-    let left = viewerRect.left + padding;
+    const buttonRect = this.elements.floatingOutline.getBoundingClientRect();
+    const buttonWidth = buttonRect.width || 92;
+    let left = viewerRect.right - padding - buttonWidth;
     let top = viewerRect.top + padding;
-
-    if (this.sidebarCollapsed && !this.elements.sidebarRestore.hidden) {
-      const restoreRect = this.elements.sidebarRestore.getBoundingClientRect();
-      left = Math.max(left, restoreRect.right + 8);
-    }
 
     return this.clampFloatingTocPosition({ left, top });
   }
@@ -705,6 +704,7 @@ resolveTheme() {
 
   async setSidebarCollapsed(collapsed, options = {}) {
     const shouldPersist = options.persist !== false;
+    const wasCollapsed = this.sidebarCollapsed;
     this.sidebarCollapsed = Boolean(collapsed);
     this.elements.app.classList.toggle('sidebar-collapsed', this.sidebarCollapsed);
     this.elements.sidebarRestore.hidden = !this.sidebarCollapsed;
@@ -720,7 +720,7 @@ resolveTheme() {
     }
 
     await nextFrame();
-    this.updateFloatingOutlineState();
+    this.updateFloatingOutlineState({ openPopover: !wasCollapsed && this.sidebarCollapsed });
   }
 
   async restoreScrollSettings() {

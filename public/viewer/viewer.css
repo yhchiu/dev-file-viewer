@@ -285,7 +285,7 @@ input, select { width: 100%; border: 1px solid var(--line); border-radius: 10px;
 .floating-outline {
   position: fixed;
   top: 16px;
-  left: 16px;
+  right: 16px;
   z-index: 21;
   min-height: 38px;
   padding: 0 14px;
@@ -338,7 +338,7 @@ input, select { width: 100%; border: 1px solid var(--line); border-radius: 10px;
 .toc-no-matches[hidden] { display: none; }
 
 @media (max-width: 820px) {
-  .floating-outline { top: 12px; left: 12px; min-height: 34px; padding: 0 12px; }
+  .floating-outline { top: 12px; right: 12px; min-height: 34px; padding: 0 12px; }
   .toc-popover { top: 54px; left: 12px; width: min(360px, calc(100vw - 24px)); max-height: 72vh; }
 }
 
