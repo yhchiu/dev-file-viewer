@@ -917,24 +917,24 @@ async loadDroppedFileDocument(file, options = {}) {
 }
 
 async openDroppedDirectoryHandle(handle) {
+  this.elements.sidebarTools.open = false;
   this.setDirectoryTreeLoading(t('statusOpeningFolder'));
   const { tree } = await this.directorySource.loadDirectoryHandle(handle);
   this.renderDirectoryTree(tree);
   this.currentFolderLoaded = true;
   this.setFolderReloadEnabled(true);
-  this.elements.sidebarTools.open = false;
   this.elements.scrollMemoryCard.hidden = false;
   this.applySidebarTab('files');
   this.setStatus(t('statusDroppedFolderLoaded'), 'success');
 }
 
 async openDroppedDirectoryEntry(entry) {
+  this.elements.sidebarTools.open = false;
   this.setDirectoryTreeLoading(t('statusOpeningFolder'));
   const { tree } = await this.directorySource.loadDirectoryEntry(entry);
   this.renderDirectoryTree(tree);
   this.currentFolderLoaded = true;
   this.setFolderReloadEnabled(true);
-  this.elements.sidebarTools.open = false;
   this.elements.scrollMemoryCard.hidden = false;
   this.applySidebarTab('files');
   this.setStatus(t('statusDroppedFolderLoaded'), 'success');
@@ -1007,13 +1007,15 @@ async openDroppedDirectoryEntry(entry) {
     try {
       this.setStatus(t('statusOpeningFolder'), 'info');
       const { tree } = await this.directorySource.pickDirectory({
-        onLoadStart: () => this.setDirectoryTreeLoading(t('statusOpeningFolder'))
+        onLoadStart: () => {
+          this.elements.sidebarTools.open = false;
+          this.setDirectoryTreeLoading(t('statusOpeningFolder'));
+        }
       });
       this.renderDirectoryTree(tree);
       this.currentFolderLoaded = true;
       this.setFolderReloadEnabled(true);
       this.clearViewerForFolder(t('statusFolderLoaded'));
-      this.elements.sidebarTools.open = false;
       this.elements.scrollMemoryCard.hidden = false;
       this.applySidebarTab('files');
       this.setStatus(t('statusFolderLoaded'), 'success');
