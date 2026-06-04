@@ -793,6 +793,7 @@ async handleWindowDrop(event) {
     }
 
     if (item.kind === 'file-handle') {
+      this.setViewerLoading(t('statusLoadingDocument', [item.handle.name || t('commonDocument')]));
       const file = await item.handle.getFile();
       const doc = await this.loadDroppedFileDocument(file, {
         handle: item.handle,
@@ -804,6 +805,7 @@ async handleWindowDrop(event) {
     }
 
     if (item.kind === 'file-entry') {
+      this.setViewerLoading(t('statusLoadingDocument', [item.entry.name || t('commonDocument')]));
       const file = await fileFromDroppedEntry(item.entry);
       const doc = await this.loadDroppedFileDocument(file, {
         forcePlainText: item.forcePlainText,
@@ -815,6 +817,7 @@ async handleWindowDrop(event) {
 
     if (item.kind === 'file') {
       const relativePath = item.file.webkitRelativePath || '';
+      this.setViewerLoading(t('statusLoadingDocument', [relativePath || item.file.name || t('commonDocument')]));
       const doc = await this.loadDroppedFileDocument(item.file, {
         forcePlainText: item.forcePlainText,
         relativePath,
@@ -826,6 +829,7 @@ async handleWindowDrop(event) {
 
     this.setStatus(t('statusNoSupportedDropped'), 'warning');
   } catch (error) {
+    this.clearViewerLoading();
     this.setStatus(error?.message || String(error), 'error');
   }
 }
@@ -973,19 +977,24 @@ async openDroppedDirectoryEntry(entry) {
   async openUrl(url, options = {}) {
     if (!url) return;
     try {
+      this.setViewerLoading();
       this.setStatus(t('statusLoadingUrl', [url]), 'info');
       const doc = await this.urlSource.load(url);
       await this.renderDocument(doc, { anchor: options.anchor || extractHash(url) });
     } catch (error) {
+      this.clearViewerLoading();
       await this.showLoadError(error, url);
     }
   }
 
   async openLocalFile() {
     try {
-      const doc = await this.fileSource.pickFile();
+      const doc = await this.fileSource.pickFile({
+        onLoadStart: name => this.setViewerLoading(t('statusLoadingDocument', [name || t('commonDocument')]))
+      });
       await this.renderDocument(doc);
     } catch (error) {
+      this.clearViewerLoading();
       if (error?.name === 'AbortError') return;
       this.setStatus(error?.message || String(error), 'error');
     }
@@ -1015,6 +1024,7 @@ async openDroppedDirectoryEntry(entry) {
 clearViewerForFolder(message = t('statusSelectFromSidebar')) {
   this.currentDoc = null;
   this.currentDocKey = '';
+  this.clearViewerLoading();
   this.clearSourceLineHighlight();
   this.clearToc();
   this.setDocumentReloadEnabled(false);
@@ -1029,9 +1039,11 @@ clearViewerForFolder(message = t('statusSelectFromSidebar')) {
   renderDirectoryTree(tree) {
     this.directoryTree.render(tree, async fileNode => {
       try {
+        this.setViewerLoading(t('statusLoadingDocument', [fileNode.name || t('commonDocument')]));
         const doc = await this.createDirectoryDocument(fileNode);
         await this.renderDocument(doc);
       } catch (error) {
+        this.clearViewerLoading();
         this.setStatus(error?.message || String(error), 'error');
       }
     });
@@ -1083,6 +1095,7 @@ async reloadCurrentDocument() {
 
   try {
     this.setDocumentReloadEnabled(false);
+    this.setViewerLoading(t('statusLoadingDocument', [previousDoc.name || t('commonDocument')]));
     this.setStatus(t('statusReloadingDocument', [previousDoc.name || t('commonDocument')]), 'info');
 
     const doc = await this.reloadDocumentSource(previousDoc);
@@ -1096,6 +1109,7 @@ async reloadCurrentDocument() {
 
     this.setStatus(t('statusReloadedDocument', [doc.name || t('commonDocument')]), 'success');
   } catch (error) {
+    this.clearViewerLoading();
     this.currentDoc = previousDoc;
     this.setDocumentReloadEnabled(true);
     this.setStatus(error?.message || String(error), 'error');
@@ -1151,6 +1165,7 @@ setDocumentReloadEnabled(enabled) {
         const targetPath = this.directorySource.resolveRelativePath(sourceDoc.path, linkData.href);
         if (!targetPath) return;
 
+        this.setViewerLoading();
         const { doc, node } = await this.directorySource.loadPath(targetPath);
         this.directoryTree.markActivePath(node.path);
         await this.renderDocument(doc, { anchor: extractHash(linkData.href) });
@@ -1161,92 +1176,112 @@ setDocumentReloadEnabled(enabled) {
         await this.openUrl(linkData.url);
       }
     } catch (error) {
+      this.clearViewerLoading();
       this.setStatus(error?.message || String(error), 'error');
     }
   }
 
   async renderDocument(doc, options = {}) {
-    await this.saveCurrentScrollPosition();
-    this.clearSourceLineHighlight();
+    this.setViewerLoading(t('statusLoadingDocument', [doc.name || t('commonDocument')]));
 
-    const format = doc.format || detectFormat(doc);
-    this.elements.title.textContent = doc.name || t('docTitleUntitled');
-    this.elements.source.textContent = this.getDocumentSourceLabel(doc);
-    this.elements.format.textContent = formatLabel(format);
-    this.elements.preview.classList.toggle('source-code-body', format === FORMAT_IDS.SOURCE_CODE);
-    this.elements.preview.classList.toggle('diff-body', format === FORMAT_IDS.DIFF);
+    try {
+      await this.saveCurrentScrollPosition();
+      this.clearSourceLineHighlight();
 
-    if (format === FORMAT_IDS.SOURCE_CODE) {
-      if (!this.sourceRenderer) this.sourceRenderer = new SourceCodeRenderer();
-      const sourceLanguage = doc.language || sourceLanguageFromPath(doc.name || doc.url || doc.path || '');
-      if (sourceLanguage === 'html') this.elements.format.textContent = 'HTML';
-      this.sourceRenderer.render(doc.text, this.elements.preview, {
-        language: sourceLanguage,
-        name: doc.name || '',
-        url: doc.url || '',
-        path: doc.path || ''
+      const format = doc.format || detectFormat(doc);
+      this.elements.title.textContent = doc.name || t('docTitleUntitled');
+      this.elements.source.textContent = this.getDocumentSourceLabel(doc);
+      this.elements.format.textContent = formatLabel(format);
+      this.elements.preview.classList.toggle('source-code-body', format === FORMAT_IDS.SOURCE_CODE);
+      this.elements.preview.classList.toggle('diff-body', format === FORMAT_IDS.DIFF);
+
+      if (format === FORMAT_IDS.SOURCE_CODE) {
+        if (!this.sourceRenderer) this.sourceRenderer = new SourceCodeRenderer();
+        const sourceLanguage = doc.language || sourceLanguageFromPath(doc.name || doc.url || doc.path || '');
+        if (sourceLanguage === 'html') this.elements.format.textContent = 'HTML';
+        this.sourceRenderer.render(doc.text, this.elements.preview, {
+          language: sourceLanguage,
+          name: doc.name || '',
+          url: doc.url || '',
+          path: doc.path || ''
+        });
+        this.buildSourceSymbols(doc, sourceLanguage);
+        if (doc.sourceType !== 'directory-file' && this.headings.length) {
+          this.applySidebarTab('outline');
+          this.elements.sidebarTools.open = false;
+        }
+        this.currentDoc = doc;
+        this.currentDocKey = this.getDocumentKey(doc);
+        this.setDocumentReloadEnabled(true);
+        await this.restoreOrResetScroll(doc, options);
+        this.setStatus(t('statusLoaded', [doc.name || t('commonSourceFile')]), 'success');
+        return;
+      }
+
+      if (format === FORMAT_IDS.DIFF) {
+        if (!this.diffRenderer) this.diffRenderer = new DiffRenderer();
+        const diffOutline = this.diffRenderer.render(doc.text, this.elements.preview, {
+          name: doc.name || '',
+          url: doc.url || '',
+          path: doc.path || ''
+        });
+        this.buildDiffOutline(diffOutline?.files || [], doc);
+        if (doc.sourceType !== 'directory-file' && diffOutline?.files?.length) {
+          this.applySidebarTab('outline');
+          this.elements.sidebarTools.open = false;
+        }
+        this.currentDoc = doc;
+        this.currentDocKey = this.getDocumentKey(doc);
+        this.setDocumentReloadEnabled(true);
+        await this.restoreOrResetScroll(doc, options);
+        this.setStatus(t('statusLoaded', [doc.name || t('commonDiffFile')]), 'success');
+        return;
+      }
+
+      if (format !== FORMAT_IDS.MARKDOWN) {
+        this.elements.preview.textContent = doc.text || '';
+        this.clearToc();
+        this.currentDoc = doc;
+        this.currentDocKey = this.getDocumentKey(doc);
+        this.setDocumentReloadEnabled(true);
+        await this.restoreOrResetScroll(doc, options);
+        this.setStatus(t('statusUnsupportedFormat', [format]), 'error');
+        return;
+      }
+
+      await this.markdown.render(doc.text, this.elements.preview, {
+        baseUrl: doc.baseUrl || doc.url || '',
+        onOpenDocumentLink: linkedUrl => this.openDocumentLink(linkedUrl, doc)
       });
-      this.buildSourceSymbols(doc, sourceLanguage);
+      ensureHeadingAnchors(this.elements.preview);
+      this.buildToc();
+      this.updateTocTitle(doc);
       if (doc.sourceType !== 'directory-file' && this.headings.length) {
         this.applySidebarTab('outline');
         this.elements.sidebarTools.open = false;
       }
+
       this.currentDoc = doc;
       this.currentDocKey = this.getDocumentKey(doc);
       this.setDocumentReloadEnabled(true);
       await this.restoreOrResetScroll(doc, options);
-      this.setStatus(t('statusLoaded', [doc.name || t('commonSourceFile')]), 'success');
-      return;
+      this.setStatus(t('statusLoaded', [doc.name || t('commonDocument')]), 'success');
+    } finally {
+      this.clearViewerLoading();
     }
+  }
 
-    if (format === FORMAT_IDS.DIFF) {
-      if (!this.diffRenderer) this.diffRenderer = new DiffRenderer();
-      const diffOutline = this.diffRenderer.render(doc.text, this.elements.preview, {
-        name: doc.name || '',
-        url: doc.url || '',
-        path: doc.path || ''
-      });
-      this.buildDiffOutline(diffOutline?.files || [], doc);
-      if (doc.sourceType !== 'directory-file' && diffOutline?.files?.length) {
-        this.applySidebarTab('outline');
-        this.elements.sidebarTools.open = false;
-      }
-      this.currentDoc = doc;
-      this.currentDocKey = this.getDocumentKey(doc);
-      this.setDocumentReloadEnabled(true);
-      await this.restoreOrResetScroll(doc, options);
-      this.setStatus(t('statusLoaded', [doc.name || t('commonDiffFile')]), 'success');
-      return;
-    }
+  setViewerLoading(message) {
+    const label = message || t('statusLoadingDocument', [t('commonDocument')]) || 'Loading document ...';
+    this.elements.preview.classList.add('is-loading');
+    this.elements.preview.dataset.loadingLabel = label;
+    this.elements.preview.setAttribute('aria-busy', 'true');
+  }
 
-    if (format !== FORMAT_IDS.MARKDOWN) {
-      this.elements.preview.textContent = doc.text || '';
-      this.clearToc();
-      this.currentDoc = doc;
-      this.currentDocKey = this.getDocumentKey(doc);
-      this.setDocumentReloadEnabled(true);
-      await this.restoreOrResetScroll(doc, options);
-      this.setStatus(t('statusUnsupportedFormat', [format]), 'error');
-      return;
-    }
-
-    await this.markdown.render(doc.text, this.elements.preview, {
-      baseUrl: doc.baseUrl || doc.url || '',
-      onOpenDocumentLink: linkedUrl => this.openDocumentLink(linkedUrl, doc)
-    });
-    ensureHeadingAnchors(this.elements.preview);
-    this.buildToc();
-    this.updateTocTitle(doc);
-    if (doc.sourceType !== 'directory-file' && this.headings.length) {
-      this.applySidebarTab('outline');
-      this.elements.sidebarTools.open = false;
-    }
-
-    this.currentDoc = doc;
-    this.currentDocKey = this.getDocumentKey(doc);
-    this.setDocumentReloadEnabled(true);
-    await this.restoreOrResetScroll(doc, options);
-    this.setStatus(t('statusLoaded', [doc.name || t('commonDocument')]), 'success');
+  clearViewerLoading() {
+    this.elements.preview.classList.remove('is-loading');
+    this.elements.preview.removeAttribute('aria-busy');
+    delete this.elements.preview.dataset.loadingLabel;
   }
 
   getDocumentKey(doc) {
@@ -1868,6 +1903,7 @@ collectTocDescendantIds(node, targetSet) {
   }
 
   async showLoadError(error, url) {
+    this.clearViewerLoading();
     const message = String(error?.message || error);
     if (url?.startsWith('file://')) {
       await this.refreshFileUrlAccessStatus();

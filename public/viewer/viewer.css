@@ -147,11 +147,55 @@ input, select { width: 100%; border: 1px solid var(--line); border-radius: 10px;
 .status.error { color: var(--danger); background: #fff7f6; border-color: #ffd6d1; }
 .status.success { color: var(--success); background: #f2fff8; border-color: #c9f0dc; }
 .status.info { color: var(--muted); }
-.markdown-body { width: min(100%, var(--markdown-body-width)); max-width: var(--markdown-body-width); min-width: 0; margin: 0 auto; background: var(--panel); border: 1px solid var(--line); box-shadow: var(--shadow); border-radius: 20px; padding: 34px; min-height: 64vh; overflow-x: auto; }
+.markdown-body { position: relative; width: min(100%, var(--markdown-body-width)); max-width: var(--markdown-body-width); min-width: 0; margin: 0 auto; background: var(--panel); border: 1px solid var(--line); box-shadow: var(--shadow); border-radius: 20px; padding: 34px; min-height: 64vh; overflow-x: auto; }
 .app-shell.content-width-full .toolbar,
 .app-shell.content-width-full .status,
 .app-shell.content-width-full .markdown-body { width: 100%; max-width: none; }
 .markdown-body:empty::before { content: "No document loaded."; color: var(--muted); }
+.markdown-body.is-loading { overflow: hidden; }
+.markdown-body.is-loading > * { opacity: .28; pointer-events: none; }
+.markdown-body.is-loading::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  top: calc(50% - 30px);
+  left: calc(50% - 15px);
+  width: 30px;
+  height: 30px;
+  border: 3px solid var(--line);
+  border-top-color: var(--accent);
+  border-radius: 999px;
+  animation: preview-loading-spin .8s linear infinite;
+}
+.markdown-body.is-loading::after {
+  content: attr(data-loading-label);
+  position: absolute;
+  z-index: 2;
+  top: calc(50% + 14px);
+  left: 50%;
+  max-width: calc(100% - 48px);
+  transform: translateX(-50%);
+  padding: 5px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.35;
+  text-align: center;
+  overflow-wrap: anywhere;
+  box-shadow: 0 8px 18px rgba(16, 24, 40, .08);
+}
+@keyframes preview-loading-spin {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .markdown-body.is-loading::before {
+    animation: none;
+    border-top-color: var(--line);
+  }
+}
 .markdown-body h1, .markdown-body h2, .markdown-body h3 { line-height: 1.25; margin-top: 1.5em; margin-bottom: .65em; }
 .markdown-body h1:first-child, .markdown-body h2:first-child, .markdown-body h3:first-child { margin-top: 0; }
 .markdown-body h1 { font-size: 2rem; padding-bottom: .25em; border-bottom: 1px solid var(--line); }

@@ -116,6 +116,10 @@
   "statusReloadingFolder": { "message": "正在重新載入資料夾…" },
   "statusFolderReloaded": { "message": "資料夾已重新載入。" },
   "statusNoDocumentLoaded": { "message": "目前沒有載入的文件。" },
+  "statusLoadingDocument": {
+    "message": "正在載入 $NAME$…",
+    "placeholders": { "name": { "content": "$1", "example": "README.md" } }
+  },
   "statusReloadingDocument": {
     "message": "正在重新載入 $NAME$…",
     "placeholders": { "name": { "content": "$1", "example": "README.md" } }

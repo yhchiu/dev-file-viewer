@@ -14,7 +14,7 @@ const SUPPORTED_EXTENSIONS = [
 ];
 
 export class FilePickerSourceProvider {
-  async pickFile() {
+  async pickFile(options = {}) {
     if ('showOpenFilePicker' in window) {
       const [handle] = await window.showOpenFilePicker({
         multiple: false,
@@ -33,10 +33,11 @@ export class FilePickerSourceProvider {
           }
         ]
       });
+      options.onLoadStart?.(handle.name);
       return this.loadFromHandle(handle);
     }
 
-    return this.pickFileWithInputFallback();
+    return this.pickFileWithInputFallback(options);
   }
 
   async loadFromHandle(handle) {
@@ -59,7 +60,7 @@ export class FilePickerSourceProvider {
     };
   }
 
-  pickFileWithInputFallback() {
+  pickFileWithInputFallback(options = {}) {
     return new Promise((resolve, reject) => {
       const input = document.createElement('input');
       input.type = 'file';
@@ -68,6 +69,7 @@ export class FilePickerSourceProvider {
         try {
           const file = input.files?.[0];
           if (!file) return reject(new Error('No file selected.'));
+          options.onLoadStart?.(file.name);
           resolve(await this.loadFromFile(file));
         } catch (error) {
           reject(error);

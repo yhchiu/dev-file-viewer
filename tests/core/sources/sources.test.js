@@ -78,6 +78,35 @@ describe('FilePickerSourceProvider.loadFromFile', () => {
   });
 });
 
+describe('FilePickerSourceProvider.pickFile', () => {
+  afterEach(() => {
+    delete window.showOpenFilePicker;
+  });
+
+  it('notifies when a selected file starts loading', async () => {
+    const calls = [];
+    const file = new File(['# hi'], 'readme.md', { type: 'text/markdown' });
+    const handle = {
+      name: 'readme.md',
+      getFile: vi.fn(async () => {
+        calls.push('getFile');
+        return file;
+      })
+    };
+    window.showOpenFilePicker = vi.fn(async () => {
+      calls.push('picker');
+      return [handle];
+    });
+
+    const doc = await new FilePickerSourceProvider().pickFile({
+      onLoadStart: name => calls.push(`load:${name}`)
+    });
+
+    expect(doc.name).toBe('readme.md');
+    expect(calls).toEqual(['picker', 'load:readme.md', 'getFile']);
+  });
+});
+
 // Minimal fakes for the File System Access API (showDirectoryPicker handles).
 function fileHandle(name) {
   return { kind: 'file', name, getFile: async () => new File([`// ${name}`], name) };

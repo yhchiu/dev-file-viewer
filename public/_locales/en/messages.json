@@ -116,6 +116,10 @@
   "statusReloadingFolder": { "message": "Reloading folder ..." },
   "statusFolderReloaded": { "message": "Folder reloaded." },
   "statusNoDocumentLoaded": { "message": "No document is currently loaded." },
+  "statusLoadingDocument": {
+    "message": "Loading $NAME$ ...",
+    "placeholders": { "name": { "content": "$1", "example": "README.md" } }
+  },
   "statusReloadingDocument": {
     "message": "Reloading $NAME$ ...",
     "placeholders": { "name": { "content": "$1", "example": "README.md" } }
