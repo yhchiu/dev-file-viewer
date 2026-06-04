@@ -1474,7 +1474,7 @@ renderTocContainer(container, context) {
     toggle.setAttribute('aria-expanded', 'true');
     toggle.innerHTML = `
       <svg class="button-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-        <path d="M5.75 3.5 10.25 8l-4.5 4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
       </svg>
     `;
     if (!heading.hasChildren) {
@@ -1888,13 +1888,13 @@ collectTocDescendantIds(node, targetSet) {
 function tocIconSvg(kind) {
   if (kind === 'folder') {
     return `<svg class="toc-item-icon toc-folder-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-      <path d="M1.75 4.25A1.25 1.25 0 0 1 3 3h3.15l1.25 1.35H13a1.25 1.25 0 0 1 1.25 1.25v6.15A1.25 1.25 0 0 1 13 13H3a1.25 1.25 0 0 1-1.25-1.25v-7.5Z" fill="currentColor" />
+      <path d="M2 5.25H6.25L7.75 6.75H14V12.5H2Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" />
     </svg>`;
   }
 
   return `<svg class="toc-item-icon toc-file-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-    <path d="M4 2.25h5.1L12 5.15v8.6H4V2.25Z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" />
-    <path d="M9 2.25V5.3h3" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" />
+    <path d="M3.75 2.25H9.25L12.25 5.25V13.75H3.75Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" />
+    <path d="M9.25 2.25V5.25H12.25" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" />
   </svg>`;
 }
 

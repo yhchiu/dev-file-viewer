@@ -38,7 +38,7 @@ export class DirectoryTreeView {
       disclosure.setAttribute('aria-label', t(collapsed ? 'a11yExpandSection' : 'a11yCollapseSection', [folderName]));
       disclosure.innerHTML = `
         <svg class="tree-arrow-icon" viewBox="0 0 12 12" aria-hidden="true" focusable="false">
-          <path d="M4 2.5 8 6 4 9.5z" fill="currentColor" />
+          <path d="M4.5 2.75 7.75 6 4.5 9.25" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
       `;
       disclosure.addEventListener('click', event => {
@@ -53,7 +53,7 @@ export class DirectoryTreeView {
       label.dataset.path = path;
       label.dataset.expanded = String(!collapsed);
       label.title = path || folderName;
-      label.innerHTML = '<svg class="tree-item-icon tree-folder-icon tree-folder-icon-closed" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M1.5 4h5l1.2 1.5h6.8v8H1.5z" fill="currentColor" opacity=".18" /><path d="M1.5 4h5l1.2 1.5h6.8v8H1.5z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" /><path d="M1.5 4v-1.4h5.1L7.8 4" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" /></svg><svg class="tree-item-icon tree-folder-icon tree-folder-icon-open" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M1.5 12.5V3.5h4.2l1.3 1.6h7v3" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round" /><path d="M1 13 2.9 6.8h12.6L13.6 13z" fill="currentColor" opacity=".18" /><path d="M1 13 2.9 6.8h12.6L13.6 13z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" /></svg><span class="tree-folder-label"></span>';
+      label.innerHTML = '<svg class="tree-item-icon tree-folder-icon tree-folder-icon-closed" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M2 5.25H6.25L7.75 6.75H14V12.5H2Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" /></svg><svg class="tree-item-icon tree-folder-icon tree-folder-icon-open" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M2.25 12.25V5H6.25L7.75 6.5H13.75V8.25" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" /><path d="M2.25 12.25 4 7.75H15.25L13.5 12.25Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" /></svg><span class="tree-folder-label"></span>';
       label.querySelector('.tree-folder-label').textContent = folderName;
       label.addEventListener('click', event => {
         event.preventDefault();
@@ -78,7 +78,7 @@ export class DirectoryTreeView {
     button.className = 'tree-file';
     button.title = node.path;
     button.dataset.path = node.path;
-    button.innerHTML = '<span class="tree-file-spacer" aria-hidden="true"></span><span class="tree-file-inner"><svg class="tree-item-icon tree-file-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M2.5 2.5h8.1l2.9 2.9v8.1h-11z" fill="currentColor" opacity=".12" /><path d="M2.5 2.5h8.1l2.9 2.9v8.1h-11z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" /><path d="M10.6 2.5v2.9h2.9" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" /></svg><span class="tree-file-label"></span></span>';
+    button.innerHTML = '<span class="tree-file-spacer" aria-hidden="true"></span><span class="tree-file-inner"><svg class="tree-item-icon tree-file-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.75 2.25H9.25L12.25 5.25V13.75H3.75Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" /><path d="M9.25 2.25V5.25H12.25" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" /></svg><span class="tree-file-label"></span></span>';
     button.querySelector('.tree-file-label').textContent = node.name;
     button.addEventListener('click', () => {
       this.activePath = node.path;
