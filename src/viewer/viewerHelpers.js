@@ -31,6 +31,7 @@ export function isSupportedDroppedName(name = '') {
   return Boolean(value) && (
     value.endsWith('.md') || value.endsWith('.mkd') || value.endsWith('.mdx') || value.endsWith('.markdown') ||
     value.endsWith('.diff') || value.endsWith('.patch') ||
+    value.endsWith('.txt') || value.endsWith('.text') ||
     value.endsWith('.js') || value.endsWith('.mjs') || value.endsWith('.cjs') || value.endsWith('.jsx') ||
     value.endsWith('.ts') || value.endsWith('.tsx') ||
     value.endsWith('.html') || value.endsWith('.htm') || value.endsWith('.css') ||

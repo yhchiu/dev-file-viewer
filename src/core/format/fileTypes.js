@@ -2,6 +2,8 @@ export const DOCUMENT_EXTENSIONS = new Set(['.md', '.mkd', '.mdx', '.markdown'])
 
 export const DIFF_EXTENSIONS = new Set(['.diff', '.patch']);
 
+export const TEXT_EXTENSIONS = new Set(['.txt', '.text']);
+
 export const SOURCE_CODE_EXTENSIONS = new Set([
   '.js', '.mjs', '.cjs', '.jsx',
   '.ts', '.tsx',
@@ -55,6 +57,7 @@ const EXTENSION_LANGUAGE_MAP = new Map([
 export const FORMAT_IDS = Object.freeze({
   MARKDOWN: 'markdown',
   SOURCE_CODE: 'source-code',
+  TEXT: 'text',
   UNKNOWN: 'unknown',
   DIFF: 'diff'
 });
@@ -80,12 +83,16 @@ export function isSupportedDiffFile(value = '') {
   return DIFF_EXTENSIONS.has(getExtension(value));
 }
 
+export function isSupportedTextFile(value = '') {
+  return TEXT_EXTENSIONS.has(getExtension(value));
+}
+
 export function isSupportedSourceCodeFile(value = '') {
   return SOURCE_CODE_EXTENSIONS.has(getExtension(value)) || SPECIAL_SOURCE_FILE_NAMES.has(getFileName(value).toLowerCase());
 }
 
 export function isSupportedViewerFile(value = '') {
-  return isSupportedDocumentFile(value) || isSupportedDiffFile(value) || isSupportedSourceCodeFile(value);
+  return isSupportedDocumentFile(value) || isSupportedDiffFile(value) || isSupportedSourceCodeFile(value) || isSupportedTextFile(value);
 }
 
 export function sourceLanguageFromPath(value = '') {
@@ -98,8 +105,46 @@ export function sourceLanguageFromPath(value = '') {
 export function formatLabel(format) {
   if (format === FORMAT_IDS.MARKDOWN) return 'Markdown';
   if (format === FORMAT_IDS.SOURCE_CODE) return 'Source';
+  if (format === FORMAT_IDS.TEXT) return 'Text';
   if (format === FORMAT_IDS.DIFF) return 'Diff';
   return 'Unknown';
+}
+
+export function detectLineEnding(text = '') {
+  const value = String(text || '');
+  let crlf = 0;
+  let lf = 0;
+  let cr = 0;
+
+  for (let index = 0; index < value.length; index += 1) {
+    const char = value[index];
+    if (char === '\r') {
+      if (value[index + 1] === '\n') {
+        crlf += 1;
+        index += 1;
+      } else {
+        cr += 1;
+      }
+      continue;
+    }
+
+    if (char === '\n') lf += 1;
+  }
+
+  const kinds = [crlf > 0, lf > 0, cr > 0].filter(Boolean).length;
+  if (kinds === 0) return 'none';
+  if (kinds > 1) return 'mixed';
+  if (crlf > 0) return 'crlf';
+  if (lf > 0) return 'lf';
+  return 'cr';
+}
+
+export function lineEndingLabel(lineEnding) {
+  if (lineEnding === 'crlf') return 'CRLF';
+  if (lineEnding === 'lf') return 'LF';
+  if (lineEnding === 'cr') return 'CR';
+  if (lineEnding === 'mixed') return 'Mixed EOL';
+  return 'No EOL';
 }
 
 export function detectFormat({ url = '', name = '', mimeType = '' } = {}) {
@@ -109,9 +154,11 @@ export function detectFormat({ url = '', name = '', mimeType = '' } = {}) {
   if (isSupportedDiffFile(target)) return FORMAT_IDS.DIFF;
   if (/^(text\/x-diff|text\/x-patch)$/i.test(String(mimeType).split(';', 1)[0])) return FORMAT_IDS.DIFF;
   if (isSupportedSourceCodeFile(target)) return FORMAT_IDS.SOURCE_CODE;
+  if (isSupportedTextFile(target)) return FORMAT_IDS.TEXT;
   if (/application\/(json|javascript|xml)|text\/(css|html|javascript|xml|x-python|x-go|x-c|x-c\+\+|x-java-source|x-shellscript)/i.test(mimeType)) {
     return FORMAT_IDS.SOURCE_CODE;
   }
+  if (/^text\/plain\b/i.test(mimeType)) return FORMAT_IDS.TEXT;
   return FORMAT_IDS.UNKNOWN;
 }
 

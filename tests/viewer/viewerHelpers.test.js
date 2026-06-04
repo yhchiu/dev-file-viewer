@@ -37,6 +37,8 @@ describe('isSupportedDroppedName', () => {
     expect(isSupportedDroppedName('Dockerfile')).toBe(true);
     expect(isSupportedDroppedName('.gitignore')).toBe(true);
     expect(isSupportedDroppedName('main.rs')).toBe(true);
+    expect(isSupportedDroppedName('notes.txt')).toBe(true);
+    expect(isSupportedDroppedName('notes.text')).toBe(true);
   });
 
   it('rejects unsupported names', () => {

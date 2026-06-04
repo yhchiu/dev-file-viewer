@@ -3,7 +3,7 @@ import { SourceCodeRenderer } from '../core/source/SourceCodeRenderer.js';
 import { buildSourceSymbolTree, extractSourceSymbols } from '../core/source/sourceSymbols.js';
 import { DiffRenderer } from '../core/diff/DiffRenderer.js';
 import { buildDiffOutlineTree } from '../core/diff/diffOutlineTree.js';
-import { FORMAT_IDS, detectFormat, displayNameFromUrl, formatLabel, sourceLanguageFromPath } from '../core/format/fileTypes.js';
+import { FORMAT_IDS, detectFormat, detectLineEnding, displayNameFromUrl, formatLabel, lineEndingLabel, sourceLanguageFromPath } from '../core/format/fileTypes.js';
 import { UrlSourceProvider } from '../core/sources/UrlSourceProvider.js';
 import { FilePickerSourceProvider } from '../core/sources/FilePickerSourceProvider.js';
 import { DirectorySourceProvider } from '../core/sources/DirectorySourceProvider.js';
@@ -1229,29 +1229,44 @@ setDocumentReloadEnabled(enabled) {
       this.elements.title.textContent = doc.name || t('docTitleUntitled');
       this.elements.source.textContent = this.getDocumentSourceLabel(doc);
       this.elements.format.textContent = formatLabel(format);
-      this.elements.preview.classList.toggle('source-code-body', format === FORMAT_IDS.SOURCE_CODE);
+      this.elements.preview.classList.toggle('source-code-body', format === FORMAT_IDS.SOURCE_CODE || format === FORMAT_IDS.TEXT || format === FORMAT_IDS.UNKNOWN);
       this.elements.preview.classList.toggle('diff-body', format === FORMAT_IDS.DIFF);
 
-      if (format === FORMAT_IDS.SOURCE_CODE) {
+      if (format === FORMAT_IDS.SOURCE_CODE || format === FORMAT_IDS.TEXT || format === FORMAT_IDS.UNKNOWN) {
         if (!this.sourceRenderer) this.sourceRenderer = new SourceCodeRenderer();
-        const sourceLanguage = doc.language || sourceLanguageFromPath(doc.name || doc.url || doc.path || '');
+        const sourceLanguage = format === FORMAT_IDS.TEXT || format === FORMAT_IDS.UNKNOWN
+          ? 'plaintext'
+          : doc.language || sourceLanguageFromPath(doc.name || doc.url || doc.path || '');
         if (sourceLanguage === 'html') this.elements.format.textContent = 'HTML';
+        if (format === FORMAT_IDS.TEXT) {
+          const lineEnding = detectLineEnding(doc.text || '');
+          this.elements.format.textContent = `${formatLabel(format)} · ${lineEndingLabel(lineEnding)}`;
+        }
         this.sourceRenderer.render(doc.text, this.elements.preview, {
           language: sourceLanguage,
           name: doc.name || '',
           url: doc.url || '',
           path: doc.path || ''
         });
-        this.buildSourceSymbols(doc, sourceLanguage);
-        if (doc.sourceType !== 'directory-file' && this.headings.length) {
-          this.applySidebarTab('outline');
-          this.elements.sidebarTools.open = false;
+        if (format === FORMAT_IDS.TEXT || format === FORMAT_IDS.UNKNOWN) {
+          this.clearToc();
+        } else {
+          this.buildSourceSymbols(doc, sourceLanguage);
+          if (doc.sourceType !== 'directory-file' && this.headings.length) {
+            this.applySidebarTab('outline');
+            this.elements.sidebarTools.open = false;
+          }
         }
         this.currentDoc = doc;
         this.currentDocKey = this.getDocumentKey(doc);
         this.setDocumentReloadEnabled(true);
         await this.restoreOrResetScroll(doc, options);
-        this.setStatus(t('statusLoaded', [doc.name || t('commonSourceFile')]), 'success');
+        this.setStatus(
+          format === FORMAT_IDS.UNKNOWN
+            ? t('statusUnsupportedFormat', [format])
+            : t('statusLoaded', [doc.name || (format === FORMAT_IDS.TEXT ? t('commonDocument') : t('commonSourceFile'))]),
+          format === FORMAT_IDS.UNKNOWN ? 'error' : 'success'
+        );
         return;
       }
 
@@ -1272,17 +1287,6 @@ setDocumentReloadEnabled(enabled) {
         this.setDocumentReloadEnabled(true);
         await this.restoreOrResetScroll(doc, options);
         this.setStatus(t('statusLoaded', [doc.name || t('commonDiffFile')]), 'success');
-        return;
-      }
-
-      if (format !== FORMAT_IDS.MARKDOWN) {
-        this.elements.preview.textContent = doc.text || '';
-        this.clearToc();
-        this.currentDoc = doc;
-        this.currentDocKey = this.getDocumentKey(doc);
-        this.setDocumentReloadEnabled(true);
-        await this.restoreOrResetScroll(doc, options);
-        this.setStatus(t('statusUnsupportedFormat', [format]), 'error');
         return;
       }
 

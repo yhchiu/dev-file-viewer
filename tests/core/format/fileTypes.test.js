@@ -4,11 +4,14 @@ import {
   getExtension,
   isSupportedDocumentFile,
   isSupportedDiffFile,
+  isSupportedTextFile,
   isSupportedSourceCodeFile,
   isSupportedViewerFile,
   sourceLanguageFromPath,
   formatLabel,
   detectFormat,
+  detectLineEnding,
+  lineEndingLabel,
   displayNameFromUrl,
   FORMAT_IDS
 } from '../../../src/core/format/fileTypes.js';
@@ -32,6 +35,8 @@ describe('isSupported* predicates', () => {
   it('classifies documents, diffs and source files', () => {
     expect(isSupportedDocumentFile('a.md')).toBe(true);
     expect(isSupportedDiffFile('a.patch')).toBe(true);
+    expect(isSupportedTextFile('notes.txt')).toBe(true);
+    expect(isSupportedTextFile('notes.text')).toBe(true);
     expect(isSupportedSourceCodeFile('a.ts')).toBe(true);
     expect(isSupportedSourceCodeFile('image.png')).toBe(false);
   });
@@ -45,6 +50,7 @@ describe('isSupported* predicates', () => {
   it('isSupportedViewerFile is the union', () => {
     expect(isSupportedViewerFile('a.md')).toBe(true);
     expect(isSupportedViewerFile('a.diff')).toBe(true);
+    expect(isSupportedViewerFile('notes.txt')).toBe(true);
     expect(isSupportedViewerFile('a.rs')).toBe(true);
     expect(isSupportedViewerFile('a.exe')).toBe(false);
   });
@@ -64,9 +70,31 @@ describe('detectFormat', () => {
     expect(detectFormat({ name: 'a.md' })).toBe(FORMAT_IDS.MARKDOWN);
     expect(detectFormat({ name: 'a.patch' })).toBe(FORMAT_IDS.DIFF);
     expect(detectFormat({ name: 'a.ts' })).toBe(FORMAT_IDS.SOURCE_CODE);
+    expect(detectFormat({ name: 'notes.txt' })).toBe(FORMAT_IDS.TEXT);
+    expect(detectFormat({ name: 'notes.text' })).toBe(FORMAT_IDS.TEXT);
+    expect(detectFormat({ name: 'CMakeLists.txt' })).toBe(FORMAT_IDS.SOURCE_CODE);
     expect(detectFormat({ mimeType: 'text/markdown' })).toBe(FORMAT_IDS.MARKDOWN);
+    expect(detectFormat({ mimeType: 'text/plain' })).toBe(FORMAT_IDS.TEXT);
     expect(detectFormat({ mimeType: 'application/json' })).toBe(FORMAT_IDS.SOURCE_CODE);
     expect(detectFormat({ name: 'mystery.bin' })).toBe(FORMAT_IDS.UNKNOWN);
+  });
+});
+
+describe('detectLineEnding / lineEndingLabel', () => {
+  it('detects line ending styles', () => {
+    expect(detectLineEnding('a\nb\n')).toBe('lf');
+    expect(detectLineEnding('a\r\nb\r\n')).toBe('crlf');
+    expect(detectLineEnding('a\rb\r')).toBe('cr');
+    expect(detectLineEnding('a\r\nb\nc')).toBe('mixed');
+    expect(detectLineEnding('single line')).toBe('none');
+  });
+
+  it('labels line ending styles', () => {
+    expect(lineEndingLabel('lf')).toBe('LF');
+    expect(lineEndingLabel('crlf')).toBe('CRLF');
+    expect(lineEndingLabel('cr')).toBe('CR');
+    expect(lineEndingLabel('mixed')).toBe('Mixed EOL');
+    expect(lineEndingLabel('none')).toBe('No EOL');
   });
 });
 
@@ -74,6 +102,7 @@ describe('formatLabel / displayNameFromUrl', () => {
   it('labels formats', () => {
     expect(formatLabel(FORMAT_IDS.MARKDOWN)).toBe('Markdown');
     expect(formatLabel(FORMAT_IDS.DIFF)).toBe('Diff');
+    expect(formatLabel(FORMAT_IDS.TEXT)).toBe('Text');
     expect(formatLabel('something-else')).toBe('Unknown');
   });
 
