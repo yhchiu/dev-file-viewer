@@ -231,7 +231,7 @@ input, select { width: 100%; border: 1px solid var(--line); border-radius: 10px;
 }
 
 /* V2 TOC Phase 1 */
-.sidebar-tabs-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px; align-items: stretch; margin: 12px 0 10px; }
+.sidebar-tabs-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px; align-items: stretch; margin: 12px 0 10px; }
 .sidebar-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; min-width: 0; padding: 4px; border: 1px solid var(--line); border-radius: 14px; background: var(--panel-2); }
 .sidebar-tab { border: 0; border-radius: 10px; padding: 8px 10px; background: transparent; color: var(--muted); font-size: 13px; font-weight: 800; cursor: pointer; }
 .sidebar-tab:hover { color: var(--accent); background: #fff; }
@@ -419,8 +419,9 @@ input, select { width: 100%; border: 1px solid var(--line); border-radius: 10px;
   padding: 0;
   display: inline-grid;
   place-items: center;
-  border-radius: 14px;
-  background: var(--panel-2);
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
   color: var(--muted);
   font-size: 0;
   font-weight: 900;
@@ -429,7 +430,6 @@ input, select { width: 100%; border: 1px solid var(--line); border-radius: 10px;
 .sidebar-popout-outline.is-active {
   color: var(--accent);
   background: var(--accent-soft);
-  border-color: #bfdbfe;
 }
 .sidebar-popout-outline:disabled {
   opacity: .45;
@@ -1137,14 +1137,12 @@ body[data-theme="dark"],
 :root[data-theme="dark"] .sidebar-popout-outline.is-active {
   color: var(--accent);
   background: var(--accent-soft);
-  border-color: #3b82f6;
 }
 
 :root[data-theme="dark"] .sidebar-popout-outline:disabled,
 :root[data-theme="dark"] .sidebar-popout-outline:disabled:hover {
   color: #64748b;
   background: transparent;
-  border-color: transparent;
 }
 
 :root[data-theme="dark"] .tree-folder {
