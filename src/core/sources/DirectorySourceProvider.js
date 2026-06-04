@@ -12,12 +12,13 @@ export class DirectorySourceProvider {
     this.fileIndex = new Map();
   }
 
-  async pickDirectory() {
+  async pickDirectory(options = {}) {
     if (!('showDirectoryPicker' in window)) {
       throw new Error('This browser does not support folder picker. Use Chrome or Chromium-based browsers.');
     }
 
     const directoryHandle = await window.showDirectoryPicker({ mode: 'read' });
+    options.onLoadStart?.(directoryHandle.name);
     return this.loadDirectoryHandle(directoryHandle);
   }
 

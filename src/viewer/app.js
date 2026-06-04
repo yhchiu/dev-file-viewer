@@ -830,6 +830,7 @@ async handleWindowDrop(event) {
     this.setStatus(t('statusNoSupportedDropped'), 'warning');
   } catch (error) {
     this.clearViewerLoading();
+    this.clearDirectoryTreeLoading();
     this.setStatus(error?.message || String(error), 'error');
   }
 }
@@ -916,6 +917,7 @@ async loadDroppedFileDocument(file, options = {}) {
 }
 
 async openDroppedDirectoryHandle(handle) {
+  this.setDirectoryTreeLoading(t('statusOpeningFolder'));
   const { tree } = await this.directorySource.loadDirectoryHandle(handle);
   this.renderDirectoryTree(tree);
   this.currentFolderLoaded = true;
@@ -927,6 +929,7 @@ async openDroppedDirectoryHandle(handle) {
 }
 
 async openDroppedDirectoryEntry(entry) {
+  this.setDirectoryTreeLoading(t('statusOpeningFolder'));
   const { tree } = await this.directorySource.loadDirectoryEntry(entry);
   this.renderDirectoryTree(tree);
   this.currentFolderLoaded = true;
@@ -1003,7 +1006,9 @@ async openDroppedDirectoryEntry(entry) {
   async openLocalFolder() {
     try {
       this.setStatus(t('statusOpeningFolder'), 'info');
-      const { tree } = await this.directorySource.pickDirectory();
+      const { tree } = await this.directorySource.pickDirectory({
+        onLoadStart: () => this.setDirectoryTreeLoading(t('statusOpeningFolder'))
+      });
       this.renderDirectoryTree(tree);
       this.currentFolderLoaded = true;
       this.setFolderReloadEnabled(true);
@@ -1013,6 +1018,7 @@ async openDroppedDirectoryEntry(entry) {
       this.applySidebarTab('files');
       this.setStatus(t('statusFolderLoaded'), 'success');
     } catch (error) {
+      this.clearDirectoryTreeLoading();
       if (error?.name === 'AbortError') return;
       this.currentFolderLoaded = false;
       this.setFolderReloadEnabled(false);
@@ -1066,6 +1072,7 @@ async clearViewerForFailedDocument(fileNode = {}) {
         this.setStatus(this.getLoadErrorMessage(error), 'error');
       }
     });
+    this.clearDirectoryTreeLoading();
   }
 
   async reloadCurrentFolder() {
@@ -1078,6 +1085,7 @@ async clearViewerForFailedDocument(fileNode = {}) {
 
     try {
       this.setFolderReloadEnabled(false);
+      this.setDirectoryTreeLoading(t('statusReloadingFolder'));
       this.setStatus(t('statusReloadingFolder'), 'info');
       const { tree } = await this.directorySource.reloadDirectory();
       this.renderDirectoryTree(tree);
@@ -1090,6 +1098,7 @@ async clearViewerForFailedDocument(fileNode = {}) {
 
       this.setStatus(t('statusFolderReloaded'), 'success');
     } catch (error) {
+      this.clearDirectoryTreeLoading();
       this.currentFolderLoaded = Boolean(this.directorySource.rootHandle);
       this.setFolderReloadEnabled(this.currentFolderLoaded);
       this.setStatus(error?.message || String(error), 'error');
@@ -1310,6 +1319,19 @@ setDocumentReloadEnabled(enabled) {
     this.elements.preview.classList.remove('is-loading');
     this.elements.preview.removeAttribute('aria-busy');
     delete this.elements.preview.dataset.loadingLabel;
+  }
+
+  setDirectoryTreeLoading(message = t('statusOpeningFolder')) {
+    const label = message || t('statusOpeningFolder');
+    this.elements.tree.classList.add('is-loading');
+    this.elements.tree.dataset.loadingLabel = label;
+    this.elements.tree.setAttribute('aria-busy', 'true');
+  }
+
+  clearDirectoryTreeLoading() {
+    this.elements.tree.classList.remove('is-loading');
+    this.elements.tree.removeAttribute('aria-busy');
+    delete this.elements.tree.dataset.loadingLabel;
   }
 
   getDocumentKey(doc) {

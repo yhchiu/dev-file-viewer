@@ -179,6 +179,35 @@ describe('DirectorySourceProvider.loadDirectoryHandle / buildTree', () => {
   });
 });
 
+describe('DirectorySourceProvider.pickDirectory', () => {
+  afterEach(() => {
+    delete window.showDirectoryPicker;
+  });
+
+  it('notifies when a selected folder starts loading', async () => {
+    const calls = [];
+    const root = dirHandle('proj', [
+      ['README.md', fileHandle('README.md')]
+    ]);
+    const originalEntries = root.entries;
+    root.entries = async function* () {
+      calls.push('entries');
+      yield* originalEntries.call(root);
+    };
+    window.showDirectoryPicker = vi.fn(async () => {
+      calls.push('picker');
+      return root;
+    });
+
+    const { tree } = await new DirectorySourceProvider().pickDirectory({
+      onLoadStart: name => calls.push(`load:${name}`)
+    });
+
+    expect(tree.name).toBe('proj');
+    expect(calls).toEqual(['picker', 'load:proj', 'entries']);
+  });
+});
+
 // Minimal fakes for the legacy webkit directory-entry API.
 function fileEntry(name, parts = [`// ${name}`]) {
   return { isFile: true, isDirectory: false, name, file: cb => cb(new File(parts, name)) };

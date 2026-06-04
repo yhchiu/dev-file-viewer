@@ -112,8 +112,39 @@ input, select { width: 100%; border: 1px solid var(--line); border-radius: 10px;
 .info-dot { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); background: #fff; font-size: 12px; font-weight: 800; cursor: help; }
 .info-dot:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
 .sidebar-section-title { margin: 18px 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 800; }
-.directory-tree { font-size: 13px; color: var(--fg); }
+.directory-tree { position: relative; font-size: 13px; color: var(--fg); }
 .directory-tree.empty { color: var(--muted); padding: 10px; border: 1px dashed var(--line); border-radius: 12px; }
+.directory-tree.is-loading { min-height: 74px; }
+.directory-tree.is-loading > * { opacity: .28; pointer-events: none; }
+.directory-tree.empty.is-loading { color: transparent; }
+.directory-tree.is-loading::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  top: 16px;
+  left: calc(50% - 12px);
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--line);
+  border-top-color: var(--accent);
+  border-radius: 999px;
+  animation: preview-loading-spin .8s linear infinite;
+}
+.directory-tree.is-loading::after {
+  content: attr(data-loading-label);
+  position: absolute;
+  z-index: 2;
+  top: 52px;
+  left: 50%;
+  max-width: calc(100% - 24px);
+  transform: translateX(-50%);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.35;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
 .tree-root, .tree-children { list-style: none; padding-left: 0; margin: 0; }
 .tree-children { padding-left: 16px; }
 .tree-children[hidden] { display: none; }
@@ -191,6 +222,7 @@ input, select { width: 100%; border: 1px solid var(--line); border-radius: 10px;
   to { transform: rotate(360deg); }
 }
 @media (prefers-reduced-motion: reduce) {
+  .directory-tree.is-loading::before,
   .markdown-body.is-loading::before {
     animation: none;
     border-top-color: var(--line);
