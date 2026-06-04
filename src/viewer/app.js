@@ -1036,6 +1036,25 @@ clearViewerForFolder(message = t('statusSelectFromSidebar')) {
   this.elements.viewerMain.scrollTop = 0;
 }
 
+async clearViewerForFailedDocument(fileNode = {}) {
+  await this.saveCurrentScrollPosition();
+  const path = fileNode.path || fileNode.displayPath || fileNode.name || '';
+  const name = fileNode.name || (path ? displayNameFromUrl(path) : t('titleNoFileSelected'));
+
+  this.currentDoc = null;
+  this.currentDocKey = '';
+  this.clearViewerLoading();
+  this.clearSourceLineHighlight();
+  this.clearToc();
+  this.setDocumentReloadEnabled(false);
+  this.elements.title.textContent = name;
+  this.elements.source.textContent = path || t('statusSelectFromSidebar');
+  this.elements.format.textContent = formatLabel(FORMAT_IDS.UNKNOWN);
+  this.elements.preview.classList.remove('source-code-body', 'diff-body');
+  this.elements.preview.textContent = '';
+  this.elements.viewerMain.scrollTop = 0;
+}
+
   renderDirectoryTree(tree) {
     this.directoryTree.render(tree, async fileNode => {
       try {
@@ -1043,8 +1062,8 @@ clearViewerForFolder(message = t('statusSelectFromSidebar')) {
         const doc = await this.createDirectoryDocument(fileNode);
         await this.renderDocument(doc);
       } catch (error) {
-        this.clearViewerLoading();
-        this.setStatus(error?.message || String(error), 'error');
+        await this.clearViewerForFailedDocument(fileNode);
+        this.setStatus(this.getLoadErrorMessage(error), 'error');
       }
     });
   }
@@ -1112,7 +1131,7 @@ async reloadCurrentDocument() {
     this.clearViewerLoading();
     this.currentDoc = previousDoc;
     this.setDocumentReloadEnabled(true);
-    this.setStatus(error?.message || String(error), 'error');
+    this.setStatus(this.getLoadErrorMessage(error), 'error');
   }
 }
 
@@ -1159,12 +1178,17 @@ setDocumentReloadEnabled(enabled) {
 
   async openDocumentLink(link, sourceDoc) {
     const linkData = normalizeLinkData(link);
+    let pendingDocument = null;
 
     try {
       if (linkData.kind === 'relative-document' && sourceDoc?.sourceType === 'directory-file') {
         const targetPath = this.directorySource.resolveRelativePath(sourceDoc.path, linkData.href);
         if (!targetPath) return;
 
+        pendingDocument = {
+          name: displayNameFromUrl(targetPath),
+          path: targetPath
+        };
         this.setViewerLoading();
         const { doc, node } = await this.directorySource.loadPath(targetPath);
         this.directoryTree.markActivePath(node.path);
@@ -1176,8 +1200,12 @@ setDocumentReloadEnabled(enabled) {
         await this.openUrl(linkData.url);
       }
     } catch (error) {
-      this.clearViewerLoading();
-      this.setStatus(error?.message || String(error), 'error');
+      if (error?.code === 'BINARY_FILE' && pendingDocument) {
+        await this.clearViewerForFailedDocument(pendingDocument);
+      } else {
+        this.clearViewerLoading();
+      }
+      this.setStatus(this.getLoadErrorMessage(error), 'error');
     }
   }
 
@@ -1904,13 +1932,21 @@ collectTocDescendantIds(node, targetSet) {
 
   async showLoadError(error, url) {
     this.clearViewerLoading();
-    const message = String(error?.message || error);
+    const message = this.getLoadErrorMessage(error);
     if (url?.startsWith('file://')) {
       await this.refreshFileUrlAccessStatus();
       this.setStatus(t('errorFileUrlBlocked', [message]), 'error');
     } else {
       this.setStatus(message, 'error');
     }
+  }
+
+  getLoadErrorMessage(error) {
+    if (error?.code === 'BINARY_FILE') {
+      return t('errorBinaryFile', [error.fileName || t('commonDocument')]);
+    }
+
+    return error?.message || String(error);
   }
 
   setStatus(message, type = 'info') {

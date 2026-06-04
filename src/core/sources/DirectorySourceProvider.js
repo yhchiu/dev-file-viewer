@@ -1,3 +1,4 @@
+import { isLikelyBinaryFile } from '../format/binarySniff.js';
 import { FilePickerSourceProvider } from './FilePickerSourceProvider.js';
 
 const MAX_FILES = 2000;
@@ -124,13 +125,30 @@ async buildEntryTree(directoryEntry, path = '') {
   }
 
   async loadFileNode(fileNode) {
-    if (fileNode.handle) return this.fileProvider.loadFromHandle(fileNode.handle);
-    if (fileNode.file) return this.fileProvider.loadFromFile(fileNode.file);
+    if (fileNode.handle) {
+      const file = await fileNode.handle.getFile();
+      return this.loadTextFile(file, { handle: fileNode.handle, name: fileNode.name });
+    }
+
+    if (fileNode.file) return this.loadTextFile(fileNode.file, { name: fileNode.name });
+
     if (fileNode.entry) {
       const file = await fileFromEntry(fileNode.entry);
-      return this.fileProvider.loadFromFile(file);
+      return this.loadTextFile(file, { name: fileNode.name });
     }
     throw new Error(`Unable to load file: ${fileNode?.name || 'unknown'}`);
+  }
+
+  async loadTextFile(file, extra = {}) {
+    if (await isLikelyBinaryFile(file)) {
+      const fileName = extra.name || file?.name || 'unknown';
+      const error = new Error(`File appears to be binary and cannot be opened as text: ${fileName}`);
+      error.code = 'BINARY_FILE';
+      error.fileName = fileName;
+      throw error;
+    }
+
+    return this.fileProvider.loadFromFile(file, extra.handle ? { handle: extra.handle } : {});
   }
 
   async loadPath(path) {

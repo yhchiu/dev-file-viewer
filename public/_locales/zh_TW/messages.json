@@ -105,6 +105,10 @@
     "message": "拖放的檔案似乎是二進位檔，無法以文字開啟：$NAME$",
     "placeholders": { "name": { "content": "$1", "example": "image.png" } }
   },
+  "errorBinaryFile": {
+    "message": "檔案似乎是二進位檔，無法以文字開啟：$NAME$",
+    "placeholders": { "name": { "content": "$1", "example": "image.png" } }
+  },
   "statusDroppedFolderLoaded": { "message": "已載入拖放的資料夾。請從側邊欄選擇檔案。" },
   "statusOpeningFolder": { "message": "正在開啟資料夾…" },
   "statusFolderLoaded": { "message": "已載入資料夾。請從側邊欄選擇檔案。" },

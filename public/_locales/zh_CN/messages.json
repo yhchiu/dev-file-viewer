@@ -105,6 +105,10 @@
     "message": "拖放的文件似乎是二进制文件，无法以文本打开：$NAME$",
     "placeholders": { "name": { "content": "$1", "example": "image.png" } }
   },
+  "errorBinaryFile": {
+    "message": "文件似乎是二进制文件，无法以文本打开：$NAME$",
+    "placeholders": { "name": { "content": "$1", "example": "image.png" } }
+  },
   "statusDroppedFolderLoaded": { "message": "已加载拖放的文件夹。请从侧边栏选择文件。" },
   "statusOpeningFolder": { "message": "正在打开文件夹…" },
   "statusFolderLoaded": { "message": "已加载文件夹。请从侧边栏选择文件。" },

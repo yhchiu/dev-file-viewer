@@ -108,8 +108,8 @@ describe('FilePickerSourceProvider.pickFile', () => {
 });
 
 // Minimal fakes for the File System Access API (showDirectoryPicker handles).
-function fileHandle(name) {
-  return { kind: 'file', name, getFile: async () => new File([`// ${name}`], name) };
+function fileHandle(name, parts = [`// ${name}`]) {
+  return { kind: 'file', name, getFile: async () => new File(parts, name) };
 }
 function dirHandle(name, entries) {
   return {
@@ -130,7 +130,7 @@ describe('DirectorySourceProvider.loadDirectoryHandle / buildTree', () => {
         ['notes.txt', fileHandle('notes.txt')]
       ])],
       ['README.md', fileHandle('README.md')],
-      ['image.png', fileHandle('image.png')]
+      ['image.png', fileHandle('image.png', [new Uint8Array([137, 80, 78, 71, 0, 1])])]
     ]);
   }
 
@@ -151,10 +151,20 @@ describe('DirectorySourceProvider.loadDirectoryHandle / buildTree', () => {
     expect(node.path).toBe('src/a.js');
     expect(doc).toMatchObject({ name: 'a.js', sourceType: 'directory-file', path: 'src/a.js', baseUrl: '' });
     expect(doc.text).toContain('a.js');
-    const { doc: unsupportedDoc } = await provider.loadPath('image.png');
-    expect(unsupportedDoc).toMatchObject({ name: 'image.png', sourceType: 'directory-file', path: 'image.png' });
-    expect(unsupportedDoc.text).toContain('image.png');
+    const { doc: unsupportedTextDoc } = await provider.loadPath('src/notes.txt');
+    expect(unsupportedTextDoc).toMatchObject({ name: 'notes.txt', sourceType: 'directory-file', path: 'src/notes.txt' });
+    expect(unsupportedTextDoc.text).toContain('notes.txt');
     await expect(provider.loadPath('missing/x.js')).rejects.toThrow(/not found/i);
+  });
+
+  it('rejects binary files from the visible tree before reading them as text', async () => {
+    const provider = new DirectorySourceProvider();
+    await provider.loadDirectoryHandle(sampleRoot());
+
+    await expect(provider.loadPath('image.png')).rejects.toMatchObject({
+      code: 'BINARY_FILE',
+      fileName: 'image.png'
+    });
   });
 
   it('reloadDirectory rebuilds from the stored root handle', async () => {
@@ -170,8 +180,8 @@ describe('DirectorySourceProvider.loadDirectoryHandle / buildTree', () => {
 });
 
 // Minimal fakes for the legacy webkit directory-entry API.
-function fileEntry(name) {
-  return { isFile: true, isDirectory: false, name, file: cb => cb(new File([`// ${name}`], name)) };
+function fileEntry(name, parts = [`// ${name}`]) {
+  return { isFile: true, isDirectory: false, name, file: cb => cb(new File(parts, name)) };
 }
 function dirEntry(name, children) {
   return {
@@ -190,7 +200,7 @@ describe('DirectorySourceProvider.loadDirectoryEntry / buildEntryTree', () => {
     const provider = new DirectorySourceProvider();
     const root = dirEntry('proj', [
       dirEntry('.git', [fileEntry('config')]),
-      dirEntry('lib', [fileEntry('m.py'), fileEntry('skip.bin')]),
+      dirEntry('lib', [fileEntry('m.py'), fileEntry('skip.bin', [new Uint8Array([0, 1, 2, 3])])]),
       fileEntry('guide.md')
     ]);
     const { tree } = await provider.loadDirectoryEntry(root);
@@ -199,7 +209,9 @@ describe('DirectorySourceProvider.loadDirectoryEntry / buildEntryTree', () => {
 
     const { doc } = await provider.loadPath('lib/m.py');
     expect(doc.text).toContain('m.py');
-    const { doc: unsupportedDoc } = await provider.loadPath('lib/skip.bin');
-    expect(unsupportedDoc.text).toContain('skip.bin');
+    await expect(provider.loadPath('lib/skip.bin')).rejects.toMatchObject({
+      code: 'BINARY_FILE',
+      fileName: 'skip.bin'
+    });
   });
 });

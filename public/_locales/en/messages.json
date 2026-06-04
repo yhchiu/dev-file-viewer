@@ -105,6 +105,10 @@
     "message": "Dropped file appears to be binary and cannot be opened as text: $NAME$",
     "placeholders": { "name": { "content": "$1", "example": "image.png" } }
   },
+  "errorBinaryFile": {
+    "message": "File appears to be binary and cannot be opened as text: $NAME$",
+    "placeholders": { "name": { "content": "$1", "example": "image.png" } }
+  },
   "statusDroppedFolderLoaded": { "message": "Dropped folder loaded. Select a file from the sidebar." },
   "statusOpeningFolder": { "message": "Opening folder ..." },
   "statusFolderLoaded": { "message": "Folder loaded. Select a file from the sidebar." },
