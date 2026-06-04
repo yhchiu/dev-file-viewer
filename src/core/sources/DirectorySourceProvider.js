@@ -1,4 +1,3 @@
-import { isSupportedViewerFile } from '../format/fileTypes.js';
 import { FilePickerSourceProvider } from './FilePickerSourceProvider.js';
 
 const MAX_FILES = 2000;
@@ -63,7 +62,7 @@ async reloadDirectory() {
       const childPath = path ? `${path}/${name}` : name;
       if (handle.kind === 'directory') {
         node.children.push(await this.buildTree(handle, childPath));
-      } else if (handle.kind === 'file' && isSupportedViewerFile(name)) {
+      } else if (handle.kind === 'file') {
         node.children.push({
           type: 'file',
           name,
@@ -98,7 +97,7 @@ async buildEntryTree(directoryEntry, path = '') {
     const childPath = path ? `${path}/${entry.name}` : entry.name;
     if (entry.isDirectory) {
       node.children.push(await this.buildEntryTree(entry, childPath));
-    } else if (entry.isFile && isSupportedViewerFile(entry.name)) {
+    } else if (entry.isFile) {
       node.children.push({
         type: 'file',
         name: entry.name,

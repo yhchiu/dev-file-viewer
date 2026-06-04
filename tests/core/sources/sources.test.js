@@ -127,21 +127,21 @@ describe('DirectorySourceProvider.loadDirectoryHandle / buildTree', () => {
       ['.hidden', dirHandle('.hidden', [])],
       ['src', dirHandle('src', [
         ['a.js', fileHandle('a.js')],
-        ['notes.txt', fileHandle('notes.txt')] // unsupported extension → excluded
+        ['notes.txt', fileHandle('notes.txt')]
       ])],
       ['README.md', fileHandle('README.md')],
-      ['image.png', fileHandle('image.png')] // unsupported → excluded
+      ['image.png', fileHandle('image.png')]
     ]);
   }
 
-  it('builds a filtered, sorted tree (dirs first, dotfiles & unsupported dropped)', async () => {
+  it('builds a sorted tree with every visible file', async () => {
     const provider = new DirectorySourceProvider();
     const { tree } = await provider.loadDirectoryHandle(sampleRoot());
     expect(tree.type).toBe('directory');
     expect(tree.name).toBe('proj');
-    expect(tree.children.map(c => c.name)).toEqual(['src', 'README.md']);
+    expect(tree.children.map(c => c.name)).toEqual(['src', 'image.png', 'README.md']);
     const src = tree.children.find(c => c.name === 'src');
-    expect(src.children.map(c => c.name)).toEqual(['a.js']);
+    expect(src.children.map(c => c.name)).toEqual(['a.js', 'notes.txt']);
   });
 
   it('indexes files so loadPath reads content via the handle', async () => {
@@ -151,6 +151,9 @@ describe('DirectorySourceProvider.loadDirectoryHandle / buildTree', () => {
     expect(node.path).toBe('src/a.js');
     expect(doc).toMatchObject({ name: 'a.js', sourceType: 'directory-file', path: 'src/a.js', baseUrl: '' });
     expect(doc.text).toContain('a.js');
+    const { doc: unsupportedDoc } = await provider.loadPath('image.png');
+    expect(unsupportedDoc).toMatchObject({ name: 'image.png', sourceType: 'directory-file', path: 'image.png' });
+    expect(unsupportedDoc.text).toContain('image.png');
     await expect(provider.loadPath('missing/x.js')).rejects.toThrow(/not found/i);
   });
 
@@ -158,7 +161,7 @@ describe('DirectorySourceProvider.loadDirectoryHandle / buildTree', () => {
     const provider = new DirectorySourceProvider();
     await provider.loadDirectoryHandle(sampleRoot());
     const { tree } = await provider.reloadDirectory();
-    expect(tree.children.map(c => c.name)).toEqual(['src', 'README.md']);
+    expect(tree.children.map(c => c.name)).toEqual(['src', 'image.png', 'README.md']);
   });
 
   it('reloadDirectory throws when nothing is open', async () => {
@@ -192,9 +195,11 @@ describe('DirectorySourceProvider.loadDirectoryEntry / buildEntryTree', () => {
     ]);
     const { tree } = await provider.loadDirectoryEntry(root);
     expect(tree.children.map(c => c.name)).toEqual(['lib', 'guide.md']);
-    expect(tree.children.find(c => c.name === 'lib').children.map(c => c.name)).toEqual(['m.py']);
+    expect(tree.children.find(c => c.name === 'lib').children.map(c => c.name)).toEqual(['m.py', 'skip.bin']);
 
     const { doc } = await provider.loadPath('lib/m.py');
     expect(doc.text).toContain('m.py');
+    const { doc: unsupportedDoc } = await provider.loadPath('lib/skip.bin');
+    expect(unsupportedDoc.text).toContain('skip.bin');
   });
 });
