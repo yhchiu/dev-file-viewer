@@ -57,6 +57,10 @@
   "themeDark": { "message": "Dark" },
   "themeSystem": { "message": "System" },
   "themeStoredNote": { "message": "Theme preference is stored locally in this browser." },
+  "a11yViewerTextSizeSetting": { "message": "Viewer text size setting" },
+  "viewerTextSizeLabel": { "message": "Text Size" },
+  "a11yViewerTextSize": { "message": "Viewer text size" },
+  "a11yViewerTextSizePixels": { "message": "Viewer text size in pixels" },
   "scrollMemoryTooltip": { "message": "Uses local session storage only. Positions are deleted when the browser session ends and are never sent anywhere." },
   "rememberScrollLabel": { "message": "Remember scroll position" },
   "a11ySidebarNavigation": { "message": "Sidebar navigation" },
@@ -96,6 +100,10 @@
   "statusContentWidthSet": {
     "message": "Content width set to $WIDTH$.",
     "placeholders": { "width": { "content": "$1", "example": "Comfortable" } }
+  },
+  "statusViewerTextSizeSet": {
+    "message": "Viewer text size set to $SIZE$ px.",
+    "placeholders": { "size": { "content": "$1", "example": "16" } }
   },
   "statusScrollEnabled": { "message": "Scroll position memory is enabled for this browser session only." },
   "statusScrollDisabled": { "message": "Scroll position memory is disabled. Files will open at the first line." },

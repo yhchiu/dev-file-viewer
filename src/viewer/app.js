@@ -32,12 +32,16 @@ const SIDEBAR_COLLAPSED_KEY = 'devFileViewer:sidebarCollapsed';
 const SIDEBAR_WIDTH_KEY = 'devFileViewer:sidebarWidth';
 const CONTENT_WIDTH_KEY = 'devFileViewer:contentWidth';
 const THEME_KEY = 'devFileViewer:theme';
+const VIEWER_FONT_SIZE_KEY = 'devFileViewer:viewerFontSize';
 const TOC_POPOVER_PINNED_KEY = 'devFileViewer:tocPopoverPinned';
 const DEFAULT_SIDEBAR_WIDTH = 310;
 const MIN_SIDEBAR_WIDTH = 240;
 const MAX_SIDEBAR_WIDTH = 560;
 const DEFAULT_CONTENT_WIDTH = 'comfortable';
 const DEFAULT_THEME = 'system';
+const DEFAULT_VIEWER_FONT_SIZE = 15;
+const MIN_VIEWER_FONT_SIZE = 12;
+const MAX_VIEWER_FONT_SIZE = 24;
 const THEME_OPTIONS = new Set(['light', 'dark', 'system']);
 const CONTENT_WIDTHS = {
   narrow: '760px',
@@ -87,6 +91,8 @@ class DevFileViewerApp {
       useOpenFile: document.querySelector('#btn-use-open-file'),
       contentWidth: document.querySelector('#content-width-select'),
       theme: document.querySelector('#theme-select'),
+      viewerFontSizeRange: document.querySelector('#viewer-font-size-range'),
+      viewerFontSizeInput: document.querySelector('#viewer-font-size-input'),
       sidebarTabs: document.querySelectorAll('[data-sidebar-tab]'),
       filesTab: document.querySelector('#tab-files'),
       outlineTab: document.querySelector('#tab-outline'),
@@ -129,6 +135,7 @@ class DevFileViewerApp {
     this.resizeDrag = null;
     this.contentWidth = DEFAULT_CONTENT_WIDTH;
     this.themePreference = DEFAULT_THEME;
+    this.viewerFontSize = DEFAULT_VIEWER_FONT_SIZE;
     this.themeMediaQuery = window.matchMedia?.('(prefers-color-scheme: dark)') || null;
     this.activeSidebarTab = 'files';
     this.outlineType = 'markdown';
@@ -154,6 +161,7 @@ class DevFileViewerApp {
     await this.plugins.init();
     await this.restoreTheme();
     await this.restoreContentWidth();
+    await this.restoreViewerFontSize();
     await this.restoreSidebarWidth();
     await this.restoreSidebarState();
     await this.restoreTocPopoverPinState();
@@ -202,6 +210,9 @@ class DevFileViewerApp {
     this.elements.rememberScroll.addEventListener('change', () => this.setRememberScroll(this.elements.rememberScroll.checked));
     this.elements.contentWidth.addEventListener('change', () => this.setContentWidth(this.elements.contentWidth.value));
     this.elements.theme?.addEventListener('change', () => this.setThemePreference(this.elements.theme.value));
+    this.elements.viewerFontSizeRange?.addEventListener('input', () => this.applyViewerFontSize(this.elements.viewerFontSizeRange.value));
+    this.elements.viewerFontSizeRange?.addEventListener('change', () => this.setViewerFontSize(this.elements.viewerFontSizeRange.value));
+    this.elements.viewerFontSizeInput?.addEventListener('change', () => this.setViewerFontSize(this.elements.viewerFontSizeInput.value));
     this.themeMediaQuery?.addEventListener?.('change', () => {
       if (this.themePreference === 'system') this.applyTheme();
     });
@@ -598,6 +609,34 @@ resolveTheme() {
     await chrome.storage.local.set({ [CONTENT_WIDTH_KEY]: this.contentWidth });
     this.setStatus(t('statusContentWidthSet', [contentWidthLabel(this.contentWidth)]), 'info');
     await nextFrame();
+  }
+
+  async restoreViewerFontSize() {
+    const stored = await chrome.storage.local.get(VIEWER_FONT_SIZE_KEY);
+    this.applyViewerFontSize(stored[VIEWER_FONT_SIZE_KEY] || DEFAULT_VIEWER_FONT_SIZE);
+  }
+
+  clampViewerFontSize(value) {
+    const numericSize = Number(value);
+    if (!Number.isFinite(numericSize)) return DEFAULT_VIEWER_FONT_SIZE;
+    return Math.min(Math.max(Math.round(numericSize), MIN_VIEWER_FONT_SIZE), MAX_VIEWER_FONT_SIZE);
+  }
+
+  applyViewerFontSize(value) {
+    this.viewerFontSize = this.clampViewerFontSize(value);
+    this.elements.preview.style.setProperty('--viewer-font-size', `${this.viewerFontSize}px`);
+    if (this.elements.viewerFontSizeRange) {
+      const progress = ((this.viewerFontSize - MIN_VIEWER_FONT_SIZE) / (MAX_VIEWER_FONT_SIZE - MIN_VIEWER_FONT_SIZE)) * 100;
+      this.elements.viewerFontSizeRange.value = String(this.viewerFontSize);
+      this.elements.viewerFontSizeRange.style.setProperty('--viewer-font-size-progress', `${progress}%`);
+    }
+    if (this.elements.viewerFontSizeInput) this.elements.viewerFontSizeInput.value = String(this.viewerFontSize);
+  }
+
+  async setViewerFontSize(value) {
+    this.applyViewerFontSize(value);
+    await chrome.storage.local.set({ [VIEWER_FONT_SIZE_KEY]: this.viewerFontSize });
+    this.setStatus(t('statusViewerTextSizeSet', [String(this.viewerFontSize)]), 'info');
   }
 
   async restoreSidebarWidth() {

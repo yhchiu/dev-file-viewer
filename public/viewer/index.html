@@ -188,7 +188,15 @@
             </div>
           </div>
           <div class="toolbar-meta">
-            <span id="doc-format" data-i18n="formatMarkdown">Markdown</span>
+            <div class="viewer-font-size" data-i18n-aria-label="a11yViewerTextSizeSetting" aria-label="Viewer text size setting">
+              <label for="viewer-font-size-range" data-i18n="viewerTextSizeLabel">Text Size</label>
+              <div class="viewer-font-size-controls">
+                <input id="viewer-font-size-range" class="viewer-font-size-range" type="range" min="12" max="24" step="1" value="15" data-i18n-aria-label="a11yViewerTextSize" aria-label="Viewer text size" />
+                <input id="viewer-font-size-input" class="viewer-font-size-input" type="number" min="12" max="24" step="1" value="15" inputmode="numeric" data-i18n-aria-label="a11yViewerTextSizePixels" aria-label="Viewer text size in pixels" />
+                <span class="viewer-font-size-unit" aria-hidden="true">px</span>
+              </div>
+            </div>
+            <span id="doc-format" class="format-badge" data-i18n="formatMarkdown">Markdown</span>
           </div>
         </header>
 

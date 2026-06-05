@@ -57,6 +57,10 @@
   "themeDark": { "message": "深色" },
   "themeSystem": { "message": "跟隨系統" },
   "themeStoredNote": { "message": "主題偏好僅儲存在這個瀏覽器本機。" },
+  "a11yViewerTextSizeSetting": { "message": "檢視器文字大小設定" },
+  "viewerTextSizeLabel": { "message": "文字大小" },
+  "a11yViewerTextSize": { "message": "檢視器文字大小" },
+  "a11yViewerTextSizePixels": { "message": "檢視器文字大小（像素）" },
   "scrollMemoryTooltip": { "message": "僅使用本機工作階段儲存空間。位置會在瀏覽器工作階段結束時刪除，且絕不會傳送至任何地方。" },
   "rememberScrollLabel": { "message": "記住捲動位置" },
   "a11ySidebarNavigation": { "message": "側邊欄導覽" },
@@ -96,6 +100,10 @@
   "statusContentWidthSet": {
     "message": "內容寬度已設為 $WIDTH$。",
     "placeholders": { "width": { "content": "$1", "example": "適中" } }
+  },
+  "statusViewerTextSizeSet": {
+    "message": "檢視器文字大小已設為 $SIZE$ px。",
+    "placeholders": { "size": { "content": "$1", "example": "16" } }
   },
   "statusScrollEnabled": { "message": "捲動位置記憶僅在本次瀏覽器工作階段啟用。" },
   "statusScrollDisabled": { "message": "捲動位置記憶已停用。檔案將從第一行開啟。" },

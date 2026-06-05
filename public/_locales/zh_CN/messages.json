@@ -57,6 +57,10 @@
   "themeDark": { "message": "深色" },
   "themeSystem": { "message": "跟随系统" },
   "themeStoredNote": { "message": "主题偏好仅保存在此浏览器本地。" },
+  "a11yViewerTextSizeSetting": { "message": "查看器文字大小设置" },
+  "viewerTextSizeLabel": { "message": "文字大小" },
+  "a11yViewerTextSize": { "message": "查看器文字大小" },
+  "a11yViewerTextSizePixels": { "message": "查看器文字大小（像素）" },
   "scrollMemoryTooltip": { "message": "仅使用本地会话存储。位置会在浏览器会话结束时删除，且绝不会发送到任何地方。" },
   "rememberScrollLabel": { "message": "记住滚动位置" },
   "a11ySidebarNavigation": { "message": "侧边栏导航" },
@@ -96,6 +100,10 @@
   "statusContentWidthSet": {
     "message": "内容宽度已设为 $WIDTH$。",
     "placeholders": { "width": { "content": "$1", "example": "适中" } }
+  },
+  "statusViewerTextSizeSet": {
+    "message": "查看器文字大小已设为 $SIZE$ px。",
+    "placeholders": { "size": { "content": "$1", "example": "16" } }
   },
   "statusScrollEnabled": { "message": "滚动位置记忆仅在本次浏览器会话中启用。" },
   "statusScrollDisabled": { "message": "滚动位置记忆已禁用。文件将从第一行打开。" },
