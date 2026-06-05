@@ -440,8 +440,8 @@ input, select { width: 100%; border: 1px solid var(--line); border-radius: 10px;
   z-index: 22;
   width: min(360px, calc(100vw - 32px));
   max-height: min(70vh, 680px);
-  display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr);
+  display: flex;
+  flex-direction: column;
   gap: 10px;
   padding: 12px;
   border: 1px solid var(--line);
@@ -449,6 +449,7 @@ input, select { width: 100%; border: 1px solid var(--line); border-radius: 10px;
   background: rgba(255, 255, 255, .98);
   box-shadow: 0 24px 70px rgba(15, 23, 42, .20);
   backdrop-filter: blur(10px);
+  overflow: hidden;
 }
 .toc-popover[hidden] { display: none; }
 .toc-popover-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-width: 0; }
@@ -456,7 +457,7 @@ input, select { width: 100%; border: 1px solid var(--line); border-radius: 10px;
 .toc-popover-title > span:first-child { flex: 0 0 auto; }
 .toc-popover-close { flex: 0 0 auto; width: 30px; height: 30px; padding: 0; border-radius: 999px; color: var(--muted); background: var(--panel-2); }
 .toc-popover-close:hover { color: var(--danger); background: #fff7f6; }
-.toc-popover-tree { min-height: 0; overflow-y: auto; padding-right: 4px; }
+.toc-popover-tree { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding-right: 4px; scrollbar-gutter: stable; }
 .toc-depth-row { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; align-items: center; margin: 0 0 10px; }
 .toc-depth-row[hidden] { display: none; }
 .toc-depth-row label { color: var(--muted); font-size: 12px; font-weight: 800; white-space: nowrap; }
