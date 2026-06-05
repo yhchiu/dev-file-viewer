@@ -1267,6 +1267,8 @@ setDocumentReloadEnabled(enabled) {
       this.clearSourceLineHighlight();
 
       const format = doc.format || detectFormat(doc);
+      const nextDocKey = this.getDocumentKey(doc);
+      const outlineOptions = { openPopover: nextDocKey !== this.currentDocKey };
       this.elements.title.textContent = doc.name || t('docTitleUntitled');
       this.elements.source.textContent = this.getDocumentSourceLabel(doc);
       this.elements.format.textContent = formatLabel(format);
@@ -1292,7 +1294,7 @@ setDocumentReloadEnabled(enabled) {
         if (format === FORMAT_IDS.TEXT || format === FORMAT_IDS.UNKNOWN) {
           this.clearToc();
         } else {
-          this.buildSourceSymbols(doc, sourceLanguage);
+          this.buildSourceSymbols(doc, sourceLanguage, outlineOptions);
           if (doc.sourceType !== 'directory-file' && this.headings.length) {
             this.applySidebarTab('outline');
             this.elements.sidebarTools.open = false;
@@ -1318,7 +1320,7 @@ setDocumentReloadEnabled(enabled) {
           url: doc.url || '',
           path: doc.path || ''
         });
-        this.buildDiffOutline(diffOutline?.files || [], doc);
+        this.buildDiffOutline(diffOutline?.files || [], doc, outlineOptions);
         if (doc.sourceType !== 'directory-file' && diffOutline?.files?.length) {
           this.applySidebarTab('outline');
           this.elements.sidebarTools.open = false;
@@ -1336,7 +1338,7 @@ setDocumentReloadEnabled(enabled) {
         onOpenDocumentLink: linkedUrl => this.openDocumentLink(linkedUrl, doc)
       });
       ensureHeadingAnchors(this.elements.preview);
-      this.buildToc();
+      this.buildToc(outlineOptions);
       this.updateTocTitle(doc);
       if (doc.sourceType !== 'directory-file' && this.headings.length) {
         this.applySidebarTab('outline');
@@ -1466,7 +1468,7 @@ setDocumentReloadEnabled(enabled) {
     }
   }
 
-  buildToc() {
+  buildToc(options = {}) {
     this.outlineType = 'markdown';
     this.headings = buildHeadingIndex(this.elements.preview, { maxLevel: this.tocMaxLevel });
     this.headingTree = buildHeadingTree(this.headings);
@@ -1485,7 +1487,7 @@ setDocumentReloadEnabled(enabled) {
       this.elements.outlineTab.textContent = t('outline');
       this.updateTocDepthVisibility();
       this.updateTocFilterVisibility();
-      this.updateFloatingOutlineState();
+      this.updateFloatingOutlineState(options);
       return;
     }
 
@@ -1495,12 +1497,12 @@ setDocumentReloadEnabled(enabled) {
     this.updateTocDepthVisibility();
     this.updateTocFilterVisibility();
     this.applyTocFilter();
-    this.updateFloatingOutlineState();
+    this.updateFloatingOutlineState(options);
     this.scheduleActiveHeadingUpdate();
   }
 
 
-buildDiffOutline(files, doc) {
+buildDiffOutline(files, doc, options = {}) {
   this.outlineType = 'diff';
   this.headingTree = buildDiffOutlineTree(files);
   this.headings = this.headingTree.fileNodes;
@@ -1521,7 +1523,7 @@ buildDiffOutline(files, doc) {
     this.elements.outlineTab.textContent = t('tabFiles');
     this.outlinePopoutEnabled = false;
     this.updateTocFilterVisibility();
-    this.updateFloatingOutlineState();
+    this.updateFloatingOutlineState(options);
     return;
   }
 
@@ -1530,11 +1532,11 @@ buildDiffOutline(files, doc) {
   this.elements.outlineTab.textContent = t('changesTabCount', [String(this.headings.length)]);
   this.updateTocFilterVisibility();
   this.applyTocFilter();
-  this.updateFloatingOutlineState();
+  this.updateFloatingOutlineState(options);
   this.scheduleActiveHeadingUpdate();
 }
 
-buildSourceSymbols(doc, language) {
+buildSourceSymbols(doc, language, options = {}) {
   this.outlineType = 'source';
   const symbols = extractSourceSymbols(doc.text || '', { language, name: doc.name || doc.url || doc.path || '' });
   this.headingTree = buildSourceSymbolTree(symbols, this.elements.preview);
@@ -1556,7 +1558,7 @@ buildSourceSymbols(doc, language) {
     this.elements.outlineTab.textContent = t('symbolsTitle');
     this.outlinePopoutEnabled = false;
     this.updateTocFilterVisibility();
-    this.updateFloatingOutlineState();
+    this.updateFloatingOutlineState(options);
     return;
   }
 
@@ -1565,7 +1567,7 @@ buildSourceSymbols(doc, language) {
   this.elements.outlineTab.textContent = t('symbolsTabCount', [String(this.headings.length)]);
   this.updateTocFilterVisibility();
   this.applyTocFilter();
-  this.updateFloatingOutlineState();
+  this.updateFloatingOutlineState(options);
   this.scheduleActiveHeadingUpdate();
 }
 
