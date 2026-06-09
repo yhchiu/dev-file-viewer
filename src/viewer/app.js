@@ -1090,6 +1090,7 @@ clearViewerForFolder(message = t('statusSelectFromSidebar')) {
   this.clearToc();
   this.setDocumentReloadEnabled(false);
   this.elements.title.textContent = t('titleNoFileSelected');
+  document.title = t('appName');
   this.elements.source.textContent = message;
   this.elements.format.textContent = t('formatFolder');
   this.elements.preview.classList.remove('source-code-body', 'diff-body');
@@ -1109,6 +1110,7 @@ async clearViewerForFailedDocument(fileNode = {}) {
   this.clearToc();
   this.setDocumentReloadEnabled(false);
   this.elements.title.textContent = name;
+  document.title = `${name} - ${t('appName')}`;
   this.elements.source.textContent = path || t('statusSelectFromSidebar');
   this.elements.format.textContent = formatLabel(FORMAT_IDS.UNKNOWN);
   this.elements.preview.classList.remove('source-code-body', 'diff-body');
@@ -1283,7 +1285,9 @@ setDocumentReloadEnabled(enabled) {
       const format = doc.format || detectFormat(doc);
       const nextDocKey = this.getDocumentKey(doc);
       const outlineOptions = { openPopover: nextDocKey !== this.currentDocKey };
-      this.elements.title.textContent = doc.name || t('docTitleUntitled');
+      const fileName = doc.name || t('docTitleUntitled');
+      this.elements.title.textContent = fileName;
+      document.title = `${fileName} - ${t('appName')}`;
       this.elements.source.textContent = this.getDocumentSourceLabel(doc);
       this.elements.format.textContent = formatLabel(format);
       this.elements.preview.classList.toggle('source-code-body', format === FORMAT_IDS.SOURCE_CODE || format === FORMAT_IDS.TEXT || format === FORMAT_IDS.UNKNOWN);
