@@ -1,4 +1,5 @@
 import { t } from '../../core/i18n/i18n.js';
+import { getArrowRightSmallIcon, getFolderClosedIcon, getFolderOpenIcon, getFileIcon } from '../../core/ui/icons.js';
 
 export class DirectoryTreeView {
   constructor(container) {
@@ -36,11 +37,7 @@ export class DirectoryTreeView {
       disclosure.dataset.path = path;
       disclosure.setAttribute('aria-expanded', String(!collapsed));
       disclosure.setAttribute('aria-label', t(collapsed ? 'a11yExpandSection' : 'a11yCollapseSection', [folderName]));
-      disclosure.innerHTML = `
-        <svg class="tree-arrow-icon" viewBox="0 0 12 12" aria-hidden="true" focusable="false">
-          <path d="M4.5 2.75 7.75 6 4.5 9.25" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-      `;
+      disclosure.innerHTML = getArrowRightSmallIcon('tree-arrow-icon');
       disclosure.addEventListener('click', event => {
         event.preventDefault();
         event.stopPropagation();
@@ -53,7 +50,9 @@ export class DirectoryTreeView {
       label.dataset.path = path;
       label.dataset.expanded = String(!collapsed);
       label.title = path || folderName;
-      label.innerHTML = '<svg class="tree-item-icon tree-folder-icon tree-folder-icon-closed" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M2 5.25H6.25L7.75 6.75H14V12.5H2Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" /></svg><svg class="tree-item-icon tree-folder-icon tree-folder-icon-open" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M2.25 12.25V5H6.25L7.75 6.5H13.75V8.25" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" /><path d="M2.25 12.25 4 7.75H15.25L13.5 12.25Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" /></svg><span class="tree-folder-label"></span>';
+      label.innerHTML = getFolderClosedIcon('tree-item-icon tree-folder-icon tree-folder-icon-closed') +
+        getFolderOpenIcon('tree-item-icon tree-folder-icon tree-folder-icon-open') +
+        '<span class="tree-folder-label"></span>';
       label.querySelector('.tree-folder-label').textContent = folderName;
       label.addEventListener('click', event => {
         event.preventDefault();
@@ -78,7 +77,9 @@ export class DirectoryTreeView {
     button.className = 'tree-file';
     button.title = node.path;
     button.dataset.path = node.path;
-    button.innerHTML = '<span class="tree-file-spacer" aria-hidden="true"></span><span class="tree-file-inner"><svg class="tree-item-icon tree-file-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.75 2.25H9.25L12.25 5.25V13.75H3.75Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" /><path d="M9.25 2.25V5.25H12.25" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" /></svg><span class="tree-file-label"></span></span>';
+    button.innerHTML = '<span class="tree-file-spacer" aria-hidden="true"></span><span class="tree-file-inner">' +
+      getFileIcon('tree-item-icon tree-file-icon') +
+      '<span class="tree-file-label"></span></span>';
     button.querySelector('.tree-file-label').textContent = node.name;
     button.addEventListener('click', () => {
       this.activePath = node.path;

@@ -1,4 +1,5 @@
 import { MarkdownEngine } from '../core/markdown/MarkdownEngine.js';
+import { getArrowRightIcon, getFolderClosedIcon, getFileIcon } from '../core/ui/icons.js';
 import { SourceCodeRenderer } from '../core/source/SourceCodeRenderer.js';
 import { buildSourceSymbolTree, extractSourceSymbols } from '../core/source/sourceSymbols.js';
 import { DiffRenderer } from '../core/diff/DiffRenderer.js';
@@ -1604,11 +1605,7 @@ renderTocContainer(container, context) {
     toggle.dataset.tocContext = context;
     toggle.setAttribute('aria-label', t('a11yCollapseSection', [heading.text]));
     toggle.setAttribute('aria-expanded', 'true');
-    toggle.innerHTML = `
-      <svg class="button-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-        <path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-      </svg>
-    `;
+    toggle.innerHTML = getArrowRightIcon('button-icon');
     if (!heading.hasChildren) {
       toggle.classList.add('is-placeholder');
       if (parentsWithExpandableChild.has(immediateParentId(heading))) {
@@ -2028,15 +2025,10 @@ collectTocDescendantIds(node, targetSet) {
 
 function tocIconSvg(kind) {
   if (kind === 'folder') {
-    return `<svg class="toc-item-icon toc-folder-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-      <path d="M2 5.25H6.25L7.75 6.75H14V12.5H2Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" />
-    </svg>`;
+    return getFolderClosedIcon('toc-item-icon toc-folder-icon');
   }
 
-  return `<svg class="toc-item-icon toc-file-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-    <path d="M3.75 2.25H9.25L12.25 5.25V13.75H3.75Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" />
-    <path d="M9.25 2.25V5.25H12.25" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" />
-  </svg>`;
+  return getFileIcon('toc-item-icon toc-file-icon');
 }
 
 function fileFromDroppedEntry(fileEntry) {

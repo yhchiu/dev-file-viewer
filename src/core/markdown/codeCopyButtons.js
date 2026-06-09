@@ -1,15 +1,9 @@
 import { t } from '../i18n/i18n.js';
+import { getCopyIcon, getCheckIcon } from '../ui/icons.js';
 
-const COPY_ICON = `
-  <svg class="code-copy-icon code-copy-icon-copy" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-    <rect x="5.75" y="5.75" width="8" height="8" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" />
-    <path d="M3.5 10.25H3A1.5 1.5 0 0 1 1.5 8.75V3A1.5 1.5 0 0 1 3 1.5h5.75A1.5 1.5 0 0 1 10.25 3v.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
-  </svg>`;
+const COPY_ICON = getCopyIcon('code-copy-icon code-copy-icon-copy');
 
-const CHECK_ICON = `
-  <svg class="code-copy-icon code-copy-icon-check" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-    <path d="M13.25 4.5 6.5 11.5 2.75 7.75" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-  </svg>`;
+const CHECK_ICON = getCheckIcon('code-copy-icon code-copy-icon-check');
 
 export function installMarkdownCodeCopyButtons(root) {
   const codeBlocks = root.querySelectorAll('pre > code');
