@@ -455,11 +455,24 @@ class DevFileViewerApp {
 
   getDefaultFloatingTocPosition() {
     const viewerRect = this.elements.viewerMain.getBoundingClientRect();
+    const previewRect = this.elements.preview.getBoundingClientRect();
     const padding = 16;
     const buttonRect = this.elements.floatingOutline.getBoundingClientRect();
     const buttonWidth = buttonRect.width || 92;
-    let left = viewerRect.right - padding - buttonWidth;
-    let top = viewerRect.top + padding;
+
+    let left;
+    let top;
+
+    if (previewRect.width > 0) {
+      // Place it at the top-right of the preview container
+      left = previewRect.right - padding - buttonWidth;
+      // Shift it down to align with the preview top, keeping at least 80px from viewport top to avoid header
+      top = Math.max(viewerRect.top + 80, previewRect.top + 12);
+    } else {
+      // Fallback if preview is not yet sized/rendered
+      left = viewerRect.right - padding - buttonWidth;
+      top = viewerRect.top + 80;
+    }
 
     return this.clampFloatingTocPosition({ left, top });
   }
