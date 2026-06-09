@@ -1898,3 +1898,67 @@ body[data-theme="dark"],
 :root[data-theme="dark"] .drop-overlay-card {
   background: color-mix(in srgb, var(--panel) 92%, transparent);
 }
+
+/* Scroll to top/bottom floating nav */
+.scroll-nav {
+  position: fixed;
+  bottom: 24px;
+  right: 28px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.scroll-nav[hidden] {
+  display: none;
+}
+.scroll-nav-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--fg);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0;
+}
+.scroll-nav-btn:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: #bfdbfe;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+.scroll-nav-btn:active {
+  transform: translateY(0);
+}
+.scroll-nav-btn svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+  pointer-events: none;
+  transition: transform 0.2s ease;
+}
+.scroll-nav-btn#btn-scroll-top:hover svg {
+  transform: translateY(-2px);
+}
+.scroll-nav-btn#btn-scroll-bottom:hover svg {
+  transform: translateY(2px);
+}
+
+:root[data-theme="dark"] .scroll-nav-btn {
+  background: rgba(30, 41, 59, 0.8);
+  border-color: var(--line);
+}
+:root[data-theme="dark"] .scroll-nav-btn:hover {
+  background: var(--accent-soft);
+  border-color: #1e3a8a;
+}
+

@@ -30,6 +30,8 @@
   "popupFileUrlEnabled": { "message": "Enabled. file:// Markdown and source links can open automatically." },
   "popupFileUrlDisabled": { "message": "Not enabled. Use Open File/Open Folder, or enable this for automatic file:// links." },
 
+  "a11yScrollToTop": { "message": "Scroll to top" },
+  "a11yScrollToBottom": { "message": "Scroll to bottom" },
   "a11yShowSidebar": { "message": "Show sidebar" },
   "a11yHideSidebar": { "message": "Hide sidebar" },
   "a11yOpenOutline": { "message": "Open document outline" },

@@ -46,3 +46,15 @@ export function getFileIcon(className = '') {
     <path d="M9.25 2.25V5.25H12.25" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" />
   </svg>`);
 }
+
+export function getArrowUpIcon(className = '') {
+  return cleanSvg(`<svg class="${className}" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3.5 10.5 8 6 12.5 10.5" />
+  </svg>`);
+}
+
+export function getArrowDownIcon(className = '') {
+  return cleanSvg(`<svg class="${className}" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3.5 5.5 8 10 12.5 5.5" />
+  </svg>`);
+}

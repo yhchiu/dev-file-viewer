@@ -1,5 +1,5 @@
 import { MarkdownEngine } from '../core/markdown/MarkdownEngine.js';
-import { getArrowRightIcon, getFolderClosedIcon, getFileIcon } from '../core/ui/icons.js';
+import { getArrowRightIcon, getFolderClosedIcon, getFileIcon, getArrowUpIcon, getArrowDownIcon } from '../core/ui/icons.js';
 import { SourceCodeRenderer } from '../core/source/SourceCodeRenderer.js';
 import { buildSourceSymbolTree, extractSourceSymbols } from '../core/source/sourceSymbols.js';
 import { DiffRenderer } from '../core/diff/DiffRenderer.js';
@@ -74,6 +74,9 @@ class DevFileViewerApp {
       tocPopover: document.querySelector('#toc-popover'),
       closeTocPopover: document.querySelector('#btn-close-toc-popover'),
       pinTocPopover: document.querySelector('#btn-pin-toc-popover'),
+      scrollNav: document.querySelector('#scroll-nav'),
+      btnScrollTop: document.querySelector('#btn-scroll-top'),
+      btnScrollBottom: document.querySelector('#btn-scroll-bottom'),
       sidebarResizer: document.querySelector('#sidebar-resizer'),
       scrollMemoryCard: document.querySelector('#scroll-memory-card'),
       rememberScroll: document.querySelector('#remember-scroll'),
@@ -236,6 +239,21 @@ class DevFileViewerApp {
       this.scheduleSaveScrollPosition();
       this.scheduleActiveHeadingUpdate();
     }, { passive: true });
+
+    // Set SVG content for scroll buttons
+    this.elements.btnScrollTop.innerHTML = getArrowUpIcon('scroll-nav-icon');
+    this.elements.btnScrollBottom.innerHTML = getArrowDownIcon('scroll-nav-icon');
+
+    // Scroll buttons event listeners
+    this.elements.btnScrollTop.addEventListener('click', () => {
+      this.elements.viewerMain.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    this.elements.btnScrollBottom.addEventListener('click', () => {
+      this.elements.viewerMain.scrollTo({
+        top: this.elements.viewerMain.scrollHeight,
+        behavior: 'smooth'
+      });
+    });
   }
 
 
@@ -1091,6 +1109,7 @@ clearViewerForFolder(message = t('statusSelectFromSidebar')) {
   this.setDocumentReloadEnabled(false);
   this.elements.title.textContent = t('titleNoFileSelected');
   document.title = t('appName');
+  this.elements.scrollNav.hidden = true;
   this.elements.source.textContent = message;
   this.elements.format.textContent = t('formatFolder');
   this.elements.preview.classList.remove('source-code-body', 'diff-body');
@@ -1111,6 +1130,7 @@ async clearViewerForFailedDocument(fileNode = {}) {
   this.setDocumentReloadEnabled(false);
   this.elements.title.textContent = name;
   document.title = `${name} - ${t('appName')}`;
+  this.elements.scrollNav.hidden = true;
   this.elements.source.textContent = path || t('statusSelectFromSidebar');
   this.elements.format.textContent = formatLabel(FORMAT_IDS.UNKNOWN);
   this.elements.preview.classList.remove('source-code-body', 'diff-body');
@@ -1288,6 +1308,7 @@ setDocumentReloadEnabled(enabled) {
       const fileName = doc.name || t('docTitleUntitled');
       this.elements.title.textContent = fileName;
       document.title = `${fileName} - ${t('appName')}`;
+      this.elements.scrollNav.hidden = false;
       this.elements.source.textContent = this.getDocumentSourceLabel(doc);
       this.elements.format.textContent = formatLabel(format);
       this.elements.preview.classList.toggle('source-code-body', format === FORMAT_IDS.SOURCE_CODE || format === FORMAT_IDS.TEXT || format === FORMAT_IDS.UNKNOWN);

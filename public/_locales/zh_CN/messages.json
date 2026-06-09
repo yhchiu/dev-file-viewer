@@ -30,6 +30,8 @@
   "popupFileUrlEnabled": { "message": "已启用。file:// 的 Markdown 与源代码链接可自动打开。" },
   "popupFileUrlDisabled": { "message": "未启用。请使用“打开文件／打开文件夹”，或启用此项以自动打开 file:// 链接。" },
 
+  "a11yScrollToTop": { "message": "回到顶部" },
+  "a11yScrollToBottom": { "message": "移至底部" },
   "a11yShowSidebar": { "message": "显示侧边栏" },
   "a11yHideSidebar": { "message": "隐藏侧边栏" },
   "a11yOpenOutline": { "message": "打开文档大纲" },

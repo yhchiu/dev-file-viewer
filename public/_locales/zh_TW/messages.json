@@ -30,6 +30,8 @@
   "popupFileUrlEnabled": { "message": "已啟用。file:// 的 Markdown 與原始碼連結可自動開啟。" },
   "popupFileUrlDisabled": { "message": "未啟用。請使用「開啟檔案／開啟資料夾」，或啟用此項以自動開啟 file:// 連結。" },
 
+  "a11yScrollToTop": { "message": "回到頂端" },
+  "a11yScrollToBottom": { "message": "移至底端" },
   "a11yShowSidebar": { "message": "顯示側邊欄" },
   "a11yHideSidebar": { "message": "隱藏側邊欄" },
   "a11yOpenOutline": { "message": "開啟文件大綱" },
