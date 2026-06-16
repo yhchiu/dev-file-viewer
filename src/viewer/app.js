@@ -564,25 +564,34 @@ class DevFileViewerApp {
     const popover = this.elements.tocPopover;
     const gap = 8;
     const bounds = this.getFloatingTocBounds();
-    const padding = bounds.padding;
     const availableWidth = Math.max(0, bounds.maxRight - bounds.minLeft);
     const popoverWidth = Math.min(360, Math.max(180, availableWidth));
-    const popoverHeight = popover.hidden ? 480 : Math.min(popover.offsetHeight || 480, window.innerHeight - padding * 2);
+    const viewportHeight = Math.max(0, bounds.maxBottom - bounds.minTop);
+    const measuredHeight = Math.min(popover.hidden ? 480 : (popover.offsetHeight || 480), viewportHeight || 480);
+    const belowTop = buttonRect.bottom + gap;
+    const belowSpace = Math.max(0, bounds.maxBottom - belowTop);
+    const aboveSpace = Math.max(0, buttonRect.top - gap - bounds.minTop);
+    const targetSpace = belowSpace >= Math.min(measuredHeight, 220) || belowSpace >= aboveSpace
+      ? belowSpace
+      : aboveSpace;
+    const minHeight = Math.min(80, viewportHeight || 80);
+    const popoverHeight = Math.min(measuredHeight, Math.max(minHeight, targetSpace));
     let left = buttonRect.left;
-    let top = buttonRect.bottom + gap;
+    let top = targetSpace === belowSpace
+      ? belowTop
+      : buttonRect.top - popoverHeight - gap;
 
     if (left + popoverWidth > bounds.maxRight) {
-      left = bounds.maxRight - popoverWidth;
-    }
-    if (top + popoverHeight > bounds.maxBottom) {
-      top = buttonRect.top - popoverHeight - gap;
+      left = Math.min(buttonRect.right - popoverWidth, bounds.maxRight - popoverWidth);
     }
     if (top < bounds.minTop) top = bounds.minTop;
+    if (top + popoverHeight > bounds.maxBottom) top = Math.max(bounds.minTop, bounds.maxBottom - popoverHeight);
     if (left < bounds.minLeft) left = bounds.minLeft;
 
     popover.style.left = `${Math.round(left)}px`;
     popover.style.top = `${Math.round(top)}px`;
     popover.style.width = `${Math.round(popoverWidth)}px`;
+    popover.style.maxHeight = `${Math.round(popoverHeight)}px`;
   }
 
   setSidebarTab(tab) {
@@ -1391,6 +1400,7 @@ setDocumentReloadEnabled(enabled) {
       const format = doc.format || detectFormat(doc);
       const nextDocKey = this.getDocumentKey(doc);
       const outlineOptions = { openPopover: nextDocKey !== this.currentDocKey };
+      if (nextDocKey !== this.currentDocKey && !options.anchor) this.clearUrlHash();
       const fileName = doc.name || t('docTitleUntitled');
       this.elements.title.textContent = fileName;
       document.title = `${fileName} - ${t('appName')}`;
@@ -1515,6 +1525,11 @@ setDocumentReloadEnabled(enabled) {
     if (doc?.path) return `path:${doc.path}`;
     if (doc?.name) return `file:${doc.name}`;
     return '';
+  }
+
+  clearUrlHash() {
+    if (!window.location.hash) return;
+    history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
   }
 
   getDocumentSourceLabel(doc) {
