@@ -88,22 +88,125 @@
 }
 
 .file-tabs {
+  --file-tabs-fade-bg: var(--panel);
+  --file-tabs-gap: 7px;
+  --file-tab-divider-inset: 10px;
   flex: 0 0 auto;
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
   min-height: 42px;
   padding: 0 14px;
   border-bottom: 1px solid var(--line);
   background: var(--panel);
+  overflow: hidden;
 }
 
 .file-tabs[hidden] {
   display: none;
 }
 
-.file-tab {
+.file-tabs-viewport {
+  flex: 1 1 auto;
   min-width: 0;
+  height: 100%;
+  align-self: stretch;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+}
+
+.file-tabs-viewport::before,
+.file-tabs-viewport::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 3;
+  width: 34px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .16s ease;
+}
+
+.file-tabs-viewport::before {
+  left: 0;
+  background: linear-gradient(90deg, var(--file-tabs-fade-bg), transparent);
+}
+
+.file-tabs-viewport::after {
+  right: 0;
+  background: linear-gradient(270deg, var(--file-tabs-fade-bg), transparent);
+}
+
+.file-tabs.can-scroll-left .file-tabs-viewport::before,
+.file-tabs.can-scroll-right .file-tabs-viewport::after {
+  opacity: 1;
+}
+
+.file-tabs-list {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--file-tabs-gap);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.file-tabs-list::-webkit-scrollbar {
+  display: none;
+}
+
+.file-tabs-scroll {
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  align-self: center;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.file-tabs-scroll[hidden] {
+  display: none;
+}
+
+.file-tabs-scroll .button-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.file-tabs-scroll:hover,
+.file-tabs-scroll:focus-visible {
+  color: var(--accent);
+  background: var(--accent-soft);
+  outline: 2px solid var(--accent-soft);
+}
+
+.file-tabs-scroll:disabled {
+  color: var(--faint);
+  cursor: default;
+  opacity: .42;
+}
+
+.file-tabs-scroll:disabled:hover,
+.file-tabs-scroll:disabled:focus-visible {
+  background: transparent;
+  outline: 0;
+}
+
+.file-tab {
+  flex: 0 0 clamp(168px, 20vw, 240px);
+  min-width: 168px;
   max-width: 240px;
   display: inline-flex;
   align-items: center;
@@ -113,10 +216,33 @@
   font-size: 12.5px;
   font-weight: 700;
   position: relative;
+  cursor: pointer;
+  user-select: none;
+}
+
+.file-tab:not(.is-active) + .file-tab:not(.is-active)::before {
+  content: "";
+  position: absolute;
+  left: calc(var(--file-tabs-gap) / -2);
+  top: var(--file-tab-divider-inset);
+  bottom: var(--file-tab-divider-inset);
+  width: 2px;
+  background: var(--line);
+  opacity: .9;
+  pointer-events: none;
 }
 
 .file-tab.is-active {
   color: var(--accent);
+}
+
+.file-tab:focus-visible {
+  outline: 2px solid var(--accent-soft);
+  outline-offset: -2px;
+}
+
+.file-tab.is-dragging {
+  opacity: .55;
 }
 
 .file-tab .button-icon {
@@ -132,6 +258,7 @@
   white-space: nowrap;
 }
 
+.file-tab-pin,
 .file-tab-close {
   margin-left: 2px;
   width: 18px;
@@ -149,25 +276,57 @@
   opacity: .75;
 }
 
+.file-tab-pin {
+  margin-left: auto;
+}
+
+.file-tab-pin .button-icon {
+  width: 13px;
+  height: 13px;
+  color: inherit;
+}
+
+.file-tab.is-pinned .file-tab-pin {
+  color: var(--accent);
+  opacity: 1;
+}
+
+.file-tab-pin:hover,
+.file-tab-pin:focus-visible,
 .file-tab-close:hover,
 .file-tab-close:focus-visible {
   opacity: 1;
-  color: var(--danger);
   background: transparent;
   outline: 2px solid var(--accent-soft);
 }
 
+.file-tab-pin:hover,
+.file-tab-pin:focus-visible {
+  color: var(--accent);
+}
+
+.file-tab-close:hover,
+.file-tab-close:focus-visible {
+  color: var(--danger);
+}
+
 .file-tabs-spacer {
-  flex: 1;
+  flex: 0 0 0;
 }
 
 :root[data-app-theme] .activity-rail-btn,
+:root[data-app-theme] .file-tabs-scroll,
+:root[data-app-theme] .file-tab-pin,
 :root[data-app-theme] .file-tab-close {
   border: 0;
   background: transparent;
 }
 
 :root[data-app-theme] .activity-rail-btn:hover,
+:root[data-app-theme] .file-tabs-scroll:hover,
+:root[data-app-theme] .file-tabs-scroll:focus-visible,
+:root[data-app-theme] .file-tab-pin:hover,
+:root[data-app-theme] .file-tab-pin:focus-visible,
 :root[data-app-theme] .file-tab-close:hover,
 :root[data-app-theme] .file-tab-close:focus-visible {
   border: 0;
@@ -253,10 +412,17 @@
 }
 
 :root[data-app-theme="bloom"] .file-tabs {
+  --file-tabs-fade-bg: var(--panel);
+  --file-tabs-gap: 7px;
+  --file-tab-divider-inset: 9px;
   align-items: flex-end;
   min-height: 45px;
   padding: 10px 16px 0;
   background: var(--panel);
+}
+
+:root[data-app-theme="bloom"] .file-tabs-list {
+  align-items: flex-end;
 }
 
 :root[data-app-theme="bloom"] .file-tab {
@@ -441,6 +607,9 @@
 }
 
 :root[data-app-theme="forge"] .file-tabs {
+  --file-tabs-fade-bg: var(--panel-2);
+  --file-tabs-gap: 0px;
+  --file-tab-divider-inset: 9px;
   align-items: stretch;
   gap: 0;
   min-height: 40px;
@@ -449,10 +618,14 @@
   background: var(--panel-2);
 }
 
+:root[data-app-theme="forge"] .file-tabs-list {
+  align-items: stretch;
+}
+
 :root[data-app-theme="forge"] .file-tab {
   max-width: 240px;
   padding: 0 15px;
-  border-right: 1px solid var(--line);
+  border-right: 0;
   color: var(--muted);
   font-size: 12.5px;
   font-weight: 500;
@@ -485,6 +658,15 @@
 :root[data-app-theme="forge"] .file-tab-close {
   border-radius: 4px;
   color: var(--faint);
+}
+
+:root[data-app-theme="forge"] .file-tab-pin {
+  border-radius: 4px;
+  color: var(--faint);
+}
+
+:root[data-app-theme="forge"] .file-tab-pin .button-icon {
+  color: inherit;
 }
 
 :root[data-app-theme="forge"] .toolbar {
@@ -713,12 +895,18 @@
 }
 
 :root[data-app-theme="folio"] .file-tabs {
+  --file-tabs-fade-bg: #f2ecdf;
+  --file-tabs-gap: 2px;
+  --file-tab-divider-inset: 10px;
   align-items: stretch;
-  gap: 2px;
   min-height: 43px;
   height: 43px;
   padding: 0 12px;
   background: linear-gradient(180deg, #f6f1e7, #f2ecdf);
+}
+
+:root[data-app-theme="folio"] .file-tabs-list {
+  align-items: stretch;
 }
 
 :root[data-app-theme="folio"] .file-tab {

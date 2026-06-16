@@ -1,5 +1,5 @@
 import { MarkdownEngine } from '../core/markdown/MarkdownEngine.js';
-import { getArrowRightIcon, getFolderClosedIcon, getFileIcon, getArrowUpIcon, getArrowDownIcon } from '../core/ui/icons.js';
+import { getArrowRightIcon, getFolderClosedIcon, getFileIcon, getPinIcon, getPinFilledIcon, getArrowUpIcon, getArrowDownIcon } from '../core/ui/icons.js';
 import { SourceCodeRenderer } from '../core/source/SourceCodeRenderer.js';
 import { buildSourceSymbolTree, extractSourceSymbols } from '../core/source/sourceSymbols.js';
 import { DiffRenderer } from '../core/diff/DiffRenderer.js';
@@ -101,8 +101,10 @@ class DevFileViewerApp {
       viewerFontSizeInput: document.querySelector('#viewer-font-size-input'),
       activityRailButtons: document.querySelectorAll('[data-rail-target]'),
       fileTabs: document.querySelector('#file-tabs'),
-      fileTabName: document.querySelector('#file-tabs .file-tab-name'),
-      closeFileTab: document.querySelector('#btn-close-file-tab'),
+      fileTabsViewport: document.querySelector('#file-tabs-viewport'),
+      fileTabsList: document.querySelector('#file-tabs-list'),
+      fileTabsScrollLeft: document.querySelector('#btn-file-tabs-scroll-left'),
+      fileTabsScrollRight: document.querySelector('#btn-file-tabs-scroll-right'),
       sidebarTabs: document.querySelectorAll('[data-sidebar-tab]'),
       filesTab: document.querySelector('#tab-files'),
       outlineTab: document.querySelector('#tab-outline'),
@@ -136,6 +138,13 @@ class DevFileViewerApp {
 
     this.currentDoc = null;
     this.currentDocKey = '';
+    this.openTabs = [];
+    this.openTabsByKey = new Map();
+    this.activeTabKey = '';
+    this.fileTabDrag = null;
+    this.fileTabsOverflowFrame = 0;
+    this.fileTabsScrollAnimationFrame = 0;
+    this.ignoreNextFileTabClick = false;
     this.currentFolderLoaded = false;
     this.rememberScrollEnabled = false;
     this.scrollPositions = {};
@@ -240,16 +249,23 @@ class DevFileViewerApp {
     this.elements.tocPopoverFilter.addEventListener('input', () => this.setTocFilter(this.elements.tocPopoverFilter.value));
     document.addEventListener('keydown', event => this.handleGlobalKeydown(event));
     document.addEventListener('pointerdown', event => this.handleDocumentPointerDown(event));
-    window.addEventListener('resize', () => this.reflowFloatingTocPosition());
+    window.addEventListener('resize', () => {
+      this.reflowFloatingTocPosition();
+      this.scheduleUpdateFileTabsOverflowState();
+    });
     for (const tab of this.elements.sidebarTabs) {
       tab.addEventListener('click', () => this.setSidebarTab(tab.dataset.sidebarTab));
     }
     for (const button of this.elements.activityRailButtons) {
       button.addEventListener('click', () => this.handleActivityRailClick(button.dataset.railTarget));
     }
-    this.elements.closeFileTab?.addEventListener('click', () => this.closeFileTab());
+    this.elements.fileTabsScrollLeft?.addEventListener('click', () => this.scrollFileTabs(-1));
+    this.elements.fileTabsScrollRight?.addEventListener('click', () => this.scrollFileTabs(1));
+    this.elements.fileTabsList?.addEventListener('scroll', () => this.updateFileTabsOverflowState(), { passive: true });
+    this.elements.fileTabsViewport?.addEventListener('wheel', event => this.handleFileTabsWheel(event), { passive: false });
     this.elements.preview.addEventListener('click', event => this.handlePreviewAnchorClick(event));
     this.scrollRoot.addEventListener('scroll', () => {
+      this.saveActiveTabRuntimeScroll();
       this.scheduleSaveScrollPosition();
       this.scheduleActiveHeadingUpdate();
     }, { passive: true });
@@ -1049,6 +1065,7 @@ async openDroppedDirectoryHandle(handle) {
   this.renderDirectoryTree(tree);
   this.currentFolderLoaded = true;
   this.setFolderReloadEnabled(true);
+  this.clearViewerForFolder(t('statusDroppedFolderLoaded'));
   this.elements.scrollMemoryCard.hidden = false;
   this.applySidebarTab('files');
   this.setStatus(t('statusDroppedFolderLoaded'), 'success');
@@ -1061,6 +1078,7 @@ async openDroppedDirectoryEntry(entry) {
   this.renderDirectoryTree(tree);
   this.currentFolderLoaded = true;
   this.setFolderReloadEnabled(true);
+  this.clearViewerForFolder(t('statusDroppedFolderLoaded'));
   this.elements.scrollMemoryCard.hidden = false;
   this.applySidebarTab('files');
   this.setStatus(t('statusDroppedFolderLoaded'), 'success');
@@ -1156,9 +1174,9 @@ async openDroppedDirectoryEntry(entry) {
   }
 
   clearViewerForFolder(message = t('statusSelectFromSidebar')) {
+    this.clearAllFileTabs();
     this.currentDoc = null;
     this.currentDocKey = '';
-    this.hideFileTab();
     this.clearViewerLoading();
     this.clearSourceLineHighlight();
     this.clearToc();
@@ -1174,14 +1192,21 @@ async openDroppedDirectoryEntry(entry) {
   }
 
   async clearViewerForFailedDocument(fileNode = {}) {
+    this.saveActiveTabRuntimeScroll();
     await this.saveCurrentScrollPosition();
+    this.clearViewerLoading();
+    if (this.currentDoc) {
+      this.setDocumentReloadEnabled(true);
+      return;
+    }
+
     const path = fileNode.path || fileNode.displayPath || fileNode.name || '';
     const name = fileNode.name || (path ? displayNameFromUrl(path) : t('titleNoFileSelected'));
 
     this.currentDoc = null;
     this.currentDocKey = '';
-    this.hideFileTab();
-    this.clearViewerLoading();
+    this.activeTabKey = '';
+    this.renderFileTabs();
     this.clearSourceLineHighlight();
     this.clearToc();
     this.setDocumentReloadEnabled(false);
@@ -1195,16 +1220,40 @@ async openDroppedDirectoryEntry(entry) {
     this.scrollRoot.scrollTop = 0;
   }
 
-  async closeFileTab() {
-    if (this.currentDoc) await this.saveCurrentScrollPosition();
-    this.clearViewerForNoDocument();
-    this.setStatus(t('statusNoDocumentLoaded'), 'info');
+  async closeFileTab(key = this.activeTabKey) {
+    const tabKey = key || this.currentDocKey;
+    const tabIndex = this.openTabs.findIndex(tab => tab.key === tabKey);
+    if (tabIndex < 0) return;
+
+    const wasActive = tabKey === this.activeTabKey;
+    if (wasActive && this.currentDoc) {
+      this.saveActiveTabRuntimeScroll();
+      await this.saveCurrentScrollPosition();
+    }
+
+    this.openTabs.splice(tabIndex, 1);
+    this.openTabsByKey.delete(tabKey);
+
+    if (!this.openTabs.length) {
+      this.clearViewerForNoDocument();
+      this.setStatus(t('statusNoDocumentLoaded'), 'info');
+      return;
+    }
+
+    if (!wasActive) {
+      this.renderFileTabs();
+      return;
+    }
+
+    const nextTab = this.openTabs[Math.min(tabIndex, this.openTabs.length - 1)];
+    this.renderFileTabs();
+    await this.activateFileTab(nextTab.key);
   }
 
   clearViewerForNoDocument(message = t('docSourceEmpty')) {
+    this.clearAllFileTabs();
     this.currentDoc = null;
     this.currentDocKey = '';
-    this.hideFileTab();
     this.clearViewerLoading();
     this.clearSourceLineHighlight();
     this.clearToc();
@@ -1219,18 +1268,457 @@ async openDroppedDirectoryEntry(entry) {
     this.scrollRoot.scrollTop = 0;
   }
 
-  showFileTab(doc) {
-    if (!this.elements.fileTabs) return;
-    const label = doc?.name || t('docTitleUntitled');
-    if (this.elements.fileTabName) {
-      this.elements.fileTabName.textContent = label;
-      this.elements.fileTabName.title = this.getDocumentSourceLabel(doc) || label;
+  clearAllFileTabs() {
+    this.openTabs = [];
+    this.openTabsByKey.clear();
+    this.activeTabKey = '';
+    this.fileTabDrag = null;
+    this.ignoreNextFileTabClick = false;
+    if (this.fileTabsOverflowFrame) {
+      cancelAnimationFrame(this.fileTabsOverflowFrame);
+      this.fileTabsOverflowFrame = 0;
     }
-    this.elements.fileTabs.hidden = false;
+    this.cancelFileTabsScrollAnimation();
+    this.elements.fileTabs?.classList.remove('is-tab-dragging');
+    this.renderFileTabs();
   }
 
-  hideFileTab() {
-    if (this.elements.fileTabs) this.elements.fileTabs.hidden = true;
+  upsertFileTab(doc, key = this.getDocumentKey(doc)) {
+    if (!key) return null;
+
+    let tab = this.openTabsByKey.get(key);
+    if (!tab) {
+      tab = {
+        key,
+        doc,
+        title: this.getFileTabTitle(doc),
+        sourceLabel: this.getDocumentSourceLabel(doc),
+        pinned: false,
+        scrollTop: null
+      };
+      this.openTabs.push(tab);
+      this.openTabsByKey.set(key, tab);
+    } else {
+      tab.doc = doc;
+      tab.title = this.getFileTabTitle(doc);
+      tab.sourceLabel = this.getDocumentSourceLabel(doc);
+    }
+
+    this.activeTabKey = key;
+    this.renderFileTabs();
+    this.scrollActiveFileTabIntoView();
+    return tab;
+  }
+
+  activateRenderedDocument(doc, key = this.getDocumentKey(doc)) {
+    this.currentDoc = doc;
+    this.currentDocKey = key;
+    this.upsertFileTab(doc, key);
+    this.setDocumentReloadEnabled(true);
+
+    if (doc.sourceType === 'directory-file' && doc.path) {
+      this.directoryTree.markActivePath(doc.path);
+    }
+  }
+
+  getFileTabTitle(doc) {
+    return doc?.name || t('docTitleUntitled');
+  }
+
+  saveActiveTabRuntimeScroll() {
+    const tabKey = this.activeTabKey || this.currentDocKey;
+    const tab = this.openTabsByKey.get(tabKey);
+    if (!tab) return;
+    tab.scrollTop = this.scrollRoot.scrollTop;
+  }
+
+  getRuntimeScrollTopForDocument(key, options = {}) {
+    if (Number.isFinite(options.scrollTop)) return options.scrollTop;
+    if (options.anchor) return null;
+
+    const tab = this.openTabsByKey.get(key);
+    return Number.isFinite(tab?.scrollTop) ? tab.scrollTop : null;
+  }
+
+  async activateFileTab(key) {
+    const tab = this.openTabsByKey.get(key);
+    if (!tab) return;
+    if (key === this.activeTabKey && this.currentDoc) {
+      this.scrollActiveFileTabIntoView();
+      return;
+    }
+
+    await this.renderDocument(tab.doc, {
+      scrollTop: Number.isFinite(tab.scrollTop) ? tab.scrollTop : null
+    });
+  }
+
+  toggleFileTabPinned(key) {
+    const tab = this.openTabsByKey.get(key);
+    if (!tab) return;
+
+    this.removeFileTabFromOrder(key);
+    tab.pinned = !tab.pinned;
+    this.insertFileTabAtGroupBoundary(tab);
+    this.renderFileTabs();
+    this.scrollActiveFileTabIntoView();
+  }
+
+  removeFileTabFromOrder(key) {
+    const index = this.openTabs.findIndex(tab => tab.key === key);
+    if (index >= 0) this.openTabs.splice(index, 1);
+  }
+
+  insertFileTabAtGroupBoundary(tab) {
+    const firstUnpinnedIndex = this.openTabs.findIndex(item => !item.pinned);
+    const insertIndex = firstUnpinnedIndex === -1 ? this.openTabs.length : firstUnpinnedIndex;
+    this.openTabs.splice(insertIndex, 0, tab);
+  }
+
+  renderFileTabs() {
+    const { fileTabs, fileTabsList } = this.elements;
+    if (!fileTabs || !fileTabsList) return;
+
+    fileTabs.hidden = this.openTabs.length === 0;
+    fileTabsList.replaceChildren();
+    if (!this.openTabs.length) {
+      this.updateFileTabsOverflowState();
+      return;
+    }
+
+    for (const tab of this.openTabs) {
+      const active = tab.key === this.activeTabKey;
+      const title = tab.sourceLabel || tab.title;
+      const tabElement = document.createElement('div');
+      tabElement.className = 'file-tab';
+      tabElement.dataset.tabKey = tab.key;
+      tabElement.setAttribute('role', 'tab');
+      tabElement.setAttribute('aria-selected', String(active));
+      tabElement.tabIndex = active ? 0 : -1;
+      tabElement.title = title;
+      tabElement.classList.toggle('is-active', active);
+      tabElement.classList.toggle('is-pinned', tab.pinned);
+      tabElement.classList.toggle('is-dragging', this.fileTabDrag?.key === tab.key && this.fileTabDrag.moved);
+      tabElement.addEventListener('click', event => this.handleFileTabClick(event, tab.key));
+      tabElement.addEventListener('keydown', event => this.handleFileTabKeydown(event, tab.key));
+      tabElement.addEventListener('pointerdown', event => this.startFileTabDrag(event, tab.key));
+
+      const icon = document.createElement('span');
+      icon.className = 'file-tab-icon';
+      icon.innerHTML = getFileIcon('button-icon');
+
+      const name = document.createElement('span');
+      name.className = 'file-tab-name';
+      name.textContent = tab.title;
+
+      const pinButton = document.createElement('button');
+      pinButton.className = 'file-tab-pin';
+      pinButton.type = 'button';
+      pinButton.setAttribute('aria-pressed', String(tab.pinned));
+      pinButton.setAttribute('aria-label', tab.pinned ? t('a11yUnpinFileTab') : t('a11yPinFileTab'));
+      pinButton.title = pinButton.getAttribute('aria-label');
+      pinButton.innerHTML = tab.pinned
+        ? getPinFilledIcon('button-icon')
+        : getPinIcon('button-icon');
+      pinButton.addEventListener('click', event => {
+        event.preventDefault();
+        event.stopPropagation();
+        this.toggleFileTabPinned(tab.key);
+      });
+
+      const closeButton = document.createElement('button');
+      closeButton.className = 'file-tab-close';
+      closeButton.type = 'button';
+      closeButton.setAttribute('aria-label', t('a11yCloseFileTab'));
+      closeButton.title = t('a11yCloseFileTab');
+      closeButton.textContent = '×';
+      closeButton.addEventListener('click', event => {
+        event.preventDefault();
+        event.stopPropagation();
+        this.closeFileTab(tab.key).catch(error => {
+          this.clearViewerLoading();
+          this.setStatus(this.getLoadErrorMessage(error), 'error');
+        });
+      });
+
+      tabElement.append(icon, name, pinButton, closeButton);
+      fileTabsList.append(tabElement);
+    }
+
+    this.scheduleUpdateFileTabsOverflowState();
+  }
+
+  handleFileTabClick(event, key) {
+    if (this.ignoreNextFileTabClick) {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+
+    this.activateFileTab(key).catch(error => {
+      this.clearViewerLoading();
+      this.setStatus(this.getLoadErrorMessage(error), 'error');
+    });
+  }
+
+  handleFileTabKeydown(event, key) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.activateFileTab(key).catch(error => {
+        this.clearViewerLoading();
+        this.setStatus(this.getLoadErrorMessage(error), 'error');
+      });
+      return;
+    }
+
+    if (event.key === 'Delete' || event.key === 'Backspace') {
+      event.preventDefault();
+      this.closeFileTab(key).catch(error => {
+        this.clearViewerLoading();
+        this.setStatus(this.getLoadErrorMessage(error), 'error');
+      });
+      return;
+    }
+
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+      event.preventDefault();
+      this.focusAdjacentFileTab(key, event.key === 'ArrowLeft' ? -1 : 1);
+    }
+  }
+
+  focusAdjacentFileTab(key, direction) {
+    if (!this.openTabs.length) return;
+    const currentIndex = this.openTabs.findIndex(tab => tab.key === key);
+    if (currentIndex < 0) return;
+    const nextIndex = (currentIndex + direction + this.openTabs.length) % this.openTabs.length;
+    this.focusFileTab(this.openTabs[nextIndex].key);
+  }
+
+  focusFileTab(key) {
+    const tabElement = Array.from(this.elements.fileTabsList?.querySelectorAll('.file-tab') || [])
+      .find(element => element.dataset.tabKey === key);
+    tabElement?.focus();
+  }
+
+  scrollActiveFileTabIntoView() {
+    requestAnimationFrame(() => {
+      const activeTab = this.elements.fileTabsList?.querySelector('.file-tab.is-active');
+      activeTab?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      this.updateFileTabsOverflowState();
+    });
+  }
+
+  scheduleUpdateFileTabsOverflowState() {
+    if (this.fileTabsOverflowFrame) return;
+    this.fileTabsOverflowFrame = requestAnimationFrame(() => {
+      this.fileTabsOverflowFrame = 0;
+      this.updateFileTabsOverflowState();
+    });
+  }
+
+  updateFileTabsOverflowState() {
+    const { fileTabs, fileTabsList, fileTabsScrollLeft, fileTabsScrollRight } = this.elements;
+    if (!fileTabs || !fileTabsList) return;
+
+    const maxScrollLeft = Math.max(0, fileTabsList.scrollWidth - fileTabsList.clientWidth);
+    const hasOverflow = !fileTabs.hidden && maxScrollLeft > 1;
+    const canScrollLeft = hasOverflow && fileTabsList.scrollLeft > 1;
+    const canScrollRight = hasOverflow && fileTabsList.scrollLeft < maxScrollLeft - 1;
+
+    fileTabs.classList.toggle('has-overflow', hasOverflow);
+    fileTabs.classList.toggle('can-scroll-left', canScrollLeft);
+    fileTabs.classList.toggle('can-scroll-right', canScrollRight);
+
+    if (fileTabsScrollLeft) {
+      fileTabsScrollLeft.hidden = !hasOverflow;
+      fileTabsScrollLeft.disabled = !canScrollLeft;
+    }
+
+    if (fileTabsScrollRight) {
+      fileTabsScrollRight.hidden = !hasOverflow;
+      fileTabsScrollRight.disabled = !canScrollRight;
+    }
+  }
+
+  scrollFileTabs(direction) {
+    const scroller = this.elements.fileTabsList;
+    if (!scroller) return;
+    const amount = Math.max(240, Math.floor(scroller.clientWidth * 0.92));
+    const maxScrollLeft = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
+    const nextLeft = Math.max(0, Math.min(maxScrollLeft, scroller.scrollLeft + (direction * amount)));
+    this.animateFileTabsScroll(nextLeft);
+  }
+
+  cancelFileTabsScrollAnimation() {
+    if (!this.fileTabsScrollAnimationFrame) return;
+    cancelAnimationFrame(this.fileTabsScrollAnimationFrame);
+    this.fileTabsScrollAnimationFrame = 0;
+  }
+
+  animateFileTabsScroll(targetLeft) {
+    const scroller = this.elements.fileTabsList;
+    if (!scroller) return;
+
+    this.cancelFileTabsScrollAnimation();
+
+    const startLeft = scroller.scrollLeft;
+    const distance = targetLeft - startLeft;
+    if (Math.abs(distance) < 1) {
+      scroller.scrollLeft = targetLeft;
+      this.updateFileTabsOverflowState();
+      return;
+    }
+
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches) {
+      scroller.scrollLeft = targetLeft;
+      this.updateFileTabsOverflowState();
+      return;
+    }
+
+    const duration = 360;
+    const startTime = performance.now();
+    const easeOutCubic = progress => 1 - Math.pow(1 - progress, 3);
+
+    const step = now => {
+      const progress = Math.min(1, (now - startTime) / duration);
+      scroller.scrollLeft = startLeft + (distance * easeOutCubic(progress));
+      this.updateFileTabsOverflowState();
+
+      if (progress < 1) {
+        this.fileTabsScrollAnimationFrame = requestAnimationFrame(step);
+        return;
+      }
+
+      this.fileTabsScrollAnimationFrame = 0;
+      scroller.scrollLeft = targetLeft;
+      this.updateFileTabsOverflowState();
+    };
+
+    this.fileTabsScrollAnimationFrame = requestAnimationFrame(step);
+  }
+
+  handleFileTabsWheel(event) {
+    const scroller = this.elements.fileTabsList;
+    if (!scroller) return;
+
+    const maxScrollLeft = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
+    if (maxScrollLeft <= 1) return;
+
+    const dominantDelta = Math.abs(event.deltaX) > Math.abs(event.deltaY)
+      ? event.deltaX
+      : event.deltaY;
+    if (!dominantDelta) return;
+
+    event.preventDefault();
+    this.cancelFileTabsScrollAnimation();
+    scroller.scrollLeft = Math.max(0, Math.min(maxScrollLeft, scroller.scrollLeft + dominantDelta));
+    this.updateFileTabsOverflowState();
+  }
+
+  startFileTabDrag(event, key) {
+    if (event.button !== 0 || event.target.closest('button')) return;
+    const tab = this.openTabsByKey.get(key);
+    if (!tab) return;
+
+    this.fileTabDrag = {
+      key,
+      pinned: tab.pinned,
+      startX: event.clientX,
+      startY: event.clientY,
+      moved: false
+    };
+
+    const onMove = moveEvent => this.updateFileTabDrag(moveEvent);
+    const onEnd = endEvent => {
+      this.finishFileTabDrag(endEvent);
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onEnd);
+      window.removeEventListener('pointercancel', onEnd);
+    };
+
+    window.addEventListener('pointermove', onMove, { passive: false });
+    window.addEventListener('pointerup', onEnd);
+    window.addEventListener('pointercancel', onEnd);
+  }
+
+  updateFileTabDrag(event) {
+    const drag = this.fileTabDrag;
+    if (!drag) return;
+
+    const distance = Math.abs(event.clientX - drag.startX) + Math.abs(event.clientY - drag.startY);
+    if (!drag.moved && distance <= 4) return;
+
+    drag.moved = true;
+    event.preventDefault();
+    this.elements.fileTabs?.classList.add('is-tab-dragging');
+
+    const targetTab = document.elementFromPoint(event.clientX, event.clientY)?.closest('.file-tab[data-tab-key]');
+    if (!targetTab || !this.elements.fileTabsList?.contains(targetTab)) {
+      this.renderFileTabs();
+      return;
+    }
+
+    const moved = this.moveFileTabByPointer(drag.key, targetTab.dataset.tabKey, event.clientX, targetTab.getBoundingClientRect());
+    if (moved) this.renderFileTabs();
+  }
+
+  finishFileTabDrag(event) {
+    const moved = Boolean(this.fileTabDrag?.moved);
+    this.fileTabDrag = null;
+    this.elements.fileTabs?.classList.remove('is-tab-dragging');
+
+    if (moved) {
+      this.renderFileTabs();
+      event.preventDefault();
+      this.ignoreNextFileTabClick = true;
+      window.setTimeout(() => {
+        this.ignoreNextFileTabClick = false;
+      }, 250);
+      return;
+    }
+
+    this.updateFileTabsOverflowState();
+  }
+
+  moveFileTabByPointer(dragKey, targetKey, clientX, targetRect) {
+    if (!dragKey || !targetKey || dragKey === targetKey) return false;
+
+    const draggedTab = this.openTabsByKey.get(dragKey);
+    const targetTab = this.openTabsByKey.get(targetKey);
+    if (!draggedTab || !targetTab || draggedTab.pinned !== targetTab.pinned) return false;
+
+    const fromIndex = this.openTabs.findIndex(tab => tab.key === dragKey);
+    const targetIndex = this.openTabs.findIndex(tab => tab.key === targetKey);
+    if (fromIndex < 0 || targetIndex < 0) return false;
+
+    const insertAfter = clientX > targetRect.left + (targetRect.width / 2);
+    let insertIndex = targetIndex + (insertAfter ? 1 : 0);
+    const [tab] = this.openTabs.splice(fromIndex, 1);
+    if (fromIndex < insertIndex) insertIndex -= 1;
+
+    insertIndex = this.clampFileTabInsertIndex(insertIndex, tab.pinned);
+    this.openTabs.splice(insertIndex, 0, tab);
+    return true;
+  }
+
+  clampFileTabInsertIndex(index, pinned) {
+    const bounds = this.getFileTabGroupBounds(pinned);
+    return Math.max(bounds.start, Math.min(bounds.end, index));
+  }
+
+  getFileTabGroupBounds(pinned) {
+    const firstUnpinnedIndex = this.openTabs.findIndex(tab => !tab.pinned);
+    if (pinned) {
+      return {
+        start: 0,
+        end: firstUnpinnedIndex === -1 ? this.openTabs.length : firstUnpinnedIndex
+      };
+    }
+
+    return {
+      start: firstUnpinnedIndex === -1 ? this.openTabs.length : firstUnpinnedIndex,
+      end: this.openTabs.length
+    };
   }
 
   renderDirectoryTree(tree) {
@@ -1392,14 +1880,18 @@ setDocumentReloadEnabled(enabled) {
 
   async renderDocument(doc, options = {}) {
     this.setViewerLoading(t('statusLoadingDocument', [doc.name || t('commonDocument')]));
+    await nextFrame();
 
     try {
+      this.saveActiveTabRuntimeScroll();
       await this.saveCurrentScrollPosition();
       this.clearSourceLineHighlight();
 
       const format = doc.format || detectFormat(doc);
       const nextDocKey = this.getDocumentKey(doc);
       const outlineOptions = { openPopover: nextDocKey !== this.currentDocKey };
+      const runtimeScrollTop = this.getRuntimeScrollTopForDocument(nextDocKey, options);
+      const scrollOptions = runtimeScrollTop === null ? options : { ...options, scrollTop: runtimeScrollTop };
       if (nextDocKey !== this.currentDocKey && !options.anchor) this.clearUrlHash();
       const fileName = doc.name || t('docTitleUntitled');
       this.elements.title.textContent = fileName;
@@ -1435,11 +1927,8 @@ setDocumentReloadEnabled(enabled) {
             this.elements.sidebarTools.open = false;
           }
         }
-        this.currentDoc = doc;
-        this.currentDocKey = this.getDocumentKey(doc);
-        this.showFileTab(doc);
-        this.setDocumentReloadEnabled(true);
-        await this.restoreOrResetScroll(doc, options);
+        this.activateRenderedDocument(doc, nextDocKey);
+        await this.restoreOrResetScroll(doc, scrollOptions);
         this.setStatus(
           format === FORMAT_IDS.UNKNOWN
             ? t('statusUnsupportedFormat', [format])
@@ -1461,11 +1950,8 @@ setDocumentReloadEnabled(enabled) {
           this.applySidebarTab('outline');
           this.elements.sidebarTools.open = false;
         }
-        this.currentDoc = doc;
-        this.currentDocKey = this.getDocumentKey(doc);
-        this.showFileTab(doc);
-        this.setDocumentReloadEnabled(true);
-        await this.restoreOrResetScroll(doc, options);
+        this.activateRenderedDocument(doc, nextDocKey);
+        await this.restoreOrResetScroll(doc, scrollOptions);
         this.setStatus(t('statusLoaded', [doc.name || t('commonDiffFile')]), 'success');
         return;
       }
@@ -1482,11 +1968,8 @@ setDocumentReloadEnabled(enabled) {
         this.elements.sidebarTools.open = false;
       }
 
-      this.currentDoc = doc;
-      this.currentDocKey = this.getDocumentKey(doc);
-      this.showFileTab(doc);
-      this.setDocumentReloadEnabled(true);
-      await this.restoreOrResetScroll(doc, options);
+      this.activateRenderedDocument(doc, nextDocKey);
+      await this.restoreOrResetScroll(doc, scrollOptions);
       this.setStatus(t('statusLoaded', [doc.name || t('commonDocument')]), 'success');
     } finally {
       this.clearViewerLoading();
@@ -1523,6 +2006,8 @@ setDocumentReloadEnabled(enabled) {
     if (doc?.sourceType === 'directory-file' && doc.path) return `directory:${doc.path}`;
     if (doc?.url) return `url:${doc.url}`;
     if (doc?.path) return `path:${doc.path}`;
+    if (doc?.relativePath) return `relative:${doc.relativePath}`;
+    if (doc?.displayPath) return `display:${doc.displayPath}`;
     if (doc?.name) return `file:${doc.name}`;
     return '';
   }
@@ -1577,7 +2062,12 @@ setDocumentReloadEnabled(enabled) {
     if (anchor && this.scrollToAnchor(anchor)) return;
 
     const saved = this.rememberScrollEnabled ? this.scrollPositions[docKey] : null;
-    this.scrollRoot.scrollTop = Number.isFinite(saved?.top) ? saved.top : 0;
+    if (Number.isFinite(options.scrollTop)) {
+      this.scrollRoot.scrollTop = options.scrollTop;
+    } else {
+      this.scrollRoot.scrollTop = Number.isFinite(saved?.top) ? saved.top : 0;
+    }
+    this.saveActiveTabRuntimeScroll();
     this.scheduleActiveHeadingUpdate();
   }
 

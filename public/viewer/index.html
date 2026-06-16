@@ -202,15 +202,20 @@
       </section>
 
       <main id="viewer-main" class="viewer-main">
-        <div id="file-tabs" class="file-tabs" role="tablist" data-i18n-aria-label="a11yFileTabs" aria-label="Open files" hidden>
-          <div id="file-tab-active" class="file-tab is-active" role="tab" aria-selected="true">
-            <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true" focusable="false">
-              <path d="M14 3v5h5M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" stroke-linecap="round" stroke-linejoin="round" />
+        <div id="file-tabs" class="file-tabs" data-i18n-aria-label="a11yFileTabs" aria-label="Open files" hidden>
+          <button id="btn-file-tabs-scroll-left" class="file-tabs-scroll file-tabs-scroll-left" type="button" data-i18n-aria-label="a11yScrollFileTabsLeft" data-i18n-title="a11yScrollFileTabsLeft" aria-label="Scroll file tabs left" title="Scroll file tabs left" hidden disabled>
+            <svg class="button-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <path d="M10 3.5 5.5 8 10 12.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
-            <span class="file-tab-name" data-i18n="appName">Dev File Viewer</span>
-            <button id="btn-close-file-tab" class="file-tab-close" type="button" data-i18n-aria-label="a11yCloseFileTab" aria-label="Close file tab">×</button>
+          </button>
+          <div id="file-tabs-viewport" class="file-tabs-viewport">
+            <div id="file-tabs-list" class="file-tabs-list" role="tablist" data-i18n-aria-label="a11yFileTabs" aria-label="Open files"></div>
           </div>
-          <div class="file-tabs-spacer"></div>
+          <button id="btn-file-tabs-scroll-right" class="file-tabs-scroll file-tabs-scroll-right" type="button" data-i18n-aria-label="a11yScrollFileTabsRight" data-i18n-title="a11yScrollFileTabsRight" aria-label="Scroll file tabs right" title="Scroll file tabs right" hidden disabled>
+            <svg class="button-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
         </div>
 
         <div id="viewer-scroll" class="viewer-scroll">
