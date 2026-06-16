@@ -3,6 +3,8 @@
 // effects). app.js imports these; behavior is unchanged.
 import { t } from '../core/i18n/i18n.js';
 
+export const THEME_OPTIONS = new Set(['system', 'bloom', 'forge', 'folio']);
+
 export function immediateParentId(node) {
   const parentIds = node?.parentIds;
   return parentIds?.length ? parentIds[parentIds.length - 1] : '';
@@ -54,13 +56,33 @@ export function isSupportedDroppedName(name = '') {
 }
 
 export function themeLabel(value) {
-  switch (value) {
-    case 'dark': return t('themeDark');
+  switch (normalizeThemePreference(value)) {
     case 'system': return t('themeSystem');
-    case 'light':
+    case 'forge': return t('themeForge');
+    case 'folio': return t('themeFolio');
+    case 'bloom':
     default:
-      return t('themeLight');
+      return t('themeBloom');
   }
+}
+
+export function normalizeThemePreference(value, fallback = 'system') {
+  if (value === 'light') return 'bloom';
+  if (value === 'dark') return 'forge';
+  return THEME_OPTIONS.has(value) ? value : fallback;
+}
+
+export function resolveThemePreference(value, prefersDark = false) {
+  const preference = normalizeThemePreference(value);
+  const appTheme = preference === 'system'
+    ? (prefersDark ? 'forge' : 'bloom')
+    : preference;
+
+  return {
+    appTheme,
+    colorScheme: appTheme === 'forge' ? 'dark' : 'light',
+    preference
+  };
 }
 
 export function contentWidthLabel(value) {

@@ -20,8 +20,10 @@ import {
   extractHash,
   immediateParentId,
   isSupportedDroppedName,
+  normalizeThemePreference,
   normalizeDroppedEntryPath,
   normalizeLinkData,
+  resolveThemePreference,
   safeDecodeURIComponent,
   symbolKindLabel,
   themeLabel
@@ -35,7 +37,7 @@ const CONTENT_WIDTH_KEY = 'devFileViewer:contentWidth';
 const THEME_KEY = 'devFileViewer:theme';
 const VIEWER_FONT_SIZE_KEY = 'devFileViewer:viewerFontSize';
 const TOC_POPOVER_PINNED_KEY = 'devFileViewer:tocPopoverPinned';
-const DEFAULT_SIDEBAR_WIDTH = 310;
+const DEFAULT_SIDEBAR_WIDTH = 322;
 const MIN_SIDEBAR_WIDTH = 240;
 const MAX_SIDEBAR_WIDTH = 560;
 const DEFAULT_CONTENT_WIDTH = 'comfortable';
@@ -43,7 +45,6 @@ const DEFAULT_THEME = 'system';
 const DEFAULT_VIEWER_FONT_SIZE = 15;
 const MIN_VIEWER_FONT_SIZE = 12;
 const MAX_VIEWER_FONT_SIZE = 24;
-const THEME_OPTIONS = new Set(['light', 'dark', 'system']);
 const CONTENT_WIDTHS = {
   narrow: '760px',
   comfortable: '920px',
@@ -66,6 +67,7 @@ class DevFileViewerApp {
       status: document.querySelector('#status'),
       preview: document.querySelector('#preview'),
       viewerMain: document.querySelector('#viewer-main'),
+      viewerScroll: document.querySelector('#viewer-scroll'),
       sidebarTools: document.querySelector('#sidebar-tools'),
       sidebarToggle: document.querySelector('#btn-sidebar-toggle'),
       sidebarRestore: document.querySelector('#btn-sidebar-restore'),
@@ -97,6 +99,10 @@ class DevFileViewerApp {
       theme: document.querySelector('#theme-select'),
       viewerFontSizeRange: document.querySelector('#viewer-font-size-range'),
       viewerFontSizeInput: document.querySelector('#viewer-font-size-input'),
+      activityRailButtons: document.querySelectorAll('[data-rail-target]'),
+      fileTabs: document.querySelector('#file-tabs'),
+      fileTabName: document.querySelector('#file-tabs .file-tab-name'),
+      closeFileTab: document.querySelector('#btn-close-file-tab'),
       sidebarTabs: document.querySelectorAll('[data-sidebar-tab]'),
       filesTab: document.querySelector('#tab-files'),
       outlineTab: document.querySelector('#tab-outline'),
@@ -160,6 +166,10 @@ class DevFileViewerApp {
     this.dragDepth = 0;
   }
 
+  get scrollRoot() {
+    return this.elements.viewerScroll || this.elements.viewerMain;
+  }
+
   async start() {
     localizeDocument();
     await this.plugins.init();
@@ -185,7 +195,7 @@ class DevFileViewerApp {
         event.preventDefault();
         event.stopPropagation();
         this.ignoreNextFloatingOutlineClick = false;
-    this.dragDepth = 0;
+        this.dragDepth = 0;
         return;
       }
       this.toggleTocPopover();
@@ -234,8 +244,12 @@ class DevFileViewerApp {
     for (const tab of this.elements.sidebarTabs) {
       tab.addEventListener('click', () => this.setSidebarTab(tab.dataset.sidebarTab));
     }
+    for (const button of this.elements.activityRailButtons) {
+      button.addEventListener('click', () => this.handleActivityRailClick(button.dataset.railTarget));
+    }
+    this.elements.closeFileTab?.addEventListener('click', () => this.closeFileTab());
     this.elements.preview.addEventListener('click', event => this.handlePreviewAnchorClick(event));
-    this.elements.viewerMain.addEventListener('scroll', () => {
+    this.scrollRoot.addEventListener('scroll', () => {
       this.scheduleSaveScrollPosition();
       this.scheduleActiveHeadingUpdate();
     }, { passive: true });
@@ -246,11 +260,11 @@ class DevFileViewerApp {
 
     // Scroll buttons event listeners
     this.elements.btnScrollTop.addEventListener('click', () => {
-      this.elements.viewerMain.scrollTo({ top: 0, behavior: 'smooth' });
+      this.scrollRoot.scrollTo({ top: 0, behavior: 'smooth' });
     });
     this.elements.btnScrollBottom.addEventListener('click', () => {
-      this.elements.viewerMain.scrollTo({
-        top: this.elements.viewerMain.scrollHeight,
+      this.scrollRoot.scrollTo({
+        top: this.scrollRoot.scrollHeight,
         behavior: 'smooth'
       });
     });
@@ -449,7 +463,7 @@ class DevFileViewerApp {
       this.ignoreNextFloatingOutlineClick = true;
       window.setTimeout(() => {
         this.ignoreNextFloatingOutlineClick = false;
-    this.dragDepth = 0;
+        this.dragDepth = 0;
       }, 250);
     }
   }
@@ -588,40 +602,72 @@ class DevFileViewerApp {
 
     this.elements.filesPanel.hidden = nextTab !== 'files';
     this.elements.outlinePanel.hidden = nextTab !== 'outline';
+    this.syncActivityRail();
   }
 
-async restoreTheme() {
-  const stored = await chrome.storage.local.get(THEME_KEY);
-  this.themePreference = THEME_OPTIONS.has(stored[THEME_KEY]) ? stored[THEME_KEY] : DEFAULT_THEME;
-  if (this.elements.theme) this.elements.theme.value = this.themePreference;
-  this.applyTheme();
-}
+  handleActivityRailClick(target) {
+    if (target === 'sidebar-tools') {
+      if (this.elements.sidebarTools) this.elements.sidebarTools.open = !this.elements.sidebarTools.open;
+      return;
+    }
 
-async setThemePreference(value) {
-  this.themePreference = THEME_OPTIONS.has(value) ? value : DEFAULT_THEME;
-  if (this.elements.theme && this.elements.theme.value !== this.themePreference) {
-    this.elements.theme.value = this.themePreference;
+    if (target === 'btn-open-url') {
+      if (this.elements.sidebarTools) this.elements.sidebarTools.open = true;
+      this.elements.openUrl?.click();
+      return;
+    }
+
+    if (target === 'tab-files') {
+      this.setSidebarTab('files');
+      this.elements.filesTab?.focus();
+      return;
+    }
+
+    if (target === 'tab-outline') {
+      this.setSidebarTab('outline');
+      this.elements.outlineTab?.focus();
+    }
   }
-  await chrome.storage.local.set({ [THEME_KEY]: this.themePreference });
-  this.applyTheme();
-  this.setStatus(t('statusThemeSet', [themeLabel(this.themePreference)]), 'success');
-}
 
-applyTheme() {
-  const resolved = this.resolveTheme();
-  document.documentElement.dataset.theme = resolved;
-  document.documentElement.dataset.themePreference = this.themePreference;
-  document.documentElement.style.colorScheme = resolved;
-  document.body?.setAttribute('data-theme', resolved);
-  this.elements.app?.setAttribute('data-theme', resolved);
-}
-
-resolveTheme() {
-  if (this.themePreference === 'system') {
-    return this.themeMediaQuery?.matches ? 'dark' : 'light';
+  syncActivityRail() {
+    const activeTarget = this.activeSidebarTab === 'outline' ? 'tab-outline' : 'tab-files';
+    for (const button of this.elements.activityRailButtons) {
+      button.classList.toggle('is-active', button.dataset.railTarget === activeTarget);
+    }
   }
-  return this.themePreference === 'dark' ? 'dark' : 'light';
-}
+
+  async restoreTheme() {
+    const stored = await chrome.storage.local.get(THEME_KEY);
+    this.themePreference = normalizeThemePreference(stored[THEME_KEY], DEFAULT_THEME);
+    if (this.elements.theme) this.elements.theme.value = this.themePreference;
+    this.applyTheme();
+  }
+
+  async setThemePreference(value) {
+    this.themePreference = normalizeThemePreference(value, DEFAULT_THEME);
+    if (this.elements.theme && this.elements.theme.value !== this.themePreference) {
+      this.elements.theme.value = this.themePreference;
+    }
+    await chrome.storage.local.set({ [THEME_KEY]: this.themePreference });
+    this.applyTheme();
+    this.setStatus(t('statusThemeSet', [themeLabel(this.themePreference)]), 'success');
+  }
+
+  applyTheme() {
+    const resolved = this.resolveTheme();
+    document.documentElement.dataset.theme = resolved.colorScheme;
+    document.documentElement.dataset.appTheme = resolved.appTheme;
+    document.documentElement.dataset.themePreference = this.themePreference;
+    document.documentElement.style.colorScheme = resolved.colorScheme;
+    document.body?.setAttribute('data-theme', resolved.colorScheme);
+    document.body?.setAttribute('data-app-theme', resolved.appTheme);
+    this.elements.app?.setAttribute('data-theme', resolved.colorScheme);
+    this.elements.app?.setAttribute('data-app-theme', resolved.appTheme);
+  }
+
+  resolveTheme() {
+    return resolveThemePreference(this.themePreference, Boolean(this.themeMediaQuery?.matches));
+  }
 
   async restoreContentWidth() {
     const stored = await chrome.storage.local.get(CONTENT_WIDTH_KEY);
@@ -1100,43 +1146,83 @@ async openDroppedDirectoryEntry(entry) {
     }
   }
 
-clearViewerForFolder(message = t('statusSelectFromSidebar')) {
-  this.currentDoc = null;
-  this.currentDocKey = '';
-  this.clearViewerLoading();
-  this.clearSourceLineHighlight();
-  this.clearToc();
-  this.setDocumentReloadEnabled(false);
-  this.elements.title.textContent = t('titleNoFileSelected');
-  document.title = t('appName');
-  this.elements.scrollNav.hidden = true;
-  this.elements.source.textContent = message;
-  this.elements.format.textContent = t('formatFolder');
-  this.elements.preview.classList.remove('source-code-body', 'diff-body');
-  this.elements.preview.textContent = '';
-  this.elements.viewerMain.scrollTop = 0;
-}
+  clearViewerForFolder(message = t('statusSelectFromSidebar')) {
+    this.currentDoc = null;
+    this.currentDocKey = '';
+    this.hideFileTab();
+    this.clearViewerLoading();
+    this.clearSourceLineHighlight();
+    this.clearToc();
+    this.setDocumentReloadEnabled(false);
+    this.elements.title.textContent = t('titleNoFileSelected');
+    document.title = t('appName');
+    this.elements.scrollNav.hidden = true;
+    this.elements.source.textContent = message;
+    this.elements.format.textContent = t('formatFolder');
+    this.elements.preview.classList.remove('source-code-body', 'diff-body');
+    this.elements.preview.textContent = '';
+    this.scrollRoot.scrollTop = 0;
+  }
 
-async clearViewerForFailedDocument(fileNode = {}) {
-  await this.saveCurrentScrollPosition();
-  const path = fileNode.path || fileNode.displayPath || fileNode.name || '';
-  const name = fileNode.name || (path ? displayNameFromUrl(path) : t('titleNoFileSelected'));
+  async clearViewerForFailedDocument(fileNode = {}) {
+    await this.saveCurrentScrollPosition();
+    const path = fileNode.path || fileNode.displayPath || fileNode.name || '';
+    const name = fileNode.name || (path ? displayNameFromUrl(path) : t('titleNoFileSelected'));
 
-  this.currentDoc = null;
-  this.currentDocKey = '';
-  this.clearViewerLoading();
-  this.clearSourceLineHighlight();
-  this.clearToc();
-  this.setDocumentReloadEnabled(false);
-  this.elements.title.textContent = name;
-  document.title = `${name} - ${t('appName')}`;
-  this.elements.scrollNav.hidden = true;
-  this.elements.source.textContent = path || t('statusSelectFromSidebar');
-  this.elements.format.textContent = formatLabel(FORMAT_IDS.UNKNOWN);
-  this.elements.preview.classList.remove('source-code-body', 'diff-body');
-  this.elements.preview.textContent = '';
-  this.elements.viewerMain.scrollTop = 0;
-}
+    this.currentDoc = null;
+    this.currentDocKey = '';
+    this.hideFileTab();
+    this.clearViewerLoading();
+    this.clearSourceLineHighlight();
+    this.clearToc();
+    this.setDocumentReloadEnabled(false);
+    this.elements.title.textContent = name;
+    document.title = `${name} - ${t('appName')}`;
+    this.elements.scrollNav.hidden = true;
+    this.elements.source.textContent = path || t('statusSelectFromSidebar');
+    this.elements.format.textContent = formatLabel(FORMAT_IDS.UNKNOWN);
+    this.elements.preview.classList.remove('source-code-body', 'diff-body');
+    this.elements.preview.textContent = '';
+    this.scrollRoot.scrollTop = 0;
+  }
+
+  async closeFileTab() {
+    if (this.currentDoc) await this.saveCurrentScrollPosition();
+    this.clearViewerForNoDocument();
+    this.setStatus(t('statusNoDocumentLoaded'), 'info');
+  }
+
+  clearViewerForNoDocument(message = t('docSourceEmpty')) {
+    this.currentDoc = null;
+    this.currentDocKey = '';
+    this.hideFileTab();
+    this.clearViewerLoading();
+    this.clearSourceLineHighlight();
+    this.clearToc();
+    this.setDocumentReloadEnabled(false);
+    this.elements.title.textContent = t('appName');
+    document.title = t('appName');
+    this.elements.scrollNav.hidden = true;
+    this.elements.source.textContent = message;
+    this.elements.format.textContent = t('formatMarkdown');
+    this.elements.preview.classList.remove('source-code-body', 'diff-body');
+    this.elements.preview.textContent = '';
+    this.scrollRoot.scrollTop = 0;
+  }
+
+  showFileTab(doc) {
+    if (!this.elements.fileTabs) return;
+    const label = doc?.name || t('docTitleUntitled');
+    if (this.elements.fileTabName) {
+      this.elements.fileTabName.textContent = label;
+      this.elements.fileTabName.title = this.getDocumentSourceLabel(doc) || label;
+    }
+    this.elements.fileTabs.hidden = false;
+  }
+
+  hideFileTab() {
+    if (this.elements.fileTabs) this.elements.fileTabs.hidden = true;
+  }
 
   renderDirectoryTree(tree) {
     this.directoryTree.render(tree, async fileNode => {
@@ -1195,7 +1281,7 @@ async reloadCurrentDocument() {
   }
 
   const previousDoc = this.currentDoc;
-  const previousScrollTop = this.elements.viewerMain.scrollTop;
+  const previousScrollTop = this.scrollRoot.scrollTop;
   const hashAnchor = extractHash(window.location.hash);
 
   try {
@@ -1208,7 +1294,7 @@ async reloadCurrentDocument() {
 
     if (!hashAnchor) {
       await nextFrame();
-      this.elements.viewerMain.scrollTop = previousScrollTop;
+      this.scrollRoot.scrollTop = previousScrollTop;
       this.scheduleActiveHeadingUpdate();
     }
 
@@ -1341,6 +1427,7 @@ setDocumentReloadEnabled(enabled) {
         }
         this.currentDoc = doc;
         this.currentDocKey = this.getDocumentKey(doc);
+        this.showFileTab(doc);
         this.setDocumentReloadEnabled(true);
         await this.restoreOrResetScroll(doc, options);
         this.setStatus(
@@ -1366,6 +1453,7 @@ setDocumentReloadEnabled(enabled) {
         }
         this.currentDoc = doc;
         this.currentDocKey = this.getDocumentKey(doc);
+        this.showFileTab(doc);
         this.setDocumentReloadEnabled(true);
         await this.restoreOrResetScroll(doc, options);
         this.setStatus(t('statusLoaded', [doc.name || t('commonDiffFile')]), 'success');
@@ -1386,6 +1474,7 @@ setDocumentReloadEnabled(enabled) {
 
       this.currentDoc = doc;
       this.currentDocKey = this.getDocumentKey(doc);
+      this.showFileTab(doc);
       this.setDocumentReloadEnabled(true);
       await this.restoreOrResetScroll(doc, options);
       this.setStatus(t('statusLoaded', [doc.name || t('commonDocument')]), 'success');
@@ -1458,7 +1547,7 @@ setDocumentReloadEnabled(enabled) {
   async saveCurrentScrollPosition() {
     if (!this.rememberScrollEnabled || !this.currentDocKey) return;
     this.scrollPositions[this.currentDocKey] = {
-      top: this.elements.viewerMain.scrollTop,
+      top: this.scrollRoot.scrollTop,
       updatedAt: Date.now()
     };
     await chrome.storage.session.set({ [SCROLL_POSITIONS_KEY]: this.scrollPositions });
@@ -1473,7 +1562,7 @@ setDocumentReloadEnabled(enabled) {
     if (anchor && this.scrollToAnchor(anchor)) return;
 
     const saved = this.rememberScrollEnabled ? this.scrollPositions[docKey] : null;
-    this.elements.viewerMain.scrollTop = Number.isFinite(saved?.top) ? saved.top : 0;
+    this.scrollRoot.scrollTop = Number.isFinite(saved?.top) ? saved.top : 0;
     this.scheduleActiveHeadingUpdate();
   }
 
@@ -1921,7 +2010,7 @@ collectTocDescendantIds(node, targetSet) {
       return;
     }
 
-    const rootRect = this.elements.viewerMain.getBoundingClientRect();
+    const rootRect = this.scrollRoot.getBoundingClientRect();
     const activationLine = rootRect.top + 110;
     let active = null;
 

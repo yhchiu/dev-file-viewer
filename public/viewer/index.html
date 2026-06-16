@@ -5,20 +5,48 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title data-i18n="appName">Dev File Viewer</title>
     <link rel="stylesheet" href="viewer.css" />
+    <link rel="stylesheet" href="viewer-themes.css" />
   </head>
   <body>
     <div id="app" class="app-shell">
       <button id="btn-sidebar-restore" class="sidebar-restore" type="button" data-i18n-aria-label="a11yShowSidebar" data-i18n-title="a11yShowSidebar" aria-label="Show sidebar" title="Show sidebar" hidden>☰</button>
       <button id="btn-floating-outline" class="floating-outline" type="button" data-i18n="outline" data-i18n-aria-label="a11yOpenOutline" data-i18n-title="floatingOutlineHint" aria-label="Open document outline" aria-expanded="false" title="Click to open outline. Drag to move." hidden>Outline</button>
       <aside id="sidebar" class="sidebar" data-i18n-aria-label="a11yDirectorySidebar" aria-label="Directory sidebar">
-        <div class="brand">
-          <img class="brand-mark" src="../assets/icons/icon48.png" srcset="../assets/icons/icon48.png 1x, ../assets/icons/icon128.png 2x" width="42" height="42" alt="" aria-hidden="true" />
-          <div class="brand-copy">
-            <div class="brand-title" data-i18n="appName">Dev File Viewer</div>
-            <div class="brand-subtitle" data-i18n="appTagline">Markdown, Diff &amp; Source Viewer</div>
+        <nav class="activity-rail" data-i18n-aria-label="a11yPrimaryNavigation" aria-label="Primary navigation">
+          <img class="activity-rail-mark" src="../assets/icons/icon48.png" srcset="../assets/icons/icon48.png 1x, ../assets/icons/icon128.png 2x" width="34" height="34" alt="" aria-hidden="true" />
+          <button class="activity-rail-btn is-active" type="button" data-rail-target="tab-files" data-i18n-aria-label="tabFiles" data-i18n-title="tabFiles" aria-label="Files" title="Files">
+            <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true" focusable="false">
+              <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+          <button class="activity-rail-btn" type="button" data-rail-target="tab-outline" data-i18n-aria-label="outline" data-i18n-title="outline" aria-label="Outline" title="Outline">
+            <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true" focusable="false">
+              <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+          <button class="activity-rail-btn" type="button" data-rail-target="btn-open-url" data-i18n-aria-label="viewerOpenUrl" data-i18n-title="viewerOpenUrl" aria-label="Open URL" title="Open URL">
+            <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true" focusable="false">
+              <path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+          <div class="activity-rail-spacer"></div>
+          <button class="activity-rail-btn" type="button" data-rail-target="sidebar-tools" data-i18n-aria-label="sidebarToolsSummary" data-i18n-title="sidebarToolsSummary" aria-label="Open &amp; Settings" title="Open &amp; Settings">
+            <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true" focusable="false">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.7 1.7 0 0 0 .35 1.86l.04.04a2 2 0 1 1-2.83 2.83l-.04-.04a1.7 1.7 0 0 0-1.86-.35 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.07A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.86.35l-.04.04a2 2 0 1 1-2.83-2.83l.04-.04A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.07A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.35-1.86l-.04-.04a2 2 0 1 1 2.83-2.83l.04.04A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 1 1 4 0v.07A1.7 1.7 0 0 0 15 4.6a1.7 1.7 0 0 0 1.86-.35l.04-.04a2 2 0 1 1 2.83 2.83l-.04.04A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.56 1.03H21a2 2 0 1 1 0 4h-.07A1.7 1.7 0 0 0 19.4 15z" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+        </nav>
+
+        <div class="sidebar-body">
+          <div class="brand">
+            <img class="brand-mark" src="../assets/icons/icon48.png" srcset="../assets/icons/icon48.png 1x, ../assets/icons/icon128.png 2x" width="42" height="42" alt="" aria-hidden="true" />
+            <div class="brand-copy">
+              <div class="brand-title" data-i18n="appName">Dev File Viewer</div>
+              <div class="brand-subtitle" data-i18n="appTagline">Markdown, Diff &amp; Source Viewer</div>
+            </div>
+            <button id="btn-sidebar-toggle" class="sidebar-toggle" type="button" data-i18n-aria-label="a11yHideSidebar" data-i18n-title="a11yHideSidebar" aria-label="Hide sidebar" title="Hide sidebar" aria-expanded="true">←</button>
           </div>
-          <button id="btn-sidebar-toggle" class="sidebar-toggle" type="button" data-i18n-aria-label="a11yHideSidebar" data-i18n-title="a11yHideSidebar" aria-label="Hide sidebar" title="Hide sidebar" aria-expanded="true">←</button>
-        </div>
 
         <details id="sidebar-tools" class="sidebar-tools" open>
           <summary data-i18n="sidebarToolsSummary">Open &amp; Settings</summary>
@@ -54,15 +82,16 @@
             </select>
           </section>
 
-<section class="theme-card" data-i18n-aria-label="a11yThemeSetting" aria-label="Theme setting">
-  <label for="theme-select" data-i18n="themeLabel">Theme</label>
-  <select id="theme-select" data-i18n-aria-label="themeLabel" aria-label="Theme">
-    <option value="light" data-i18n="themeLight">Light</option>
-    <option value="dark" data-i18n="themeDark">Dark</option>
-    <option value="system" selected data-i18n="themeSystem">System</option>
-  </select>
-  <p data-i18n="themeStoredNote">Theme preference is stored locally in this browser.</p>
-</section>
+          <section class="theme-card" data-i18n-aria-label="a11yThemeSetting" aria-label="Theme setting">
+            <label for="theme-select" data-i18n="themeLabel">Theme</label>
+            <select id="theme-select" data-i18n-aria-label="themeLabel" aria-label="Theme">
+              <option value="system" selected data-i18n="themeSystem">System (Light/Dark)</option>
+              <option value="bloom" data-i18n="themeBloom">Bloom (Light)</option>
+              <option value="forge" data-i18n="themeForge">Forge (Dark)</option>
+              <option value="folio" data-i18n="themeFolio">Folio (Light)</option>
+            </select>
+            <p data-i18n="themeStoredNote">Theme preference is stored locally in this browser.</p>
+          </section>
         </details>
 
         <section id="scroll-memory-card" class="scroll-memory-card" hidden>
@@ -123,6 +152,7 @@
             <div class="toc-empty" data-i18n="tocEmptyMarkdown">Open a Markdown document to show its outline. Source files do not have an outline yet.</div>
           </nav>
         </section>
+        </div>
       </aside>
 
       <div
@@ -134,7 +164,7 @@
         aria-label="Resize sidebar"
         aria-valuemin="240"
         aria-valuemax="560"
-        aria-valuenow="310"
+        aria-valuenow="322"
         tabindex="0"
         data-i18n-title="resizeSidebarHint"
         title="Drag to resize sidebar. Double-click to reset."
@@ -172,7 +202,19 @@
       </section>
 
       <main id="viewer-main" class="viewer-main">
-        <header class="toolbar">
+        <div id="file-tabs" class="file-tabs" role="tablist" data-i18n-aria-label="a11yFileTabs" aria-label="Open files" hidden>
+          <div id="file-tab-active" class="file-tab is-active" role="tab" aria-selected="true">
+            <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true" focusable="false">
+              <path d="M14 3v5h5M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <span class="file-tab-name" data-i18n="appName">Dev File Viewer</span>
+            <button id="btn-close-file-tab" class="file-tab-close" type="button" data-i18n-aria-label="a11yCloseFileTab" aria-label="Close file tab">×</button>
+          </div>
+          <div class="file-tabs-spacer"></div>
+        </div>
+
+        <div id="viewer-scroll" class="viewer-scroll">
+          <header class="toolbar">
           <div class="doc-heading">
             <h1 id="doc-title" data-i18n="appName">Dev File Viewer</h1>
             <div class="doc-source-row">
@@ -198,17 +240,18 @@
             </div>
             <span id="doc-format" class="format-badge" data-i18n="formatMarkdown">Markdown</span>
           </div>
-        </header>
+          </header>
 
-        <section id="status" class="status info" data-i18n="viewerInitialStatus">
+          <section id="status" class="status info" data-i18n="viewerInitialStatus">
 V2.9.3 uses SVG controls for Outline pop-out/pin and places the floating Outline control in the viewer area.
-        </section>
+          </section>
 
-        <article id="preview" class="markdown-body" tabindex="0"></article>
+          <article id="preview" class="markdown-body" tabindex="0"></article>
 
-        <div id="scroll-nav" class="scroll-nav" hidden>
-          <button id="btn-scroll-top" class="scroll-nav-btn" type="button" data-i18n-title="a11yScrollToTop" title="Scroll to top"></button>
-          <button id="btn-scroll-bottom" class="scroll-nav-btn" type="button" data-i18n-title="a11yScrollToBottom" title="Scroll to bottom"></button>
+          <div id="scroll-nav" class="scroll-nav" hidden>
+            <button id="btn-scroll-top" class="scroll-nav-btn" type="button" data-i18n-title="a11yScrollToTop" title="Scroll to top"></button>
+            <button id="btn-scroll-bottom" class="scroll-nav-btn" type="button" data-i18n-title="a11yScrollToBottom" title="Scroll to bottom"></button>
+          </div>
         </div>
       </main>
     </div>

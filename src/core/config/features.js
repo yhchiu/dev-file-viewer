@@ -23,8 +23,10 @@ export const features = Object.freeze({
     annotations: false
   },
   themes: {
-    light: true,
-    dark: true
+    bloom: true,
+    forge: true,
+    folio: true,
+    system: true
   },
   shortcuts: false
 });

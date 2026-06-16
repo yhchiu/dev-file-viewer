@@ -74,7 +74,7 @@ button { border: 1px solid var(--line); border-radius: 10px; background: #fff; c
 button:hover { border-color: var(--accent); color: var(--accent); }
 input, select { width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; background: #fff; color: var(--fg); }
 
-.app-shell { --sidebar-width: 310px; display: grid; grid-template-columns: var(--sidebar-width) 8px minmax(0, 1fr); height: 100vh; min-height: 0; overflow: hidden; transition: grid-template-columns .18s ease; }
+.app-shell { --sidebar-width: 322px; display: grid; grid-template-columns: var(--sidebar-width) 8px minmax(0, 1fr); height: 100vh; min-height: 0; overflow: hidden; transition: grid-template-columns .18s ease; }
 .app-shell.sidebar-collapsed { grid-template-columns: minmax(0, 1fr); }
 .app-shell.sidebar-resizing { cursor: col-resize; user-select: none; transition: none; }
 .app-shell.sidebar-resizing * { cursor: col-resize !important; user-select: none; }
@@ -716,7 +716,8 @@ input, select { width: 100%; border: 1px solid var(--line); border-radius: 10px;
 }
 
 body.markdown-width-full .diff-body,
-.app-shell.markdown-width-full .diff-body {
+.app-shell.markdown-width-full .diff-body,
+.app-shell.content-width-full .diff-body {
   width: calc(100% - 48px);
   max-width: none;
 }
@@ -1961,4 +1962,3 @@ body[data-theme="dark"],
   background: var(--accent-soft);
   border-color: #1e3a8a;
 }
-

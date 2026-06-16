@@ -5,6 +5,8 @@ import {
   normalizeDroppedEntryPath,
   isSupportedDroppedName,
   normalizeLinkData,
+  normalizeThemePreference,
+  resolveThemePreference,
   themeLabel,
   contentWidthLabel,
   symbolKindLabel
@@ -57,11 +59,35 @@ describe('normalizeLinkData', () => {
 
 describe('label helpers (i18n-backed)', () => {
   it('returns localized labels via the chrome.i18n mock', () => {
-    expect(themeLabel('dark')).toBe('Dark');
-    expect(themeLabel('system')).toBe('System');
+    expect(themeLabel('bloom')).toBe('Bloom (Light)');
+    expect(themeLabel('forge')).toBe('Forge (Dark)');
+    expect(themeLabel('folio')).toBe('Folio (Light)');
+    expect(themeLabel('system')).toBe('System (Light/Dark)');
     expect(contentWidthLabel('full')).toBe('Full width');
     expect(contentWidthLabel('narrow')).toBe('Narrow');
     expect(symbolKindLabel('function')).toBe('fn');
     expect(symbolKindLabel('class')).toBe('class');
+  });
+});
+
+describe('theme helpers', () => {
+  it('maps legacy light/dark preferences to named themes', () => {
+    expect(normalizeThemePreference('light')).toBe('bloom');
+    expect(normalizeThemePreference('dark')).toBe('forge');
+    expect(normalizeThemePreference('folio')).toBe('folio');
+    expect(normalizeThemePreference('unknown')).toBe('system');
+  });
+
+  it('resolves system to Bloom for light mode and Forge for dark mode', () => {
+    expect(resolveThemePreference('system', false)).toEqual({
+      appTheme: 'bloom',
+      colorScheme: 'light',
+      preference: 'system'
+    });
+    expect(resolveThemePreference('system', true)).toEqual({
+      appTheme: 'forge',
+      colorScheme: 'dark',
+      preference: 'system'
+    });
   });
 });
