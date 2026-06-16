@@ -68,6 +68,8 @@ class DevFileViewerApp {
       preview: document.querySelector('#preview'),
       viewerMain: document.querySelector('#viewer-main'),
       viewerScroll: document.querySelector('#viewer-scroll'),
+      viewerLoading: document.querySelector('#viewer-loading'),
+      viewerLoadingLabel: document.querySelector('#viewer-loading-label'),
       sidebarTools: document.querySelector('#sidebar-tools'),
       sidebarToggle: document.querySelector('#btn-sidebar-toggle'),
       sidebarRestore: document.querySelector('#btn-sidebar-restore'),
@@ -1981,12 +1983,21 @@ setDocumentReloadEnabled(enabled) {
     this.elements.preview.classList.add('is-loading');
     this.elements.preview.dataset.loadingLabel = label;
     this.elements.preview.setAttribute('aria-busy', 'true');
+    if (this.elements.viewerLoadingLabel) this.elements.viewerLoadingLabel.textContent = label;
+    if (this.elements.viewerLoading) {
+      this.elements.viewerLoading.hidden = false;
+      this.elements.viewerLoading.removeAttribute('aria-hidden');
+    }
   }
 
   clearViewerLoading() {
     this.elements.preview.classList.remove('is-loading');
     this.elements.preview.removeAttribute('aria-busy');
     delete this.elements.preview.dataset.loadingLabel;
+    if (this.elements.viewerLoading) {
+      this.elements.viewerLoading.hidden = true;
+      this.elements.viewerLoading.setAttribute('aria-hidden', 'true');
+    }
   }
 
   setDirectoryTreeLoading(message = t('statusOpeningFolder')) {

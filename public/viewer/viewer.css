@@ -277,37 +277,26 @@ input, select { width: 100%; border: 1px solid var(--line); border-radius: 10px;
 .status.error { color: var(--danger); background: #fff7f6; border-color: #ffd6d1; }
 .status.success { color: var(--success); background: #f2fff8; border-color: #c9f0dc; }
 .status.info { color: var(--muted); }
-.markdown-body { position: relative; width: min(100%, var(--markdown-body-width)); max-width: var(--markdown-body-width); min-width: 0; margin: 0 auto; background: var(--panel); border: 1px solid var(--line); box-shadow: var(--shadow); border-radius: 20px; padding: 34px; min-height: 64vh; overflow-x: auto; font-size: var(--viewer-font-size); }
-.app-shell.content-width-full .toolbar,
-.app-shell.content-width-full .status,
-.app-shell.content-width-full .markdown-body { width: 100%; max-width: none; }
-.markdown-body:empty::before { content: "No document loaded."; color: var(--muted); }
-.markdown-body.is-loading { overflow: hidden; }
-.markdown-body.is-loading > * { opacity: .28; pointer-events: none; }
-.markdown-body.is-loading::before {
-  content: "";
-  position: absolute;
-  z-index: 2;
-  top: calc(50% - 30px);
-  left: calc(50% - 15px);
-  width: 30px;
-  height: 30px;
-  border: 3px solid var(--line);
-  border-top-color: var(--accent);
-  border-radius: 999px;
-  transform-origin: 50% 50%;
-  will-change: transform;
-  animation: preview-loading-spin .8s linear infinite;
+.viewer-loading {
+  position: sticky;
+  z-index: 30;
+  top: 50%;
+  width: min(100%, var(--markdown-body-width));
+  max-width: var(--markdown-body-width);
+  height: 0;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  transform: translateY(-50%);
 }
-.markdown-body.is-loading::after {
-  content: attr(data-loading-label);
-  position: absolute;
-  z-index: 2;
-  top: calc(50% + 14px);
-  left: 50%;
-  max-width: calc(100% - 48px);
-  transform: translateX(-50%);
-  padding: 5px 10px;
+.viewer-loading[hidden] { display: none; }
+.viewer-loading-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: min(100%, 520px);
+  padding: 9px 14px;
   border: 1px solid var(--line);
   border-radius: 999px;
   background: var(--panel);
@@ -315,9 +304,36 @@ input, select { width: 100%; border: 1px solid var(--line); border-radius: 10px;
   font-size: 13px;
   font-weight: 750;
   line-height: 1.35;
-  text-align: center;
   overflow-wrap: anywhere;
-  box-shadow: 0 8px 18px rgba(16, 24, 40, .08);
+  box-shadow: 0 12px 28px rgba(16, 24, 40, .14);
+}
+.viewer-loading-spinner {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  border: 3px solid var(--line);
+  border-top-color: var(--accent);
+  border-radius: 999px;
+  transform-origin: 50% 50%;
+  will-change: transform;
+  animation: preview-loading-spin .8s linear infinite;
+}
+.viewer-loading-label {
+  min-width: 0;
+}
+.markdown-body { position: relative; width: min(100%, var(--markdown-body-width)); max-width: var(--markdown-body-width); min-width: 0; margin: 0 auto; background: var(--panel); border: 1px solid var(--line); box-shadow: var(--shadow); border-radius: 20px; padding: 34px; min-height: 64vh; overflow-x: auto; font-size: var(--viewer-font-size); }
+.app-shell.content-width-full .toolbar,
+.app-shell.content-width-full .status,
+.app-shell.content-width-full .viewer-loading,
+.app-shell.content-width-full .markdown-body { width: 100%; max-width: none; }
+.markdown-body:empty::before { content: "No document loaded."; color: var(--muted); }
+.markdown-body.is-loading { overflow: hidden; }
+.markdown-body.is-loading > * { opacity: .28; pointer-events: none; }
+.markdown-body.is-loading::before {
+  content: none;
+}
+.markdown-body.is-loading::after {
+  content: none;
 }
 @keyframes preview-loading-spin {
   from { transform: rotate(0deg); }
@@ -325,7 +341,7 @@ input, select { width: 100%; border: 1px solid var(--line); border-radius: 10px;
 }
 @media (prefers-reduced-motion: reduce) {
   .directory-tree.is-loading::before,
-  .markdown-body.is-loading::before {
+  .viewer-loading-spinner {
     animation-duration: 1.6s;
   }
 }

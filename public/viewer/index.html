@@ -219,6 +219,12 @@
         </div>
 
         <div id="viewer-scroll" class="viewer-scroll">
+          <div id="viewer-loading" class="viewer-loading" role="status" aria-live="polite" aria-atomic="true" hidden>
+            <div class="viewer-loading-card">
+              <span class="viewer-loading-spinner" aria-hidden="true"></span>
+              <span id="viewer-loading-label" class="viewer-loading-label">Loading document ...</span>
+            </div>
+          </div>
           <header class="toolbar">
           <div class="doc-heading">
             <h1 id="doc-title" data-i18n="appName">Dev File Viewer</h1>
