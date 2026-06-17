@@ -22,7 +22,7 @@
     "placeholders": { "url": { "content": "$1", "example": "chrome://extensions/?id=..." } }
   },
 
-  "popupOpenCurrent": { "message": "Open current tab" },
+  "popupOpenCurrent": { "message": "Use the viewer to open current tab" },
   "popupOpenViewer": { "message": "Open viewer" },
   "popupChecking": { "message": "Checking..." },
   "popupRecommendedTitle": { "message": "Recommended for local files" },
@@ -104,7 +104,7 @@
   "a11yReloadDocument": { "message": "Reload document" },
   "docSourceEmpty": { "message": "Open a Markdown or source file, folder, or URL." },
   "formatMarkdown": { "message": "Markdown" },
-  "viewerInitialStatus": { "message": "V2.9.3 uses SVG controls for Outline pop-out/pin and places the floating Outline control in the viewer area." },
+  "viewerInitialStatus": { "message": "Please select the open method from the sidebar." },
   "dropOverlayTitle": { "message": "Drop file or folder to open" },
   "dropOverlayBody": { "message": "Dev File Viewer will open supported developer files locally." },
 

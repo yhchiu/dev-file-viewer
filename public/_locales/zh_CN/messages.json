@@ -22,7 +22,7 @@
     "placeholders": { "url": { "content": "$1", "example": "chrome://extensions/?id=..." } }
   },
 
-  "popupOpenCurrent": { "message": "打开当前标签页" },
+  "popupOpenCurrent": { "message": "用查看器打开当前标签页内容" },
   "popupOpenViewer": { "message": "打开查看器" },
   "popupChecking": { "message": "检查中…" },
   "popupRecommendedTitle": { "message": "本地文件推荐用法" },
@@ -104,7 +104,7 @@
   "a11yReloadDocument": { "message": "重新加载文档" },
   "docSourceEmpty": { "message": "打开 Markdown、源代码文件、文件夹或网址。" },
   "formatMarkdown": { "message": "Markdown" },
-  "viewerInitialStatus": { "message": "V2.9.3 使用 SVG 控件处理大纲弹出／固定，并将浮动的大纲控件放置在查看器区域。" },
+  "viewerInitialStatus": { "message": "请从侧边栏选择开启方式" },
   "dropOverlayTitle": { "message": "拖放文件或文件夹以打开" },
   "dropOverlayBody": { "message": "Dev File Viewer 将在本地打开支持的开发者文件。" },
 

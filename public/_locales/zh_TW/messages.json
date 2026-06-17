@@ -22,7 +22,7 @@
     "placeholders": { "url": { "content": "$1", "example": "chrome://extensions/?id=..." } }
   },
 
-  "popupOpenCurrent": { "message": "開啟目前分頁" },
+  "popupOpenCurrent": { "message": "用檢視器開啟目前分頁內容" },
   "popupOpenViewer": { "message": "開啟檢視器" },
   "popupChecking": { "message": "檢查中…" },
   "popupRecommendedTitle": { "message": "本機檔案建議用法" },
@@ -104,7 +104,7 @@
   "a11yReloadDocument": { "message": "重新載入文件" },
   "docSourceEmpty": { "message": "開啟 Markdown、原始碼檔案、資料夾或網址。" },
   "formatMarkdown": { "message": "Markdown" },
-  "viewerInitialStatus": { "message": "V2.9.3 使用 SVG 控制項處理大綱彈出／釘選，並將浮動的大綱控制項置於檢視器區域。" },
+  "viewerInitialStatus": { "message": "請從側邊欄選擇開啟方式" },
   "dropOverlayTitle": { "message": "拖放檔案或資料夾以開啟" },
   "dropOverlayBody": { "message": "Dev File Viewer 將在本機開啟支援的開發者檔案。" },
 
