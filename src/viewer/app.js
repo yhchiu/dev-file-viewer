@@ -529,21 +529,26 @@ class DevFileViewerApp {
   getDefaultFloatingTocPosition() {
     const viewerRect = this.elements.viewerMain.getBoundingClientRect();
     const previewRect = this.elements.preview.getBoundingClientRect();
+    const statusEl = this.elements.status;
+    const statusRect = statusEl && !statusEl.hidden ? statusEl.getBoundingClientRect() : null;
     const padding = 16;
     const buttonRect = this.elements.floatingOutline.getBoundingClientRect();
     const buttonWidth = buttonRect.width || 92;
+    const buttonHeight = buttonRect.height || 38;
 
-    let left;
+    // Right edge of the centered content column (the status section shares this width).
+    const contentRight = previewRect.width > 0 ? previewRect.right : viewerRect.right;
+    const left = contentRight - padding - buttonWidth;
+
     let top;
-
-    if (previewRect.width > 0) {
-      // Place it at the top-right of the preview container
-      left = previewRect.right - padding - buttonWidth;
-      // Shift it down to align with the preview top, keeping at least 80px from viewport top to avoid header
+    if (statusRect && statusRect.height > 0) {
+      // Sit to the right of the status section, vertically centered on it.
+      top = statusRect.top + (statusRect.height - buttonHeight) / 2;
+    } else if (previewRect.width > 0) {
+      // No status visible: fall back to the top of the preview, clearing the header.
       top = Math.max(viewerRect.top + 80, previewRect.top + 12);
     } else {
-      // Fallback if preview is not yet sized/rendered
-      left = viewerRect.right - padding - buttonWidth;
+      // Fallback if preview is not yet sized/rendered.
       top = viewerRect.top + 80;
     }
 
