@@ -399,6 +399,8 @@
   --bloom-radius: 22px;
   --bloom-radius-sm: 14px;
   --bloom-font: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --scrollbar-thumb: #cec8e6;
+  --scrollbar-thumb-hover: #b6abe0;
 }
 
 :root[data-app-theme="bloom"] body {
@@ -549,6 +551,8 @@
   --forge-radius-sm: 6px;
   --forge-sans: "Public Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --forge-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --scrollbar-thumb: #1f2733;
+  --scrollbar-thumb-hover: #2c3744;
 }
 
 :root[data-app-theme="forge"] body {
@@ -788,17 +792,6 @@
   border-radius: var(--forge-radius-sm);
 }
 
-:root[data-app-theme="forge"] ::-webkit-scrollbar {
-  width: 11px;
-  height: 11px;
-}
-
-:root[data-app-theme="forge"] ::-webkit-scrollbar-thumb {
-  background: #1f2733;
-  border-radius: 11px;
-  border: 3px solid var(--bg);
-}
-
 /* Folio: selectable editorial light theme. */
 :root[data-app-theme="folio"] {
   --bg: #faf7f1;
@@ -829,6 +822,8 @@
   --folio-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --viewer-text-size-control: #1f5d4c;
   --viewer-text-size-track: #ddd5c6;
+  --scrollbar-thumb: #d4c9b3;
+  --scrollbar-thumb-hover: #c0b194;
 }
 
 :root[data-app-theme="folio"] body {

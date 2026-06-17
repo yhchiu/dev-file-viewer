@@ -30,6 +30,8 @@
   --viewer-font-size: 15px;
   --viewer-text-size-control: #8a94a6;
   --viewer-text-size-track: #d0d5dd;
+  --scrollbar-thumb: #c7ccda;
+  --scrollbar-thumb-hover: #aeb5c6;
 }
 
 :root[data-theme="dark"] {
@@ -62,6 +64,37 @@
   --shadow: 0 18px 50px rgba(0, 0, 0, .38);
   --viewer-text-size-control: #94a3b8;
   --viewer-text-size-track: #475569;
+  --scrollbar-thumb: #3c4a63;
+  --scrollbar-thumb-hover: #4d5e7d;
+}
+
+
+/* Themed scrollbars. scrollbar-width/-color are inherited from :root,
+   so a single declaration cascades to every scroll container. */
+:root {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+  background-clip: padding-box;
 }
 
 
