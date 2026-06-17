@@ -33,7 +33,7 @@
 
 .activity-rail {
   flex: 0 0 auto;
-  width: 50px;
+  width: var(--activity-rail-width);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -41,15 +41,52 @@
   padding: 14px 0 12px;
   border-right: 1px solid var(--line);
   background: var(--panel-2);
+  cursor: w-resize;
+}
+
+.app-shell.sidebar-collapsed .activity-rail {
+  cursor: e-resize;
+}
+
+.activity-rail-mark-slot {
+  width: 38px;
+  height: 38px;
+  margin-bottom: 12px;
+  flex: 0 0 auto;
+  display: none;
+  place-items: center;
+  position: relative;
+}
+
+.app-shell.sidebar-collapsed .activity-rail-mark-slot {
+  display: grid;
 }
 
 .activity-rail-mark {
   width: 34px;
   height: 34px;
-  margin-bottom: 12px;
-  flex: 0 0 auto;
   display: block;
   object-fit: cover;
+  transition: opacity .12s ease;
+}
+
+.activity-rail-mark-slot .sidebar-restore {
+  position: absolute;
+  inset: 1px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .12s ease, background .15s ease, color .15s ease;
+}
+
+.app-shell.sidebar-collapsed .activity-rail-mark-slot:hover .activity-rail-mark,
+.app-shell.sidebar-collapsed .activity-rail-mark-slot:focus-within .activity-rail-mark {
+  opacity: 0;
+}
+
+.app-shell.sidebar-collapsed .activity-rail-mark-slot:hover .sidebar-restore,
+.app-shell.sidebar-collapsed .activity-rail-mark-slot:focus-within .sidebar-restore {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .activity-rail-btn {
@@ -65,6 +102,16 @@
   cursor: pointer;
   position: relative;
   transition: background .15s ease, color .15s ease, box-shadow .15s ease;
+}
+
+.activity-rail-btn[hidden] {
+  display: none;
+}
+
+.activity-rail-btn.sidebar-toggle,
+.activity-rail-btn.sidebar-restore {
+  background: transparent;
+  box-shadow: none;
 }
 
 .activity-rail-btn:hover {
@@ -360,6 +407,7 @@
 }
 
 :root[data-app-theme="bloom"] .app-shell {
+  --activity-rail-width: 50px;
   padding: 14px;
   gap: 0;
   background: transparent;
@@ -380,7 +428,7 @@
 }
 
 :root[data-app-theme="bloom"] .activity-rail {
-  width: 50px;
+  width: var(--activity-rail-width);
   border-right-color: var(--line);
   background: var(--panel-2);
 }
@@ -397,7 +445,6 @@
   box-shadow: 0 6px 14px rgba(109, 91, 246, .26);
 }
 
-:root[data-app-theme="bloom"] .sidebar-tools,
 :root[data-app-theme="bloom"] .file-url-card,
 :root[data-app-theme="bloom"] .content-width-card,
 :root[data-app-theme="bloom"] .theme-card,
@@ -511,6 +558,7 @@
 }
 
 :root[data-app-theme="forge"] .app-shell {
+  --activity-rail-width: 52px;
   background: var(--bg);
 }
 
@@ -532,7 +580,7 @@
 }
 
 :root[data-app-theme="forge"] .activity-rail {
-  width: 52px;
+  width: var(--activity-rail-width);
   gap: 5px;
   padding: 14px 0;
   background: var(--forge-rail);
@@ -581,7 +629,6 @@
   font-family: var(--forge-mono);
 }
 
-:root[data-app-theme="forge"] .sidebar-tools,
 :root[data-app-theme="forge"] .file-url-card,
 :root[data-app-theme="forge"] .content-width-card,
 :root[data-app-theme="forge"] .theme-card,
@@ -791,6 +838,7 @@
 }
 
 :root[data-app-theme="folio"] .app-shell {
+  --activity-rail-width: 56px;
   background: var(--bg);
 }
 
@@ -812,7 +860,7 @@
 }
 
 :root[data-app-theme="folio"] .activity-rail {
-  width: 56px;
+  width: var(--activity-rail-width);
   gap: 5px;
   padding: 18px 0 16px;
   background: linear-gradient(180deg, #f4efe4, #eee8db);
@@ -822,8 +870,15 @@
   width: 38px;
   height: 38px;
   border-radius: 9px;
-  margin-bottom: 16px;
   box-shadow: 0 6px 14px rgba(33, 29, 24, .16);
+}
+
+:root[data-app-theme] .activity-rail-mark-slot .activity-rail-mark {
+  margin-bottom: 0;
+}
+
+:root[data-app-theme="folio"] .activity-rail-mark-slot {
+  margin-bottom: 16px;
 }
 
 :root[data-app-theme="folio"] .activity-rail-btn {
@@ -872,7 +927,6 @@
   color: var(--faint);
 }
 
-:root[data-app-theme="folio"] .sidebar-tools,
 :root[data-app-theme="folio"] .file-url-card,
 :root[data-app-theme="folio"] .content-width-card,
 :root[data-app-theme="folio"] .theme-card,
@@ -1015,7 +1069,15 @@
   }
 
   .activity-rail {
-    width: 46px;
+    width: var(--activity-rail-width);
+  }
+
+  :root[data-app-theme="bloom"] .app-shell {
+    --activity-rail-width: 46px;
+  }
+
+  :root[data-app-theme="forge"] .app-shell {
+    --activity-rail-width: 48px;
   }
 
   :root[data-app-theme="forge"] .viewer-scroll,
@@ -1023,11 +1085,12 @@
     padding: 0 18px 40px;
   }
 
-  :root[data-app-theme="forge"] .activity-rail {
-    width: 48px;
+  :root[data-app-theme="folio"] .app-shell {
+    --activity-rail-width: 50px;
   }
 
+  :root[data-app-theme="forge"] .activity-rail,
   :root[data-app-theme="folio"] .activity-rail {
-    width: 50px;
+    width: var(--activity-rail-width);
   }
 }

@@ -35,7 +35,7 @@ Dev File Viewer is a Chrome Extension for previewing local and remote developer-
 - Markdown links: external links, same-page anchors, and folder-relative links to other Markdown files
 - Mermaid fenced-code blocks using ` ```mermaid `
 - First-install onboarding page
-- Auto-collapsed Open/Settings tools after a folder is successfully opened
+- Persistent activity rail with Open, Files, Outline, and Settings sidebar panels
 - Optional scroll position memory per file, stored only in local session storage
 - Popup and viewer status for Chrome's `file://` URL access setting
 - One-click button to open the extension settings page
@@ -99,7 +99,7 @@ npm run test:coverage
 - Open a remote Markdown URL, then use the extension popup or context menu.
 - Open a local Markdown URL after enabling file URL access. Automatic `file://` preview is routed through the background service worker to avoid Chrome blocking direct `chrome-extension://` navigation from the file page.
 - Use **Open File** to read one local file without changing Chrome settings.
-- Use **Open Folder** to build a directory sidebar from a selected folder. After a folder opens, the Open/Settings panel collapses automatically; expand it again when needed. Use **Files / Outline** to switch between folder navigation and the current document TOC. Use the sidebar arrow to collapse the full sidebar, the `☰` button to restore it, and the floating **Outline** button to open a quick TOC popover without reopening the sidebar. Drag the floating **Outline** button to move both the button and popover for the current runtime session. Use the popover pin button to keep the Outline button/popover visible and prevent automatic closing on outside click, Escape, section click, or sidebar expansion. Drag the divider between the sidebar and preview pane to resize the sidebar; double-click the divider to reset it. Use **Content Width** to switch the Markdown reading area between Narrow, Comfortable, Wide, and Full width.
+- Use **Open Folder** to build a directory sidebar from a selected folder. The activity rail stays visible when the sidebar is collapsed and switches between Open, Files, Outline, and Settings. Use the rail's sidebar control to collapse or restore the sidebar body; use the floating **Outline** button to open a quick TOC popover without reopening the sidebar. Drag the floating **Outline** button to move both the button and popover for the current runtime session. Use the popover pin button to keep the Outline button/popover visible and prevent automatic closing on outside click, Escape, section click, or sidebar expansion. Drag the divider between the sidebar and preview pane to resize the sidebar; double-click the divider to reset it. Use **Content Width** in Settings to switch the Markdown reading area between Narrow, Comfortable, Wide, and Full width.
 - Enable **Remember scroll position** after opening a folder if you want each file to reopen at its last scroll position during the current browser session. When disabled, files open at the first line.
 - Markdown links are supported. External links open in a new tab. Folder-relative links to Markdown files open inside Dev File Viewer.
 - Markdown tables are rendered from pipe table syntax:
@@ -138,7 +138,7 @@ flowchart TD
 - Added **Outline** as TOC Phase 1. It is generated from rendered Markdown headings, so code blocks containing `#` are ignored.
 - The sidebar has **Files** and **Outline** tabs. Tab switching is runtime-only and is not saved to `chrome.storage.local`. Files shows the selected folder tree; Outline shows the current document section list.
 - Outline currently indexes H1-H3 headings by default to keep navigation useful without becoming noisy. The title shows the current file name, for example `On this page (03-bridge.md)`.
-- Clicking an Outline item smoothly scrolls the internal viewer pane to the heading and updates the viewer URL hash. Opening a single Markdown file with headings automatically switches to Outline and collapses Open/Settings to maximize reading space.
+- Clicking an Outline item smoothly scrolls the internal viewer pane to the heading and updates the viewer URL hash. Opening a single Markdown file with headings automatically switches the sidebar body to the Outline panel.
 - Scrolling the document highlights the active heading in the Outline tab.
 - Heading IDs are generated when missing, with duplicate handling, so same-page anchor links and TOC links share the same target IDs.
 
@@ -153,7 +153,7 @@ flowchart TD
 - Added a sidebar collapse/expand control. The collapsed state is stored as a local UI preference so the viewer keeps the same layout after reopening.
 - Fixed a viewer layout issue where long Markdown documents with Mermaid diagrams or wide tables could show both the page scrollbar and the viewer scrollbar. The app shell now owns the viewport height and only the sidebar/viewer panes scroll internally.
 - Earlier V1.1 builds redirected a detected Markdown page directly from the content script with `location.replace(chrome-extension://...)`. Chrome can block that page-initiated navigation and show `ERR_BLOCKED_BY_CLIENT`. The current build captures the already-loaded Markdown text, stores it temporarily in `chrome.storage.session`, and asks the background service worker to replace the tab with the viewer using `chrome.tabs.update()`.
-- Folder mode now collapses the Open/Settings tools after successful folder selection.
+- Folder mode now switches the sidebar body to the Files panel after successful folder selection.
 - Folder mode includes optional per-file scroll position memory using session-only local storage.
 - Markdown links now support external links, anchors, and relative links between Markdown files in the selected folder.
 

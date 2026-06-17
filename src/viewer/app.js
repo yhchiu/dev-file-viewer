@@ -70,7 +70,9 @@ class DevFileViewerApp {
       viewerScroll: document.querySelector('#viewer-scroll'),
       viewerLoading: document.querySelector('#viewer-loading'),
       viewerLoadingLabel: document.querySelector('#viewer-loading-label'),
-      sidebarTools: document.querySelector('#sidebar-tools'),
+      activityRail: document.querySelector('.activity-rail'),
+      sidebarBody: document.querySelector('.sidebar-body'),
+      sidebarPanels: document.querySelectorAll('[data-sidebar-panel]'),
       sidebarToggle: document.querySelector('#btn-sidebar-toggle'),
       sidebarRestore: document.querySelector('#btn-sidebar-restore'),
       floatingOutline: document.querySelector('#btn-floating-outline'),
@@ -92,6 +94,7 @@ class DevFileViewerApp {
       urlInput: document.querySelector('#url-input'),
       loadUrl: document.querySelector('#btn-load-url'),
       tree: document.querySelector('#directory-tree'),
+      directoryRootName: document.querySelector('#directory-root-name'),
       fileUrlCard: document.querySelector('#file-url-card'),
       fileUrlStatus: document.querySelector('#file-url-status'),
       openExtensionSettings: document.querySelector('#btn-open-extension-settings'),
@@ -148,6 +151,7 @@ class DevFileViewerApp {
     this.fileTabsScrollAnimationFrame = 0;
     this.ignoreNextFileTabClick = false;
     this.currentFolderLoaded = false;
+    this.currentFolderName = '';
     this.rememberScrollEnabled = false;
     this.scrollPositions = {};
     this.scrollSaveTimer = 0;
@@ -158,7 +162,9 @@ class DevFileViewerApp {
     this.themePreference = DEFAULT_THEME;
     this.viewerFontSize = DEFAULT_VIEWER_FONT_SIZE;
     this.themeMediaQuery = window.matchMedia?.('(prefers-color-scheme: dark)') || null;
+    this.activeSidebarPanel = 'open';
     this.activeSidebarTab = 'files';
+    this.activeRailTarget = 'open-file';
     this.outlineType = 'markdown';
     this.headings = [];
     this.headingTree = { nodes: [], roots: [], byId: new Map() };
@@ -190,7 +196,8 @@ class DevFileViewerApp {
     await this.restoreSidebarWidth();
     await this.restoreSidebarState();
     await this.restoreTocPopoverPinState();
-    this.applySidebarTab('files');
+    this.applySidebarTab('files', { showPanel: false });
+    this.setSidebarPanel('open', { activeTarget: 'open-file' });
     await this.restoreScrollSettings();
     this.bindEvents();
     await this.refreshFileUrlAccessStatus();
@@ -200,6 +207,7 @@ class DevFileViewerApp {
   bindEvents() {
     this.elements.sidebarToggle.addEventListener('click', () => this.setSidebarCollapsed(true));
     this.elements.sidebarRestore.addEventListener('click', () => this.setSidebarCollapsed(false));
+    this.elements.activityRail?.addEventListener('click', event => this.handleActivityRailFrameClick(event));
     this.elements.floatingOutline.addEventListener('pointerdown', event => this.startFloatingOutlineDrag(event));
     this.elements.floatingOutline.addEventListener('click', event => {
       if (this.ignoreNextFloatingOutlineClick) {
@@ -217,11 +225,18 @@ class DevFileViewerApp {
     this.elements.sidebarResizer.addEventListener('pointerdown', event => this.startSidebarResize(event));
     this.elements.sidebarResizer.addEventListener('keydown', event => this.handleSidebarResizeKey(event));
     this.elements.sidebarResizer.addEventListener('dblclick', () => this.resetSidebarWidth());
-    this.elements.openFile.addEventListener('click', () => this.openLocalFile());
+    this.elements.openFile.addEventListener('click', () => {
+      this.setSidebarPanel('open', { activeTarget: 'open-file' });
+      this.openLocalFile();
+    });
     this.elements.reloadDocument.addEventListener('click', () => this.reloadCurrentDocument());
-    this.elements.openFolder.addEventListener('click', () => this.openLocalFolder());
+    this.elements.openFolder.addEventListener('click', () => {
+      this.setSidebarPanel('open', { activeTarget: 'open-folder' });
+      this.openLocalFolder();
+    });
     this.elements.reloadFolder.addEventListener('click', () => this.reloadCurrentFolder());
     this.elements.openUrl.addEventListener('click', () => {
+      this.setSidebarPanel('open', { activeTarget: 'open-url' });
       this.elements.urlBox.hidden = !this.elements.urlBox.hidden;
       if (!this.elements.urlBox.hidden) this.elements.urlInput.focus();
     });
@@ -231,7 +246,10 @@ class DevFileViewerApp {
     });
     this.elements.openExtensionSettings.addEventListener('click', () => this.openExtensionSettingsPage());
     this.elements.copySettingsLink.addEventListener('click', () => this.copySettingsUrl());
-    this.elements.useOpenFile.addEventListener('click', () => this.openLocalFile());
+    this.elements.useOpenFile.addEventListener('click', () => {
+      this.setSidebarPanel('open', { activeTarget: 'open-file' });
+      this.openLocalFile();
+    });
     this.elements.rememberScroll.addEventListener('change', () => this.setRememberScroll(this.elements.rememberScroll.checked));
     this.elements.contentWidth.addEventListener('change', () => this.setContentWidth(this.elements.contentWidth.value));
     this.elements.theme?.addEventListener('change', () => this.setThemePreference(this.elements.theme.value));
@@ -259,7 +277,12 @@ class DevFileViewerApp {
       tab.addEventListener('click', () => this.setSidebarTab(tab.dataset.sidebarTab));
     }
     for (const button of this.elements.activityRailButtons) {
-      button.addEventListener('click', () => this.handleActivityRailClick(button.dataset.railTarget));
+      button.addEventListener('click', () => {
+        this.handleActivityRailClick(button.dataset.railTarget).catch(error => {
+          this.clearViewerLoading();
+          this.setStatus(error?.message || String(error), 'error');
+        });
+      });
     }
     this.elements.fileTabsScrollLeft?.addEventListener('click', () => this.scrollFileTabs(-1));
     this.elements.fileTabsScrollRight?.addEventListener('click', () => this.scrollFileTabs(1));
@@ -616,7 +639,7 @@ class DevFileViewerApp {
     this.applySidebarTab(tab);
   }
 
-  applySidebarTab(tab) {
+  applySidebarTab(tab, options = {}) {
     const nextTab = tab === 'outline' ? 'outline' : 'files';
     this.activeSidebarTab = nextTab;
 
@@ -629,38 +652,116 @@ class DevFileViewerApp {
 
     this.elements.filesPanel.hidden = nextTab !== 'files';
     this.elements.outlinePanel.hidden = nextTab !== 'outline';
+    if (options.showPanel !== false) {
+      this.setSidebarPanel('navigator');
+      return;
+    }
+
     this.syncActivityRail();
   }
 
-  handleActivityRailClick(target) {
-    if (target === 'sidebar-tools') {
-      if (this.elements.sidebarTools) this.elements.sidebarTools.open = !this.elements.sidebarTools.open;
+  setSidebarPanel(panel, options = {}) {
+    const nextPanel = ['open', 'settings', 'navigator'].includes(panel) ? panel : 'open';
+    this.activeSidebarPanel = nextPanel;
+
+    for (const sidebarPanel of this.elements.sidebarPanels) {
+      const isActive = sidebarPanel.dataset.sidebarPanel === nextPanel;
+      sidebarPanel.hidden = !isActive;
+      sidebarPanel.setAttribute('aria-hidden', String(!isActive));
+    }
+
+    if (options.activeTarget) {
+      this.activeRailTarget = options.activeTarget;
+    } else if (nextPanel === 'settings') {
+      this.activeRailTarget = 'settings';
+    } else if (nextPanel === 'navigator') {
+      this.activeRailTarget = this.activeSidebarTab === 'outline' ? 'outline' : 'files';
+    } else if (!['open-file', 'open-folder', 'open-url'].includes(this.activeRailTarget)) {
+      this.activeRailTarget = 'open-file';
+    }
+
+    this.syncActivityRail();
+  }
+
+  async revealSidebarPanel(panel, options = {}) {
+    if (this.sidebarCollapsed) {
+      await this.setSidebarCollapsed(false);
+    }
+
+    this.setSidebarPanel(panel, options);
+    await nextFrame();
+  }
+
+  async handleActivityRailClick(target) {
+    if (target === 'open-file') {
+      await this.revealSidebarPanel('open', { activeTarget: 'open-file' });
+      await this.openLocalFile();
       return;
     }
 
-    if (target === 'btn-open-url') {
-      if (this.elements.sidebarTools) this.elements.sidebarTools.open = true;
-      this.elements.openUrl?.click();
+    if (target === 'open-folder') {
+      await this.revealSidebarPanel('open', { activeTarget: 'open-folder' });
+      await this.openLocalFolder();
       return;
     }
 
-    if (target === 'tab-files') {
+    if (target === 'open-url') {
+      await this.revealSidebarPanel('open', { activeTarget: 'open-url' });
+      this.elements.urlBox.hidden = false;
+      this.elements.urlInput?.focus();
+      return;
+    }
+
+    if (target === 'files') {
+      await this.revealSidebarPanel('navigator');
       this.setSidebarTab('files');
       this.elements.filesTab?.focus();
       return;
     }
 
-    if (target === 'tab-outline') {
+    if (target === 'outline') {
+      await this.revealSidebarPanel('navigator');
       this.setSidebarTab('outline');
       this.elements.outlineTab?.focus();
+      return;
+    }
+
+    if (target === 'settings') {
+      await this.revealSidebarPanel('settings', { activeTarget: 'settings' });
+      this.elements.contentWidth?.focus();
     }
   }
 
   syncActivityRail() {
-    const activeTarget = this.activeSidebarTab === 'outline' ? 'tab-outline' : 'tab-files';
     for (const button of this.elements.activityRailButtons) {
-      button.classList.toggle('is-active', button.dataset.railTarget === activeTarget);
+      const isActive = button.dataset.railTarget === this.activeRailTarget;
+      button.classList.toggle('is-active', isActive);
+      button.removeAttribute('aria-current');
     }
+  }
+
+  handleActivityRailFrameClick(event) {
+    const target = event.target;
+    if (target.closest?.('button, a, input, select, textarea, [role="button"]')) return;
+    this.setSidebarCollapsed(!this.sidebarCollapsed);
+  }
+
+  setDirectoryRootName(name) {
+    this.currentFolderName = String(name || '').trim();
+    if (!this.elements.directoryRootName) return;
+
+    this.elements.directoryRootName.textContent = this.currentFolderName ? `(${this.currentFolderName})` : '';
+    this.elements.directoryRootName.title = this.currentFolderName;
+    this.elements.directoryRootName.hidden = !this.currentFolderName;
+  }
+
+  showDirectoryLoading(message = t('statusOpeningFolder'), folderName = '') {
+    if (folderName) this.setDirectoryRootName(folderName);
+    if (this.sidebarCollapsed) {
+      this.setSidebarCollapsed(false).catch(() => {});
+    }
+    this.applySidebarTab('files');
+    this.setDirectoryTreeLoading(message);
   }
 
   async restoreTheme() {
@@ -851,13 +952,18 @@ class DevFileViewerApp {
     const wasCollapsed = this.sidebarCollapsed;
     this.sidebarCollapsed = Boolean(collapsed);
     this.elements.app.classList.toggle('sidebar-collapsed', this.sidebarCollapsed);
-    this.elements.sidebarRestore.hidden = !this.sidebarCollapsed;
+    this.elements.sidebarToggle.hidden = this.sidebarCollapsed;
+    this.elements.sidebarRestore.tabIndex = this.sidebarCollapsed ? 0 : -1;
+    this.elements.sidebarRestore.setAttribute('aria-hidden', String(!this.sidebarCollapsed));
     this.elements.sidebarResizer.setAttribute('aria-hidden', String(this.sidebarCollapsed));
     this.elements.sidebarResizer.tabIndex = this.sidebarCollapsed ? -1 : 0;
     this.elements.sidebarToggle.setAttribute('aria-expanded', String(!this.sidebarCollapsed));
-    this.elements.sidebarToggle.setAttribute('aria-label', this.sidebarCollapsed ? t('a11yShowSidebar') : t('a11yHideSidebar'));
-    this.elements.sidebarToggle.title = this.sidebarCollapsed ? t('a11yShowSidebar') : t('a11yHideSidebar');
-    this.elements.sidebar.setAttribute('aria-hidden', String(this.sidebarCollapsed));
+    this.elements.sidebarToggle.setAttribute('aria-label', t('a11yHideSidebar'));
+    this.elements.sidebarToggle.title = t('a11yHideSidebar');
+    this.elements.sidebarRestore.setAttribute('aria-expanded', String(!this.sidebarCollapsed));
+    this.elements.sidebarRestore.setAttribute('aria-label', t('a11yShowSidebar'));
+    this.elements.sidebarRestore.title = t('a11yShowSidebar');
+    this.elements.sidebarBody?.setAttribute('aria-hidden', String(this.sidebarCollapsed));
 
     if (shouldPersist) {
       await chrome.storage.local.set({ [SIDEBAR_COLLAPSED_KEY]: this.sidebarCollapsed });
@@ -1061,8 +1167,7 @@ async loadDroppedFileDocument(file, options = {}) {
 }
 
 async openDroppedDirectoryHandle(handle) {
-  this.elements.sidebarTools.open = false;
-  this.setDirectoryTreeLoading(t('statusOpeningFolder'));
+  this.showDirectoryLoading(t('statusOpeningFolder'), handle?.name || '');
   const { tree } = await this.directorySource.loadDirectoryHandle(handle);
   this.renderDirectoryTree(tree);
   this.currentFolderLoaded = true;
@@ -1074,8 +1179,7 @@ async openDroppedDirectoryHandle(handle) {
 }
 
 async openDroppedDirectoryEntry(entry) {
-  this.elements.sidebarTools.open = false;
-  this.setDirectoryTreeLoading(t('statusOpeningFolder'));
+  this.showDirectoryLoading(t('statusOpeningFolder'), entry?.name || '');
   const { tree } = await this.directorySource.loadDirectoryEntry(entry);
   this.renderDirectoryTree(tree);
   this.currentFolderLoaded = true;
@@ -1153,9 +1257,8 @@ async openDroppedDirectoryEntry(entry) {
     try {
       this.setStatus(t('statusOpeningFolder'), 'info');
       const { tree } = await this.directorySource.pickDirectory({
-        onLoadStart: () => {
-          this.elements.sidebarTools.open = false;
-          this.setDirectoryTreeLoading(t('statusOpeningFolder'));
+        onLoadStart: name => {
+          this.showDirectoryLoading(t('statusOpeningFolder'), name);
         }
       });
       this.renderDirectoryTree(tree);
@@ -1169,6 +1272,7 @@ async openDroppedDirectoryEntry(entry) {
       this.clearDirectoryTreeLoading();
       if (error?.name === 'AbortError') return;
       this.currentFolderLoaded = false;
+      this.setDirectoryRootName('');
       this.setFolderReloadEnabled(false);
       this.directoryTree.showEmpty(t('statusFolderCouldNotOpen'));
       this.setStatus(error?.message || String(error), 'error');
@@ -1724,6 +1828,7 @@ async openDroppedDirectoryEntry(entry) {
   }
 
   renderDirectoryTree(tree) {
+    this.setDirectoryRootName(tree?.name || this.currentFolderName);
     this.directoryTree.render(tree, async fileNode => {
       try {
         this.setViewerLoading(t('statusLoadingDocument', [fileNode.name || t('commonDocument')]));
@@ -1747,7 +1852,7 @@ async openDroppedDirectoryEntry(entry) {
 
     try {
       this.setFolderReloadEnabled(false);
-      this.setDirectoryTreeLoading(t('statusReloadingFolder'));
+      this.showDirectoryLoading(t('statusReloadingFolder'), this.currentFolderName);
       this.setStatus(t('statusReloadingFolder'), 'info');
       const { tree } = await this.directorySource.reloadDirectory();
       this.renderDirectoryTree(tree);
@@ -1926,7 +2031,6 @@ setDocumentReloadEnabled(enabled) {
           this.buildSourceSymbols(doc, sourceLanguage, outlineOptions);
           if (doc.sourceType !== 'directory-file' && this.headings.length) {
             this.applySidebarTab('outline');
-            this.elements.sidebarTools.open = false;
           }
         }
         this.activateRenderedDocument(doc, nextDocKey);
@@ -1950,7 +2054,6 @@ setDocumentReloadEnabled(enabled) {
         this.buildDiffOutline(diffOutline?.files || [], doc, outlineOptions);
         if (doc.sourceType !== 'directory-file' && diffOutline?.files?.length) {
           this.applySidebarTab('outline');
-          this.elements.sidebarTools.open = false;
         }
         this.activateRenderedDocument(doc, nextDocKey);
         await this.restoreOrResetScroll(doc, scrollOptions);
@@ -1967,7 +2070,6 @@ setDocumentReloadEnabled(enabled) {
       this.updateTocTitle(doc);
       if (doc.sourceType !== 'directory-file' && this.headings.length) {
         this.applySidebarTab('outline');
-        this.elements.sidebarTools.open = false;
       }
 
       this.activateRenderedDocument(doc, nextDocKey);
