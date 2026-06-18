@@ -2,6 +2,7 @@
 // without instantiating the viewer application (which has DOM/chrome side
 // effects). app.js imports these; behavior is unchanged.
 import { t } from '../core/i18n/i18n.js';
+import { isSupportedViewerFile } from '../core/format/fileTypes.js';
 
 export const THEME_OPTIONS = new Set(['system', 'bloom', 'forge', 'folio']);
 
@@ -29,30 +30,7 @@ export function normalizeDroppedEntryPath(path = '') {
 }
 
 export function isSupportedDroppedName(name = '') {
-  const value = String(name || '').toLowerCase();
-  return Boolean(value) && (
-    value.endsWith('.md') || value.endsWith('.mkd') || value.endsWith('.mdx') || value.endsWith('.markdown') ||
-    value.endsWith('.diff') || value.endsWith('.patch') ||
-    value.endsWith('.txt') || value.endsWith('.text') ||
-    value.endsWith('.js') || value.endsWith('.mjs') || value.endsWith('.cjs') || value.endsWith('.jsx') ||
-    value.endsWith('.ts') || value.endsWith('.tsx') ||
-    value.endsWith('.html') || value.endsWith('.htm') || value.endsWith('.css') ||
-    value.endsWith('.json') || value.endsWith('.jsonc') || value.endsWith('.yaml') || value.endsWith('.yml') ||
-    value.endsWith('.toml') || value.endsWith('.ini') || value.endsWith('.xml') || value.endsWith('.svg') ||
-    value.endsWith('.sh') || value.endsWith('.bash') || value.endsWith('.zsh') || value.endsWith('.ps1') ||
-    value.endsWith('.py') || value.endsWith('.go') || value.endsWith('.java') ||
-    value.endsWith('.c') || value.endsWith('.h') || value.endsWith('.cpp') || value.endsWith('.cc') ||
-    value.endsWith('.cxx') || value.endsWith('.hpp') || value.endsWith('.hh') || value.endsWith('.hxx') ||
-    value.endsWith('.rs') || value.endsWith('.cs') || value.endsWith('.php') || value.endsWith('.rb') ||
-    value.endsWith('.sql') || value.endsWith('.swift') || value.endsWith('.kt') || value.endsWith('.kts') ||
-    value.endsWith('.scala') || value.endsWith('.dart') || value.endsWith('.lua') || value.endsWith('.r') ||
-    value.endsWith('.pl') || value.endsWith('.pm') || value.endsWith('.ex') || value.endsWith('.exs') ||
-    value.endsWith('.erl') || value.endsWith('.hrl') || value.endsWith('.clj') || value.endsWith('.cljs') ||
-    value.endsWith('.groovy') || value.endsWith('.gradle') || value.endsWith('.vue') || value.endsWith('.svelte') ||
-    value.endsWith('.dockerfile') || value.endsWith('.makefile') || value.endsWith('.cmake') ||
-    ['makefile', 'dockerfile', 'cmakelists.txt', 'gemfile', 'rakefile', 'justfile', 'procfile'].includes(value) ||
-    value.startsWith('.gitignore') || value.startsWith('.gitattributes') || value.startsWith('.env')
-  );
+  return Boolean(name) && isSupportedViewerFile(String(name));
 }
 
 export function themeLabel(value) {

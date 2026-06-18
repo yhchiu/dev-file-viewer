@@ -1,17 +1,7 @@
 import { t } from '../core/i18n/i18n.js';
+import { isSupportedViewerFile } from '../core/format/fileTypes.js';
 import { affectsWebOrigins, syncWebAutoviewRegistration } from './webAutoview.js';
 
-const DOCUMENT_EXTENSIONS = [
-    '.md', '.mkd', '.mdx', '.markdown',
-    '.diff', '.patch',
-    '.js', '.mjs', '.cjs', '.jsx', '.ts', '.tsx',
-    '.html', '.htm', '.css', '.json', '.jsonc', '.yaml', '.yml', '.toml', '.ini',
-    '.xml', '.svg', '.sh', '.bash', '.zsh', '.ps1', '.py', '.go', '.java',
-    '.c', '.h', '.cpp', '.cc', '.cxx', '.hpp', '.hh', '.hxx', '.rs', '.cs',
-    '.php', '.rb', '.sql', '.swift', '.kt', '.kts', '.scala', '.dart', '.lua',
-    '.r', '.pl', '.pm', '.ex', '.exs', '.erl', '.hrl', '.clj', '.cljs',
-    '.groovy', '.gradle', '.vue', '.svelte', '.dockerfile', '.makefile', '.cmake'
-  ];
 const SNAPSHOT_PREFIX = 'sourceSnapshot:';
 const SNAPSHOT_TTL_MS = 30 * 60 * 1000;
 
@@ -19,7 +9,7 @@ function isSupportedDocumentUrl(url = '') {
   try {
     const parsed = new URL(url);
     if (!['http:', 'https:', 'file:'].includes(parsed.protocol)) return false;
-    return DOCUMENT_EXTENSIONS.some(ext => parsed.pathname.toLowerCase().endsWith(ext));
+    return isSupportedViewerFile(parsed.pathname);
   } catch {
     return false;
   }

@@ -1,18 +1,6 @@
-import { detectFormat } from '../format/fileTypes.js';
+import { ALL_SUPPORTED_EXTENSIONS, detectFormat } from '../format/fileTypes.js';
 
-const SUPPORTED_EXTENSIONS = [
-  '.md', '.mkd', '.mdx', '.markdown',
-  '.diff', '.patch',
-  '.txt', '.text',
-  '.js', '.mjs', '.cjs', '.jsx', '.ts', '.tsx',
-  '.html', '.htm', '.css', '.scss', '.sass', '.less',
-  '.json', '.jsonc', '.yaml', '.yml', '.toml', '.ini', '.conf', '.cfg', '.env',
-  '.xml', '.svg', '.sh', '.bash', '.zsh', '.ps1',
-  '.py', '.go', '.java', '.c', '.h', '.cpp', '.cc', '.cxx', '.hpp', '.hh', '.hxx',
-  '.rs', '.cs', '.php', '.rb', '.sql', '.swift', '.kt', '.kts', '.scala', '.dart',
-  '.lua', '.r', '.pl', '.pm', '.ex', '.exs', '.erl', '.hrl', '.clj', '.cljs',
-  '.groovy', '.gradle', '.vue', '.svelte', '.dockerfile', '.makefile', '.cmake'
-];
+const SUPPORTED_EXTENSIONS = ALL_SUPPORTED_EXTENSIONS;
 
 export class FilePickerSourceProvider {
   async pickFile(options = {}) {

@@ -22,6 +22,25 @@ export const SOURCE_CODE_EXTENSIONS = new Set([
   '.dockerfile', '.makefile', '.cmake'
 ]);
 
+// Flat list of every supported extension, for file-picker `accept` filters.
+export const ALL_SUPPORTED_EXTENSIONS = [
+  ...DOCUMENT_EXTENSIONS,
+  ...DIFF_EXTENSIONS,
+  ...TEXT_EXTENSIONS,
+  ...SOURCE_CODE_EXTENSIONS
+];
+
+// Common config dotfiles whose leading dot is the whole name, so getExtension()
+// reads no extension for them. Recognized so they open as plain-text source via
+// the file picker and drag-and-drop. Matches the exact name or a `.env.local`
+// style suffix, not unrelated names like `.envrc`.
+const CONFIG_DOTFILE_PREFIXES = ['.gitignore', '.gitattributes', '.editorconfig', '.env'];
+
+export function isConfigDotfile(value = '') {
+  const fileName = getFileName(value).toLowerCase();
+  return CONFIG_DOTFILE_PREFIXES.some(prefix => fileName === prefix || fileName.startsWith(`${prefix}.`));
+}
+
 const SPECIAL_SOURCE_FILE_NAMES = new Map([
   ['dockerfile', 'dockerfile'],
   ['containerfile', 'dockerfile'],
@@ -88,7 +107,9 @@ export function isSupportedTextFile(value = '') {
 }
 
 export function isSupportedSourceCodeFile(value = '') {
-  return SOURCE_CODE_EXTENSIONS.has(getExtension(value)) || SPECIAL_SOURCE_FILE_NAMES.has(getFileName(value).toLowerCase());
+  return SOURCE_CODE_EXTENSIONS.has(getExtension(value))
+    || SPECIAL_SOURCE_FILE_NAMES.has(getFileName(value).toLowerCase())
+    || isConfigDotfile(value);
 }
 
 export function isSupportedViewerFile(value = '') {

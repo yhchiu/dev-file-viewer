@@ -7,6 +7,8 @@ import {
   isSupportedTextFile,
   isSupportedSourceCodeFile,
   isSupportedViewerFile,
+  isConfigDotfile,
+  ALL_SUPPORTED_EXTENSIONS,
   sourceLanguageFromPath,
   formatLabel,
   detectFormat,
@@ -55,6 +57,33 @@ describe('isSupported* predicates', () => {
     expect(isSupportedViewerFile('notes.txt')).toBe(true);
     expect(isSupportedViewerFile('a.rs')).toBe(true);
     expect(isSupportedViewerFile('a.exe')).toBe(false);
+  });
+
+  it('recognises styling and config extensions that the worker list once missed', () => {
+    // Regression: service-worker.isSupportedDocumentUrl used a narrower list,
+    // so .scss/.less raw files were rejected on opt-in web auto-open.
+    expect(isSupportedViewerFile('https://x.com/styles.scss')).toBe(true);
+    expect(isSupportedViewerFile('vars.less')).toBe(true);
+    expect(isSupportedViewerFile('app.conf')).toBe(true);
+  });
+
+  it('recognises config dotfiles', () => {
+    expect(isConfigDotfile('.gitignore')).toBe(true);
+    expect(isConfigDotfile('.env')).toBe(true);
+    expect(isConfigDotfile('.env.local')).toBe(true);
+    expect(isConfigDotfile('.editorconfig')).toBe(true);
+    expect(isConfigDotfile('.envrc')).toBe(false);
+    expect(isConfigDotfile('notes.txt')).toBe(false);
+    expect(isSupportedViewerFile('/repo/.gitignore')).toBe(true);
+  });
+});
+
+describe('ALL_SUPPORTED_EXTENSIONS', () => {
+  it('is a flat list spanning every category', () => {
+    expect(ALL_SUPPORTED_EXTENSIONS).toContain('.md');
+    expect(ALL_SUPPORTED_EXTENSIONS).toContain('.patch');
+    expect(ALL_SUPPORTED_EXTENSIONS).toContain('.txt');
+    expect(ALL_SUPPORTED_EXTENSIONS).toContain('.scss');
   });
 });
 
