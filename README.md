@@ -1,65 +1,48 @@
-# Dev File Viewer V2.9.3
+# Dev File Viewer
 
 ![Dev File Viewer brand mark](public/assets/brand/brand-mark.png)
 
-Dev File Viewer is a Chrome Extension for previewing local and remote developer-oriented files. The product subtitle is **Markdown, Diff & Source Viewer**. V2.9.3 continues the V2 roadmap with collapsible TOC / Outline heading groups. The Outline now builds a navigable H1-H3 tree with SVG disclosure controls, shared collapsed state between sidebar and floating popover, active-section auto-expansion, and filter-aware visibility while keeping the existing Markdown, Mermaid, table, link, local-folder, sidebar, content-width, scroll-memory, and `file://` preview features.
+**Markdown, Diff & Source Viewer** — a privacy-first Chrome extension for previewing local and remote developer files. Everything is rendered locally inside the extension; no file contents are ever sent anywhere.
 
-## V2.9.3 scope
+## Features
 
-- Collapsible Outline heading groups for H1-H3 headings.
-- SVG chevron controls for headings with children.
-- Click chevron to expand/collapse; click heading text to navigate.
-- Active heading auto-expands its ancestors.
-- Filter mode temporarily shows matching headings and their parent path.
-- Sidebar Outline and floating TOC popover share runtime-only collapsed state.
+### Rendering
+- **Markdown** with GitHub-flavored syntax, tables, and stable heading anchors
+- **Mermaid** diagrams from ` ```mermaid ` fenced code blocks
+- **Source code** viewer with syntax highlighting for dozens of languages, plus common extensionless files (`Dockerfile`, `Makefile`, `Gemfile`, `Rakefile`, …)
+- **Diff / patch** viewer for `.diff` and `.patch`
+- **Plain text** with line-ending detection
 
+### Navigation
+- **Outline / Table of Contents** generated from headings, available as a sidebar tab and a low-distraction floating popover
+- Collapsible H1–H3 heading groups, active-section highlighting, and a heading filter for large documents
+- Draggable, pinnable floating Outline button
+- **Multiple file tabs** with pin and close
+- **Directory tree** sidebar for a user-selected local folder
 
-- Markdown preview for `.md`, `.mkd`, `.mdx`, `.markdown`
-- Open files from `file://`, `http://`, and `https://`
-- Local file and folder picker
-- Sidebar directory tree for user-selected local folders
-- Sidebar collapse/expand control with persisted preference
-- Resizable sidebar width with persisted local UI preference
-- Adjustable Markdown content width: Narrow, Comfortable, Wide, or Full width
-- HiDPI-aware popup and sidebar logos using `srcset` instead of scaling `icon48.png`
-- Table of Contents / Outline tab generated from Markdown headings H1-H3
-- Floating Outline button when the sidebar is collapsed, popped out, or whenever the Outline popover is pinned
-- Draggable floating Outline button; the popover follows the button position during the current runtime session
-- Pinnable Outline popover; the pin state is stored in `chrome.storage.local`
-- Low-distraction Outline popover for quick section jumps without reopening the full sidebar
-- Heading filter when a document has many headings
-- Active section highlighting while reading
-- Smooth section jump from the Outline tab
-- Stable heading anchors for same-page Markdown links and TOC links
-- Markdown table rendering
-- Markdown links: external links, same-page anchors, and folder-relative links to other Markdown files
-- Mermaid fenced-code blocks using ` ```mermaid `
-- First-install onboarding page
-- Persistent activity rail with Open, Files, Outline, and Settings sidebar panels
-- Optional scroll position memory per file, stored only in local session storage
-- Popup and viewer status for Chrome's `file://` URL access setting
-- One-click button to open the extension settings page
-- Copyable settings URL fallback
-- Offline-only runtime: all parser, sanitizer, renderer, and Mermaid code are bundled inside the extension
-- 100% client-side processing
+### Opening files
+- **Open File** / **Open Folder** local pickers — no special Chrome setting required
+- **Open URL** for remote `http(s)` documents
+- **Automatic preview** in the browser for supported file types served as plain text, configurable per type
+- Optional `file://` URL preview (requires enabling Chrome's file-access permission)
+
+### Customization
+- Selectable themes: System (light/dark), Bloom, Forge, and Folio
+- Adjustable content width: Narrow, Comfortable, Wide, or Full
+- Adjustable viewer text size
+- Optional per-file scroll-position memory (current browser session only)
+- Resizable and collapsible sidebar with persisted layout
+- English, Traditional Chinese, and Simplified Chinese UI
+
+### Privacy
+- 100% client-side; offline-only runtime — the parser, sanitizer, renderer, and Mermaid are all bundled inside the extension
 - No tracking, no analytics, no data collection
 
-## Local-file UX recommendation
+## Installation
 
-For non-technical users, use **Open File** or **Open Folder**. These workflows do not require the user to enable Chrome's advanced `file://` URL access setting.
+Requires Chrome 116 or newer.
 
-Automatic preview for `file://.../*.md` links is an advanced workflow. Chrome requires the user to enable file URL access manually:
-
-1. Open the Dev File Viewer popup, onboarding page, or viewer.
-2. Click **Open Settings**.
-3. Enable **Allow access to file URLs**.
-4. Open the local Markdown URL again.
-
-If the settings button does not deep-link correctly in a Chromium-based browser, use **Copy Link** and paste the copied `chrome://extensions/?id=...` URL manually.
-
-The extension cannot silently enumerate local directories from a `file://` URL. The sidebar directory tree is available only after the user explicitly selects a folder with **Open Folder**.
-
-## Install for development
+Build from source and load the unpacked extension:
 
 ```bash
 npm install
@@ -68,127 +51,81 @@ npm run build
 
 Then open `chrome://extensions`, enable **Developer mode**, click **Load unpacked**, and select the generated `dist/` folder.
 
-## Testing
+## Usage
 
-Install dependencies first:
+- **Open File / Open Folder** — preview local files without changing any Chrome setting. Open Folder builds a directory tree in the sidebar.
+- **Open URL** — paste a remote Markdown or source URL.
+- **Automatic preview** — when you open a supported file in the browser and it is served as plain text, the extension opens it in the viewer. Detection is routed through the background service worker so Chrome does not block the navigation.
+- **Settings** — open the options page (toolbar popup → **Open Settings**, or right-click the extension → **Options**) to choose which file types open automatically and to manage `file://` access.
+
+Once a document is open, use the activity rail to switch between the Open, Files, Outline, and Settings panels, the floating Outline button for a quick section jump, the divider to resize the sidebar (double-click to reset), and the file tabs to move between open documents.
+
+### `file://` URL access (optional)
+
+Automatic preview of `file://…` links is an advanced workflow that requires a Chrome permission:
+
+1. Open the popup or the Settings page.
+2. Go to **Settings → Auto-open → Local file access** and open the extension settings.
+3. Enable **Allow access to file URLs**.
+4. Open the local file link again.
+
+If the settings button does not deep-link in a Chromium-based browser, use **Copy Link** and paste the copied `chrome://extensions/?id=...` URL manually.
+
+The extension cannot enumerate local directories from a `file://` URL. The directory tree is only available after you explicitly choose a folder with **Open Folder**.
+
+## Configuration: auto-open file types
+
+The Settings page (**Auto-open** category) lists every supported file type, grouped by category — Markdown, Diff & patch, Source & config, Plain text, and extensionless files. Use the master switch to enable or disable automatic opening entirely, or toggle individual types. A file only opens automatically when the browser serves it as plain text. Preferences are stored locally in `chrome.storage.local`.
+
+## Development
 
 ```bash
-npm install
-```
-
-Run the unit test suite:
-
-```bash
-npm test
-```
-
-Use watch mode while developing:
-
-```bash
-npm run test:watch
-```
-
-Generate a coverage report:
-
-```bash
+npm install          # install dependencies
+npm run build        # bundle to dist/ with esbuild
+npm test             # run the Vitest unit suite
+npm run test:watch   # watch mode
 npm run test:coverage
 ```
 
-## Usage
+The build copies `public/` to `dist/` and bundles each entry point (viewer, popup, settings, content script, service worker) with esbuild. Unit tests run on Vitest under jsdom.
 
-- Open a remote Markdown URL, then use the extension popup or context menu.
-- Open a local Markdown URL after enabling file URL access. Automatic `file://` preview is routed through the background service worker to avoid Chrome blocking direct `chrome-extension://` navigation from the file page.
-- Use **Open File** to read one local file without changing Chrome settings.
-- Use **Open Folder** to build a directory sidebar from a selected folder. The activity rail stays visible when the sidebar is collapsed and switches between Open, Files, Outline, and Settings. Use the rail's sidebar control to collapse or restore the sidebar body; use the floating **Outline** button to open a quick TOC popover without reopening the sidebar. Drag the floating **Outline** button to move both the button and popover for the current runtime session. Use the popover pin button to keep the Outline button/popover visible and prevent automatic closing on outside click, Escape, section click, or sidebar expansion. Drag the divider between the sidebar and preview pane to resize the sidebar; double-click the divider to reset it. Use **Content Width** in Settings to switch the Markdown reading area between Narrow, Comfortable, Wide, and Full width.
-- Enable **Remember scroll position** after opening a folder if you want each file to reopen at its last scroll position during the current browser session. When disabled, files open at the first line.
-- Markdown links are supported. External links open in a new tab. Folder-relative links to Markdown files open inside Dev File Viewer.
-- Markdown tables are rendered from pipe table syntax:
-
-```markdown
-| Feature | Status |
-|---|---:|
-| Markdown | Supported |
-| Mermaid | Supported |
-| Tables | Supported |
-```
-
-- Mermaid diagrams are rendered from fenced code blocks:
-
-````markdown
-```mermaid
-flowchart TD
-  A[Open Markdown] --> B[Render HTML]
-  B --> C[Render Mermaid]
-```
-````
-
-
-## V2.9.3 notes
-
-- Refined **TOC Phase 2** with SVG-based pop-out and pin controls instead of emoji glyphs.
-- Dragging the floating **Outline** button moves both the button and the TOC popover. This position is runtime-only and is not stored in `chrome.storage.local`.
-- The floating Outline button now defaults to the viewer pane's top-left area. When the sidebar is open, placement is clamped to the viewer pane so it does not cover the sidebar.
-- Added a pin switch in the TOC popover header. The pin state is stored in `chrome.storage.local`.
-- When pinned, the floating Outline button and TOC popover remain available even after reopening the sidebar.
-- When pinned, the TOC popover no longer auto-closes on outside click, Escape, or section selection.
-- Heading filtering still appears when the document has 12 or more headings and is shared between the sidebar Outline and the popover Outline.
-
-## V2.0.1 notes
-
-- Added **Outline** as TOC Phase 1. It is generated from rendered Markdown headings, so code blocks containing `#` are ignored.
-- The sidebar has **Files** and **Outline** tabs. Tab switching is runtime-only and is not saved to `chrome.storage.local`. Files shows the selected folder tree; Outline shows the current document section list.
-- Outline currently indexes H1-H3 headings by default to keep navigation useful without becoming noisy. The title shows the current file name, for example `On this page (03-bridge.md)`.
-- Clicking an Outline item smoothly scrolls the internal viewer pane to the heading and updates the viewer URL hash. Opening a single Markdown file with headings automatically switches the sidebar body to the Outline panel.
-- Scrolling the document highlights the active heading in the Outline tab.
-- Heading IDs are generated when missing, with duplicate handling, so same-page anchor links and TOC links share the same target IDs.
-
-## V1.1.7 notes
-
-- Replaced the Chrome extension icon set with the new blue-to-purple **DF** app icon.
-- Updated the in-app brand mark used in the popup, onboarding page, and viewer sidebar to match the new icon style.
-- Added brand assets under `public/assets/brand/`, including the horizontal brand-mark lockup and high-resolution icon source.
-
-- Added a **Content Width** setting for the Markdown reading area. Choices are Narrow, Comfortable, Wide, and Full width. The preference is stored in `chrome.storage.local`.
-- Added a draggable sidebar divider so users can resize the directory sidebar. The width is stored as a local UI preference and can be reset by double-clicking the divider.
-- Added a sidebar collapse/expand control. The collapsed state is stored as a local UI preference so the viewer keeps the same layout after reopening.
-- Fixed a viewer layout issue where long Markdown documents with Mermaid diagrams or wide tables could show both the page scrollbar and the viewer scrollbar. The app shell now owns the viewport height and only the sidebar/viewer panes scroll internally.
-- Earlier V1.1 builds redirected a detected Markdown page directly from the content script with `location.replace(chrome-extension://...)`. Chrome can block that page-initiated navigation and show `ERR_BLOCKED_BY_CLIENT`. The current build captures the already-loaded Markdown text, stores it temporarily in `chrome.storage.session`, and asks the background service worker to replace the tab with the viewer using `chrome.tabs.update()`.
-- Folder mode now switches the sidebar body to the Files panel after successful folder selection.
-- Folder mode includes optional per-file scroll position memory using session-only local storage.
-- Markdown links now support external links, anchors, and relative links between Markdown files in the selected folder.
-
-## Architecture for V2 expansion
+### Project structure
 
 ```text
+public/              static assets, HTML, manifest, _locales
 src/
+  background/        service worker: context menu, tab routing, first install
+  content/           auto-detect plain-text developer pages in the browser
+  popup/             toolbar popup
+  settings/          multi-category settings page (Auto-open, About)
+  viewer/            viewer app shell and orchestration
+  features/          sidebar directory tree UI
+  plugins/           Mermaid and the plugin registry
   core/
-    browser/           browser-specific helpers, such as file URL access UX
-    format/            file-type detection and format registry
-    markdown/          Markdown engine boundary
-    toc/               heading anchors and Table of Contents index
-    security/          sanitization and safe link policies
-    sources/           URL, file, and directory source providers
-  features/sidebar/    local directory tree UI
-  plugins/             syntax/plugin lifecycle
-  viewer/              app shell and orchestration
-  settings/            multi-category settings page (auto-open, about)
-  content/             auto-detect Markdown URL pages
-  background/          context menu and tab actions
+    browser/         file:// access helpers
+    config/          feature flags
+    diff/            diff rendering and outline
+    format/          file-type detection and the auto-open catalog
+    highlight/       syntax highlighting
+    i18n/            chrome.i18n wrapper
+    markdown/        Markdown engine and code-copy buttons
+    security/        sanitization and safe link policy
+    source/          source-code rendering and symbols
+    sources/         URL, file, and directory source providers
+    toc/             heading index and anchors
+    ui/              icons and shared chrome theming
 ```
-
-V2 should add new format renderers without changing the viewer shell:
-
-- `FormatRegistry`: add `diff`, `source-code`, `log`, etc.
-- `RendererRegistry`: map a format to a renderer implementation.
-- `PluginRegistry`: add Markdown plugins such as emoji, math, alerts, checkboxes. TOC Phase 1 currently lives in the viewer/core TOC boundary so it can later become a full Markdown plugin.
-- `ThemeService`: switch CSS variables for light/dark themes.
-- `CommandRegistry`: centralize keyboard shortcuts and command palette actions.
 
 ## Privacy
 
-See `PRIVACY.md`.
+See [`PRIVACY.md`](PRIVACY.md).
 
+## License
 
-## V2.9.3 fix
+This project is licensed under the GNU General Public License v3 (GPL v3).
 
-- Fix source code viewer crash: initialize `SourceCodeRenderer` before rendering source files.
+Copyright (C) Yu-Hsiung Chiu
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit issues, feature requests, or pull requests.
