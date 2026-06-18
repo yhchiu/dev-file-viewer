@@ -40,41 +40,25 @@ import {
 import { isLikelyBinaryFile } from '../core/format/binarySniff.js';
 import { localizeDocument, t } from '../core/i18n/i18n.js';
 import {
-  contentWidthLabel,
   extractHash,
   immediateParentId,
   isSupportedDroppedName,
-  normalizeThemePreference,
   normalizeDroppedEntryPath,
   normalizeLinkData,
-  resolveThemePreference,
   safeDecodeURIComponent,
-  symbolKindLabel,
-  themeLabel
+  symbolKindLabel
 } from './viewerHelpers.js';
+import { nextFrame } from './domUtils.js';
+import { AppearanceController } from './controllers/AppearanceController.js';
 
 const SCROLL_ENABLED_KEY = 'devFileViewer:rememberScrollEnabled';
 const SCROLL_POSITIONS_KEY = 'devFileViewer:scrollPositions';
 const SIDEBAR_COLLAPSED_KEY = 'devFileViewer:sidebarCollapsed';
 const SIDEBAR_WIDTH_KEY = 'devFileViewer:sidebarWidth';
-const CONTENT_WIDTH_KEY = 'devFileViewer:contentWidth';
-const THEME_KEY = 'devFileViewer:theme';
-const VIEWER_FONT_SIZE_KEY = 'devFileViewer:viewerFontSize';
 const TOC_POPOVER_PINNED_KEY = 'devFileViewer:tocPopoverPinned';
 const DEFAULT_SIDEBAR_WIDTH = 322;
 const MIN_SIDEBAR_WIDTH = 240;
 const MAX_SIDEBAR_WIDTH = 560;
-const DEFAULT_CONTENT_WIDTH = 'comfortable';
-const DEFAULT_THEME = 'system';
-const DEFAULT_VIEWER_FONT_SIZE = 15;
-const MIN_VIEWER_FONT_SIZE = 12;
-const MAX_VIEWER_FONT_SIZE = 24;
-const CONTENT_WIDTHS = {
-  narrow: '760px',
-  comfortable: '920px',
-  wide: '1180px',
-  full: '100%'
-};
 const TOC_FILTER_THRESHOLD = 12;
 const DEFAULT_TOC_MAX_LEVEL = 3;
 const TOC_DEPTH_LEVELS = new Set([2, 3, 4, 5, 6]);
@@ -166,6 +150,8 @@ class DevFileViewerApp {
     this.directorySource = new DirectorySourceProvider();
     this.directoryTree = new DirectoryTreeView(this.elements.tree);
 
+    this.appearance = new AppearanceController(this);
+
     this.currentDoc = null;
     this.currentDocKey = '';
     this.openTabs = [];
@@ -183,10 +169,6 @@ class DevFileViewerApp {
     this.sidebarCollapsed = false;
     this.sidebarWidth = DEFAULT_SIDEBAR_WIDTH;
     this.resizeDrag = null;
-    this.contentWidth = DEFAULT_CONTENT_WIDTH;
-    this.themePreference = DEFAULT_THEME;
-    this.viewerFontSize = DEFAULT_VIEWER_FONT_SIZE;
-    this.themeMediaQuery = window.matchMedia?.('(prefers-color-scheme: dark)') || null;
     this.activeSidebarPanel = 'open';
     this.activeSidebarTab = 'files';
     this.activeRailTarget = 'open-file';
@@ -216,9 +198,7 @@ class DevFileViewerApp {
     localizeDocument();
     this.showLaunchLoadingIfPending();
     await this.plugins.init();
-    await this.restoreTheme();
-    await this.restoreContentWidth();
-    await this.restoreViewerFontSize();
+    await this.appearance.restore();
     await this.restoreSidebarWidth();
     await this.restoreSidebarState();
     await this.restoreTocPopoverPinState();
@@ -295,25 +275,8 @@ class DevFileViewerApp {
     this.elements.rememberScroll.addEventListener('change', () =>
       this.setRememberScroll(this.elements.rememberScroll.checked)
     );
-    this.elements.contentWidth.addEventListener('change', () =>
-      this.setContentWidth(this.elements.contentWidth.value)
-    );
-    this.elements.theme?.addEventListener('change', () =>
-      this.setThemePreference(this.elements.theme.value)
-    );
     this.elements.manageAutoOpen?.addEventListener('click', () => chrome.runtime.openOptionsPage());
-    this.elements.viewerFontSizeRange?.addEventListener('input', () =>
-      this.applyViewerFontSize(this.elements.viewerFontSizeRange.value)
-    );
-    this.elements.viewerFontSizeRange?.addEventListener('change', () =>
-      this.setViewerFontSize(this.elements.viewerFontSizeRange.value)
-    );
-    this.elements.viewerFontSizeInput?.addEventListener('change', () =>
-      this.setViewerFontSize(this.elements.viewerFontSizeInput.value)
-    );
-    this.themeMediaQuery?.addEventListener?.('change', () => {
-      if (this.themePreference === 'system') this.applyTheme();
-    });
+    this.appearance.bindEvents();
     window.addEventListener('dragenter', event => this.handleWindowDragEnter(event));
     window.addEventListener('dragover', event => this.handleWindowDragOver(event));
     window.addEventListener('dragleave', event => this.handleWindowDragLeave(event));
@@ -852,96 +815,6 @@ class DevFileViewerApp {
     }
     this.applySidebarTab('files');
     this.setDirectoryTreeLoading(message);
-  }
-
-  async restoreTheme() {
-    const stored = await chrome.storage.local.get(THEME_KEY);
-    this.themePreference = normalizeThemePreference(stored[THEME_KEY], DEFAULT_THEME);
-    if (this.elements.theme) this.elements.theme.value = this.themePreference;
-    this.applyTheme();
-  }
-
-  async setThemePreference(value) {
-    this.themePreference = normalizeThemePreference(value, DEFAULT_THEME);
-    if (this.elements.theme && this.elements.theme.value !== this.themePreference) {
-      this.elements.theme.value = this.themePreference;
-    }
-    await chrome.storage.local.set({ [THEME_KEY]: this.themePreference });
-    this.applyTheme();
-    this.setStatus(t('statusThemeSet', [themeLabel(this.themePreference)]), 'success');
-  }
-
-  applyTheme() {
-    const resolved = this.resolveTheme();
-    document.documentElement.dataset.theme = resolved.colorScheme;
-    document.documentElement.dataset.appTheme = resolved.appTheme;
-    document.documentElement.dataset.themePreference = this.themePreference;
-    document.documentElement.style.colorScheme = resolved.colorScheme;
-    document.body?.setAttribute('data-theme', resolved.colorScheme);
-    document.body?.setAttribute('data-app-theme', resolved.appTheme);
-    this.elements.app?.setAttribute('data-theme', resolved.colorScheme);
-    this.elements.app?.setAttribute('data-app-theme', resolved.appTheme);
-  }
-
-  resolveTheme() {
-    return resolveThemePreference(this.themePreference, Boolean(this.themeMediaQuery?.matches));
-  }
-
-  async restoreContentWidth() {
-    const stored = await chrome.storage.local.get(CONTENT_WIDTH_KEY);
-    this.applyContentWidth(stored[CONTENT_WIDTH_KEY] || DEFAULT_CONTENT_WIDTH);
-  }
-
-  applyContentWidth(value) {
-    const widthKey = Object.prototype.hasOwnProperty.call(CONTENT_WIDTHS, value)
-      ? value
-      : DEFAULT_CONTENT_WIDTH;
-    this.contentWidth = widthKey;
-    this.elements.contentWidth.value = widthKey;
-    this.elements.app.classList.toggle('content-width-full', widthKey === 'full');
-    this.elements.app.style.setProperty('--markdown-body-width', CONTENT_WIDTHS[widthKey]);
-  }
-
-  async setContentWidth(value) {
-    this.applyContentWidth(value);
-    await chrome.storage.local.set({ [CONTENT_WIDTH_KEY]: this.contentWidth });
-    this.setStatus(t('statusContentWidthSet', [contentWidthLabel(this.contentWidth)]), 'info');
-    await nextFrame();
-  }
-
-  async restoreViewerFontSize() {
-    const stored = await chrome.storage.local.get(VIEWER_FONT_SIZE_KEY);
-    this.applyViewerFontSize(stored[VIEWER_FONT_SIZE_KEY] || DEFAULT_VIEWER_FONT_SIZE);
-  }
-
-  clampViewerFontSize(value) {
-    const numericSize = Number(value);
-    if (!Number.isFinite(numericSize)) return DEFAULT_VIEWER_FONT_SIZE;
-    return Math.min(Math.max(Math.round(numericSize), MIN_VIEWER_FONT_SIZE), MAX_VIEWER_FONT_SIZE);
-  }
-
-  applyViewerFontSize(value) {
-    this.viewerFontSize = this.clampViewerFontSize(value);
-    this.elements.preview.style.setProperty('--viewer-font-size', `${this.viewerFontSize}px`);
-    if (this.elements.viewerFontSizeRange) {
-      const progress =
-        ((this.viewerFontSize - MIN_VIEWER_FONT_SIZE) /
-          (MAX_VIEWER_FONT_SIZE - MIN_VIEWER_FONT_SIZE)) *
-        100;
-      this.elements.viewerFontSizeRange.value = String(this.viewerFontSize);
-      this.elements.viewerFontSizeRange.style.setProperty(
-        '--viewer-font-size-progress',
-        `${progress}%`
-      );
-    }
-    if (this.elements.viewerFontSizeInput)
-      this.elements.viewerFontSizeInput.value = String(this.viewerFontSize);
-  }
-
-  async setViewerFontSize(value) {
-    this.applyViewerFontSize(value);
-    await chrome.storage.local.set({ [VIEWER_FONT_SIZE_KEY]: this.viewerFontSize });
-    this.setStatus(t('statusViewerTextSizeSet', [String(this.viewerFontSize)]), 'info');
   }
 
   async restoreSidebarWidth() {
@@ -2986,10 +2859,6 @@ function fileFromDroppedEntry(fileEntry) {
   return new Promise((resolve, reject) => {
     fileEntry.file(resolve, reject);
   });
-}
-
-function nextFrame() {
-  return new Promise(resolve => requestAnimationFrame(() => resolve()));
 }
 
 // Guard auto-start so importing this module in tests (empty document) is a
