@@ -180,6 +180,13 @@
     "placeholders": { "name": { "content": "$1", "example": "README.md" } }
   },
   "sourceLocalFileGeneric": { "message": "Local file" },
+  "sourceTruncatedNotice": {
+    "message": "Showing the first $SHOWN$ of $TOTAL$ lines. The rest are hidden to keep this page responsive.",
+    "placeholders": {
+      "shown": { "content": "$1", "example": "50000" },
+      "total": { "content": "$2", "example": "120000" }
+    }
+  },
   "tocNoHeadingsFound": { "message": "No headings found in this document." },
   "outlineTabCount": {
     "message": "Outline ($COUNT$)",

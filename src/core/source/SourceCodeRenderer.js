@@ -1,5 +1,12 @@
 import { highlightCodeToHtml, normalizeLanguageName } from '../highlight/syntaxHighlighter.js';
 import { sourceLanguageFromPath } from '../format/fileTypes.js';
+import { t } from '../i18n/i18n.js';
+
+// Upper bound on rendered lines. Each line produces several DOM nodes, so a
+// pathological file (e.g. a huge minified blob) could otherwise create hundreds
+// of thousands of nodes and freeze the tab. Above this we render a prefix and
+// show a notice with the full line count.
+export const MAX_RENDERED_LINES = 50000;
 
 export class SourceCodeRenderer {
   render(sourceText, targetElement, context = {}) {
@@ -15,10 +22,14 @@ export class SourceCodeRenderer {
 
     const normalizedText = String(sourceText || '').replace(/\r\n?/g, '\n');
     const lines = normalizedText.split('\n');
-    const lineNumberWidth = `${Math.max(3, String(lines.length).length)}ch`;
+    const maxLines = Number.isFinite(context.maxLines) ? context.maxLines : MAX_RENDERED_LINES;
+    const totalLines = lines.length;
+    const renderedLines = Math.min(totalLines, maxLines);
+    const lineNumberWidth = `${Math.max(3, String(renderedLines).length)}ch`;
     pre.style.setProperty('--source-line-number-width', lineNumberWidth);
 
-    lines.forEach((line, index) => {
+    for (let index = 0; index < renderedLines; index += 1) {
+      const line = lines[index];
       const lineNumber = index + 1;
       const lineElement = document.createElement('span');
       lineElement.className = 'source-line';
@@ -43,14 +54,25 @@ export class SourceCodeRenderer {
 
       lineElement.append(marker, number, codeText);
       code.append(lineElement);
-    });
+    }
 
     pre.append(code);
     targetElement.append(pre);
 
+    if (totalLines > renderedLines) {
+      const notice = document.createElement('div');
+      notice.className = 'source-truncated-notice';
+      notice.setAttribute('role', 'status');
+      notice.textContent = t('sourceTruncatedNotice', [
+        String(renderedLines),
+        String(totalLines)
+      ]);
+      targetElement.append(notice);
+    }
+
     return {
       language,
-      lineCount: lines.length
+      lineCount: totalLines
     };
   }
 }

@@ -180,6 +180,13 @@
     "placeholders": { "name": { "content": "$1", "example": "README.md" } }
   },
   "sourceLocalFileGeneric": { "message": "本機檔案" },
+  "sourceTruncatedNotice": {
+    "message": "顯示 $TOTAL$ 行中的前 $SHOWN$ 行，其餘已隱藏以維持頁面流暢。",
+    "placeholders": {
+      "shown": { "content": "$1", "example": "50000" },
+      "total": { "content": "$2", "example": "120000" }
+    }
+  },
   "tocNoHeadingsFound": { "message": "此文件中找不到標題。" },
   "outlineTabCount": {
     "message": "大綱（$COUNT$）",

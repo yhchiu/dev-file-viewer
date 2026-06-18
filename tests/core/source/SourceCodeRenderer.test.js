@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { SourceCodeRenderer } from '../../../src/core/source/SourceCodeRenderer.js';
+import { SourceCodeRenderer, MAX_RENDERED_LINES } from '../../../src/core/source/SourceCodeRenderer.js';
 
 const ZWSP = String.fromCharCode(0x200b);
 
@@ -34,5 +34,30 @@ describe('SourceCodeRenderer.render', () => {
     const empty = document.createElement('div');
     new SourceCodeRenderer().render('', empty, { language: 'plaintext' });
     expect(empty.querySelector('.source-line-code').innerHTML).toBe(ZWSP);
+  });
+
+  it('caps rendered lines and shows a notice for very large files', () => {
+    // Exercise the cap with a small override so the test does not build 200k nodes.
+    const total = 15;
+    const source = Array.from({ length: total }, (_, i) => `line ${i}`).join('\n');
+
+    const result = new SourceCodeRenderer().render(source, target, { language: 'plaintext', maxLines: 10 });
+
+    expect(target.querySelectorAll('.source-line')).toHaveLength(10);
+    expect(result.lineCount).toBe(total);
+
+    const notice = target.querySelector('.source-truncated-notice');
+    expect(notice).not.toBeNull();
+    expect(notice.textContent).toContain('10');
+    expect(notice.textContent).toContain(String(total));
+  });
+
+  it('exposes a sane default line cap', () => {
+    expect(MAX_RENDERED_LINES).toBeGreaterThanOrEqual(10000);
+  });
+
+  it('does not show a notice when under the cap', () => {
+    new SourceCodeRenderer().render('a\nb\nc', target, { language: 'plaintext' });
+    expect(target.querySelector('.source-truncated-notice')).toBeNull();
   });
 });
