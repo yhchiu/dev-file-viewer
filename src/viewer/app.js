@@ -671,8 +671,10 @@ class DevFileViewerApp {
 
     for (const sidebarPanel of this.elements.sidebarPanels) {
       const isActive = sidebarPanel.dataset.sidebarPanel === nextPanel;
+      // `hidden` already removes the panel from layout, the a11y tree, and the
+      // focus order, so an explicit aria-hidden is redundant. Setting it while a
+      // descendant still holds focus is what Chrome blocks, so we omit it.
       sidebarPanel.hidden = !isActive;
-      sidebarPanel.setAttribute('aria-hidden', String(!isActive));
     }
 
     if (options.activeTarget) {
@@ -968,7 +970,9 @@ class DevFileViewerApp {
     this.elements.sidebarRestore.setAttribute('aria-expanded', String(!this.sidebarCollapsed));
     this.elements.sidebarRestore.setAttribute('aria-label', t('a11yShowSidebar'));
     this.elements.sidebarRestore.title = t('a11yShowSidebar');
-    this.elements.sidebarBody?.setAttribute('aria-hidden', String(this.sidebarCollapsed));
+    // When collapsed, `.sidebar-body` is display:none in every theme, which
+    // already hides it from the a11y tree and focus order; an explicit
+    // aria-hidden is redundant and Chrome blocks it if focus is still inside.
 
     if (shouldPersist) {
       await chrome.storage.local.set({ [SIDEBAR_COLLAPSED_KEY]: this.sidebarCollapsed });
