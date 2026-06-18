@@ -33,6 +33,14 @@ import { SidebarController } from './controllers/SidebarController.js';
 import { OutlineController } from './controllers/OutlineController.js';
 import { FileTabsController } from './controllers/FileTabsController.js';
 
+// Orchestrator for the viewer page. Owns the shared element registry, the
+// rendering collaborators (markdown/source/diff/url/file/directory), and the
+// document lifecycle (load → renderDocument → reload/clear). UI concerns live in
+// dedicated controllers under ./controllers/, each constructed with this app as
+// their host: AppearanceController (theme/width/font), ScrollMemoryController,
+// DropController, SidebarController, OutlineController (TOC + floating outline),
+// and FileTabsController. Controllers call back via shared host services
+// (setStatus, scrollRoot, renderDocument, scrollToAnchor, getDocumentKey, ...).
 class DevFileViewerApp {
   constructor() {
     this.elements = {
