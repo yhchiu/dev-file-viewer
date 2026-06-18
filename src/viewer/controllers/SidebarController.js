@@ -229,7 +229,7 @@ export class SidebarController {
     event.preventDefault();
     const nextWidth = this.resizeDrag.startWidth + event.clientX - this.resizeDrag.startX;
     this.applySidebarWidth(nextWidth);
-    this.host.reflowFloatingTocPosition();
+    this.host.outline.reflowFloatingTocPosition();
   }
 
   async finishSidebarResize() {
@@ -245,7 +245,7 @@ export class SidebarController {
     this.elements.app.classList.remove('sidebar-resizing');
     await this.persistSidebarWidth();
     await nextFrame();
-    this.host.reflowFloatingTocPosition();
+    this.host.outline.reflowFloatingTocPosition();
   }
 
   async handleSidebarResizeKey(event) {
@@ -263,13 +263,13 @@ export class SidebarController {
     }
 
     await this.persistSidebarWidth();
-    this.host.reflowFloatingTocPosition();
+    this.host.outline.reflowFloatingTocPosition();
   }
 
   async resetSidebarWidth() {
     this.applySidebarWidth(DEFAULT_SIDEBAR_WIDTH);
     await this.persistSidebarWidth();
-    this.host.reflowFloatingTocPosition();
+    this.host.outline.reflowFloatingTocPosition();
   }
 
   async restoreSidebarState() {
@@ -302,6 +302,8 @@ export class SidebarController {
     }
 
     await nextFrame();
-    this.host.updateFloatingOutlineState({ openPopover: !wasCollapsed && this.sidebarCollapsed });
+    this.host.outline.updateFloatingOutlineState({
+      openPopover: !wasCollapsed && this.sidebarCollapsed
+    });
   }
 }

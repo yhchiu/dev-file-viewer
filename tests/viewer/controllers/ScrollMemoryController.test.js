@@ -25,7 +25,7 @@ function makeHost() {
     getDocumentKey: doc => doc.key,
     scrollToAnchor: () => false,
     saveActiveTabRuntimeScroll: () => {},
-    scheduleActiveHeadingUpdate: () => {},
+    outline: { scheduleActiveHeadingUpdate: () => {} },
     setStatus: () => {}
   };
 }
