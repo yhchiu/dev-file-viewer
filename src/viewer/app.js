@@ -190,6 +190,7 @@ class DevFileViewerApp {
 
   async start() {
     localizeDocument();
+    this.showLaunchLoadingIfPending();
     await this.plugins.init();
     await this.restoreTheme();
     await this.restoreContentWidth();
@@ -1201,6 +1202,15 @@ async openDroppedDirectoryEntry(entry) {
   this.setStatus(t('statusDroppedFolderLoaded'), 'success');
 }
 
+  showLaunchLoadingIfPending() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('snapshot') || params.get('url')) {
+      // Show the loader right away so an auto-opened document does not sit on a
+      // blank screen during cold-start init (plugins, settings) before render.
+      this.setViewerLoading();
+    }
+  }
+
   async loadFromLaunchParams() {
     const params = new URLSearchParams(window.location.search);
     const snapshotId = params.get('snapshot');
@@ -1220,6 +1230,7 @@ async openDroppedDirectoryEntry(entry) {
     const snapshot = stored[key];
 
     if (!snapshot) {
+      this.clearViewerLoading();
       throw new Error(t('errorSnapshotUnavailable'));
     }
 
@@ -2801,6 +2812,11 @@ function nextFrame() {
 // no-op; the real viewer page always has #app.
 if (document.querySelector('#app')) {
   new DevFileViewerApp().start().catch(error => {
+    const loading = document.querySelector('#viewer-loading');
+    if (loading) {
+      loading.hidden = true;
+      loading.setAttribute('aria-hidden', 'true');
+    }
     const status = document.querySelector('#status');
     if (!status) return;
     status.hidden = false;
