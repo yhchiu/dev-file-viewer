@@ -20,16 +20,13 @@ beforeEach(() => {
 });
 
 describe('mermaidPlugin.init', () => {
-  it('initialises mermaid with strict security', async () => {
-    await mermaidPlugin.init();
-    expect(mermaid.initialize).toHaveBeenCalledWith(
-      expect.objectContaining({ securityLevel: 'strict', startOnLoad: false })
-    );
+  it('defers loading: init() is a no-op that resolves', async () => {
+    await expect(mermaidPlugin.init()).resolves.toBeUndefined();
   });
 });
 
 describe('mermaidPlugin.afterRender', () => {
-  it('replaces mermaid code blocks with .mermaid containers and runs mermaid', async () => {
+  it('replaces mermaid code blocks, lazily initialises with strict security, and runs', async () => {
     const root = rootWithDiagram();
     await mermaidPlugin.afterRender(root);
 
@@ -37,6 +34,9 @@ describe('mermaidPlugin.afterRender', () => {
     expect(container).not.toBeNull();
     expect(container.textContent).toContain('graph TD');
     expect(root.querySelector('pre')).toBeNull();
+    expect(mermaid.initialize).toHaveBeenCalledWith(
+      expect.objectContaining({ securityLevel: 'strict', startOnLoad: false })
+    );
     expect(mermaid.run).toHaveBeenCalledTimes(1);
   });
 

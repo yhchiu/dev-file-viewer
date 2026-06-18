@@ -22,8 +22,12 @@ const common = {
 await build({
   ...common,
   entryPoints: [path.join(root, 'src/viewer/app.js')],
-  outfile: path.join(dist, 'viewer/app.js'),
-  format: 'esm'
+  outdir: path.join(dist, 'viewer'),
+  format: 'esm',
+  // Code splitting so the dynamically imported mermaid bundle becomes a
+  // separate chunk that is only fetched when a document has a diagram.
+  splitting: true,
+  chunkNames: 'chunks/[name]-[hash]'
 });
 
 await build({

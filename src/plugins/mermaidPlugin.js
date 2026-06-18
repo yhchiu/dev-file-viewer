@@ -1,17 +1,31 @@
-import mermaid from 'mermaid';
 import { features } from '../core/config/features.js';
+
+let mermaidPromise;
+
+// Load and initialise mermaid on first use. mermaid (with d3/cytoscape) is by
+// far the largest dependency, so importing it dynamically keeps it out of the
+// viewer's initial bundle and only pays the download/parse cost when a document
+// actually contains a diagram.
+function loadMermaid() {
+  if (!mermaidPromise) {
+    mermaidPromise = import('mermaid').then(({ default: mermaid }) => {
+      mermaid.initialize({
+        startOnLoad: false,
+        securityLevel: 'strict',
+        theme: 'default'
+      });
+      return mermaid;
+    });
+  }
+  return mermaidPromise;
+}
 
 export const mermaidPlugin = {
   id: 'mermaid',
   enabled: features.plugins.mermaid,
 
-  async init() {
-    mermaid.initialize({
-      startOnLoad: false,
-      securityLevel: 'strict',
-      theme: 'default'
-    });
-  },
+  // Initialisation is deferred to the first afterRender that finds a diagram.
+  async init() {},
 
   async afterRender(root) {
     const nodes = [];
@@ -27,6 +41,8 @@ export const mermaidPlugin = {
     }
 
     if (!nodes.length) return;
+
+    const mermaid = await loadMermaid();
 
     try {
       await mermaid.run({ nodes });
