@@ -39,6 +39,23 @@ describe('MarkdownEngine — XSS sanitisation', () => {
     await engine.render('<iframe src="https://evil.example"></iframe>', target);
     expect(target.querySelector('iframe')).toBeNull();
   });
+
+  it('strips external url() from inline styles (privacy beacon)', async () => {
+    await engine.render('<div style="background: url(http://evil.example/x.png); color: red">hi</div>', target);
+    expect(target.innerHTML.toLowerCase()).not.toContain('url(');
+    expect(target.innerHTML.toLowerCase()).not.toContain('evil.example');
+  });
+
+  it('drops <foreignObject> (mutation-XSS surface)', async () => {
+    await engine.render('<svg><foreignObject><div>x</div></foreignObject></svg>', target);
+    expect(target.querySelector('foreignObject')).toBeNull();
+  });
+
+  it('namespaces user ids to prevent DOM clobbering', async () => {
+    await engine.render('<div id="status">x</div>', target);
+    expect(target.innerHTML).toContain('user-content-status');
+    expect(target.querySelector('[id="status"]')).toBeNull();
+  });
 });
 
 describe('MarkdownEngine — normal rendering', () => {
