@@ -191,6 +191,7 @@ export function highlightMarkdownCodeBlocks(root) {
       // Trusted sink: highlight.js HTML-escapes its input and emits only its own
       // <span class="hljs-*"> markup, so result.value carries no active content.
       // This path deliberately bypasses DOMPurify; do not feed it un-highlighted text.
+      // eslint-disable-next-line no-unsanitized/property -- highlight.js escapes its input (see comment above)
       code.innerHTML = result.value;
       code.classList.add('hljs', `language-${language}`);
       code.dataset.language = language;

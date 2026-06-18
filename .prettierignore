@@ -1,0 +1,6 @@
+dist/
+node_modules/
+sample/
+new_theme/
+package-lock.json
+public/_locales/

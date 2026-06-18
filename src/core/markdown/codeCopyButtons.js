@@ -29,6 +29,7 @@ export function installMarkdownCodeCopyButtons(root) {
     button.className = 'markdown-code-copy';
     button.title = t('a11yCopyCode');
     button.setAttribute('aria-label', t('a11yCopyCode'));
+    // eslint-disable-next-line no-unsanitized/property -- trusted static SVG icon constant
     button.innerHTML = COPY_ICON;
 
     button.addEventListener('click', async event => {
@@ -90,6 +91,7 @@ function setCopiedState(button) {
   button.classList.add('is-copied');
   button.title = t('a11yCopied');
   button.setAttribute('aria-label', t('a11yCopied'));
+  // eslint-disable-next-line no-unsanitized/property -- trusted static SVG icon constant
   button.innerHTML = CHECK_ICON;
 
   window.clearTimeout(button._copyTimer);
@@ -97,6 +99,7 @@ function setCopiedState(button) {
     button.classList.remove('is-copied');
     button.title = t('a11yCopyCode');
     button.setAttribute('aria-label', t('a11yCopyCode'));
+    // eslint-disable-next-line no-unsanitized/property -- trusted static SVG icon constant
     button.innerHTML = COPY_ICON;
   }, 1400);
 }
@@ -112,6 +115,7 @@ function setCopyFailedState(button) {
     button.classList.remove('is-copy-failed');
     button.title = t('a11yCopyCode');
     button.setAttribute('aria-label', t('a11yCopyCode'));
+    // eslint-disable-next-line no-unsanitized/property -- trusted static SVG icon constant
     button.innerHTML = COPY_ICON;
   }, 1800);
 }

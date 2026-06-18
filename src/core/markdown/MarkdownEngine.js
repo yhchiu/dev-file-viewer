@@ -49,6 +49,7 @@ export class MarkdownEngine {
       ADD_ATTR: ['class', 'id', 'style', 'viewBox', 'd', 'x', 'y', 'x1', 'y1', 'x2', 'y2', 'cx', 'cy', 'r', 'rx', 'ry', 'width', 'height', 'fill', 'stroke', 'stroke-width', 'marker-end', 'transform', 'text-anchor', 'dominant-baseline']
     });
 
+    // eslint-disable-next-line no-unsanitized/property -- cleanHtml is DOMPurify-sanitized output
     targetElement.innerHTML = cleanHtml;
     highlightMarkdownCodeBlocks(targetElement);
     rewriteLinks(targetElement, context.baseUrl, context.onOpenDocumentLink);

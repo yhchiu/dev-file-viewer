@@ -249,7 +249,7 @@ function extractBraceLanguageSymbols(lines, language) {
       const kind = /interface|protocol/.test(line) ? 'interface' : /enum/.test(line) ? 'enum' : 'class';
       const symbol = addSymbol(symbols, kind, match[1], lineNumber, parent?.id || '');
       if (symbol) stack.push({ ...symbol, startDepth: depth, kind });
-    } else if (parent && (match = line.match(/^(?:@\w+(?:\([^)]*\))?\s*)*(?:(?:public|private|protected|internal|static|final|open|override|abstract|virtual|async|suspend|mutating|func|fun|def|native|synchronized|sealed|readonly|partial)\s+)*(?:[\w<>\[\],.?]+\s+)+([A-Za-z_][\w$]*)\s*\([^;{}]*\)\s*(?:throws\s+\w+\s*)?[{;]?/))) {
+    } else if (parent && (match = line.match(/^(?:@\w+(?:\([^)]*\))?\s*)*(?:(?:public|private|protected|internal|static|final|open|override|abstract|virtual|async|suspend|mutating|func|fun|def|native|synchronized|sealed|readonly|partial)\s+)*(?:[\w<>[\],.?]+\s+)+([A-Za-z_][\w$]*)\s*\([^;{}]*\)\s*(?:throws\s+\w+\s*)?[{;]?/))) {
       const name = match[1];
       if (!RESERVED_METHOD_WORDS.has(name)) addSymbol(symbols, 'method', name, lineNumber, parent.id);
     } else if (language === 'swift' && (match = line.match(/^(?:public|private|internal|open|static|mutating|override\s+)*func\s+([A-Za-z_]\w*)\s*\(/))) {

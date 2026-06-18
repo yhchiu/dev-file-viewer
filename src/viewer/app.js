@@ -299,7 +299,9 @@ class DevFileViewerApp {
     }, { passive: true });
 
     // Set SVG content for scroll buttons
+    // eslint-disable-next-line no-unsanitized/property -- trusted static SVG icon
     this.elements.btnScrollTop.innerHTML = getArrowUpIcon('scroll-nav-icon');
+    // eslint-disable-next-line no-unsanitized/property -- trusted static SVG icon
     this.elements.btnScrollBottom.innerHTML = getArrowDownIcon('scroll-nav-icon');
 
     // Scroll buttons event listeners
@@ -912,7 +914,7 @@ class DevFileViewerApp {
     this.reflowFloatingTocPosition();
   }
 
-  async finishSidebarResize(event) {
+  async finishSidebarResize() {
     if (!this.resizeDrag) return;
     try {
       if (this.elements.sidebarResizer.hasPointerCapture?.(this.resizeDrag.pointerId)) {
@@ -1533,6 +1535,7 @@ async openDroppedDirectoryEntry(entry) {
 
       const icon = document.createElement('span');
       icon.className = 'file-tab-icon';
+      // eslint-disable-next-line no-unsanitized/property -- trusted static SVG icon
       icon.innerHTML = getFileIcon('button-icon');
 
       const name = document.createElement('span');
@@ -1545,6 +1548,7 @@ async openDroppedDirectoryEntry(entry) {
       pinButton.setAttribute('aria-pressed', String(tab.pinned));
       pinButton.setAttribute('aria-label', tab.pinned ? t('a11yUnpinFileTab') : t('a11yPinFileTab'));
       pinButton.title = pinButton.getAttribute('aria-label');
+      // eslint-disable-next-line no-unsanitized/property -- trusted static SVG icon
       pinButton.innerHTML = tab.pinned
         ? getPinFilledIcon('button-icon')
         : getPinIcon('button-icon');
@@ -2372,6 +2376,7 @@ renderTocContainer(container, context) {
     toggle.dataset.tocContext = context;
     toggle.setAttribute('aria-label', t('a11yCollapseSection', [heading.text]));
     toggle.setAttribute('aria-expanded', 'true');
+    // eslint-disable-next-line no-unsanitized/property -- trusted static SVG icon
     toggle.innerHTML = getArrowRightIcon('button-icon');
     if (!heading.hasChildren) {
       toggle.classList.add('is-placeholder');
@@ -2401,6 +2406,7 @@ renderTocContainer(container, context) {
     if (heading.kind === 'diff-directory') {
       item.type = 'button';
       item.classList.add('toc-directory-item');
+      // eslint-disable-next-line no-unsanitized/property -- trusted static markup; label text set via textContent below
       item.innerHTML = `${tocIconSvg('folder')}<span class="toc-item-label"></span>`;
       item.querySelector('.toc-item-label').textContent = heading.text;
       item.addEventListener('click', event => {
@@ -2409,6 +2415,7 @@ renderTocContainer(container, context) {
       });
     } else if (heading.kind === 'diff-file') {
       item.href = `#${encodeURIComponent(heading.id)}`;
+      // eslint-disable-next-line no-unsanitized/property -- trusted static markup; label/stats text set via textContent below
       item.innerHTML = `${tocIconSvg('file')}<span class="toc-item-label"></span><span class="toc-item-stats"></span>`;
       item.querySelector('.toc-item-label').textContent = heading.text;
       item.querySelector('.toc-item-stats').textContent = `+${heading.stats?.added || 0} −${heading.stats?.removed || 0}`;
@@ -2422,6 +2429,7 @@ renderTocContainer(container, context) {
     } else if (heading.kind === 'source-symbol') {
       const anchorId = heading.anchorId || `L${heading.line}`;
       item.href = `#${encodeURIComponent(anchorId)}`;
+      // eslint-disable-next-line no-unsanitized/property -- trusted static markup with localized badge + numeric line; label text set via textContent below
       item.innerHTML = `<span class="toc-symbol-badge">${symbolKindLabel(heading.symbolKind)}</span><span class="toc-item-label"></span><span class="toc-symbol-line">L${heading.line}</span>`;
       item.querySelector('.toc-item-label').textContent = heading.text;
       item.addEventListener('click', event => {
@@ -2554,7 +2562,7 @@ renderTocContainer(container, context) {
       for (const row of rows) {
         const id = row.dataset.headingId;
         const node = this.headingTree.byId.get(id);
-        let hidden = false;
+        let hidden;
 
         if (query) {
           hidden = !visibleIds.has(id);

@@ -50,6 +50,7 @@ export class SourceCodeRenderer {
       // Trusted sink: highlightCodeToHtml() returns highlight.js output (input is
       // HTML-escaped) or escapeHtml() for unknown/plaintext, so this is safe to set
       // as innerHTML without DOMPurify.
+      // eslint-disable-next-line no-unsanitized/property -- highlight.js/escapeHtml output (see comment above)
       codeText.innerHTML = line ? highlightCodeToHtml(line, language) : '\u200b';
 
       lineElement.append(marker, number, codeText);

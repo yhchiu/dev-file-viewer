@@ -37,6 +37,7 @@ export class DirectoryTreeView {
       disclosure.dataset.path = path;
       disclosure.setAttribute('aria-expanded', String(!collapsed));
       disclosure.setAttribute('aria-label', t(collapsed ? 'a11yExpandSection' : 'a11yCollapseSection', [folderName]));
+      // eslint-disable-next-line no-unsanitized/property -- trusted static SVG icon
       disclosure.innerHTML = getArrowRightSmallIcon('tree-arrow-icon');
       disclosure.addEventListener('click', event => {
         event.preventDefault();
@@ -50,6 +51,7 @@ export class DirectoryTreeView {
       label.dataset.path = path;
       label.dataset.expanded = String(!collapsed);
       label.title = path || folderName;
+      // eslint-disable-next-line no-unsanitized/property -- trusted static SVG icons; label text set via textContent below
       label.innerHTML = getFolderClosedIcon('tree-item-icon tree-folder-icon tree-folder-icon-closed') +
         getFolderOpenIcon('tree-item-icon tree-folder-icon tree-folder-icon-open') +
         '<span class="tree-folder-label"></span>';
@@ -77,6 +79,7 @@ export class DirectoryTreeView {
     button.className = 'tree-file';
     button.title = node.path;
     button.dataset.path = node.path;
+    // eslint-disable-next-line no-unsanitized/property -- trusted static SVG icon + markup; label text set via textContent below
     button.innerHTML = '<span class="tree-file-spacer" aria-hidden="true"></span><span class="tree-file-inner">' +
       getFileIcon('tree-item-icon tree-file-icon') +
       '<span class="tree-file-label"></span></span>';
