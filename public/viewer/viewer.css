@@ -364,6 +364,9 @@ input, select { width: 100%; border: 1px solid var(--line); border-radius: 10px;
   min-width: 0;
 }
 .markdown-body { position: relative; width: min(100%, var(--markdown-body-width)); max-width: var(--markdown-body-width); min-width: 0; margin: 0 auto; background: var(--panel); border: 1px solid var(--line); box-shadow: var(--shadow); border-radius: 20px; padding: 34px; min-height: 64vh; overflow-x: auto; font-size: var(--viewer-font-size); }
+/* #preview is a scroll container made keyboard-focusable via tabindex="0";
+   it takes no text input, so suppress the UA focus ring that appears after a keypress. */
+#preview:focus, #preview:focus-visible { outline: none; }
 .app-shell.content-width-full .toolbar,
 .app-shell.content-width-full .status,
 .app-shell.content-width-full .viewer-loading,
