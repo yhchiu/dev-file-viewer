@@ -188,6 +188,9 @@ export function highlightMarkdownCodeBlocks(root) {
         ignoreIllegals: true
       });
 
+      // Trusted sink: highlight.js HTML-escapes its input and emits only its own
+      // <span class="hljs-*"> markup, so result.value carries no active content.
+      // This path deliberately bypasses DOMPurify; do not feed it un-highlighted text.
       code.innerHTML = result.value;
       code.classList.add('hljs', `language-${language}`);
       code.dataset.language = language;
@@ -199,6 +202,9 @@ export function highlightMarkdownCodeBlocks(root) {
 }
 
 
+// Returns an HTML string safe to assign to innerHTML: highlight.js escapes its
+// input, and the unknown / plaintext / mermaid fallback goes through escapeHtml().
+// Callers therefore do not run it through DOMPurify.
 export function highlightCodeToHtml(sourceText = '', languageName = '') {
   registerLanguages();
 

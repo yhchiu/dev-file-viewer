@@ -36,6 +36,9 @@ export class SourceCodeRenderer {
 
       const codeText = document.createElement('span');
       codeText.className = 'source-line-code';
+      // Trusted sink: highlightCodeToHtml() returns highlight.js output (input is
+      // HTML-escaped) or escapeHtml() for unknown/plaintext, so this is safe to set
+      // as innerHTML without DOMPurify.
       codeText.innerHTML = line ? highlightCodeToHtml(line, language) : '\u200b';
 
       lineElement.append(marker, number, codeText);
