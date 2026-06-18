@@ -49,8 +49,8 @@ await build({
 
 await build({
   ...common,
-  entryPoints: [path.join(root, 'src/onboarding/onboarding.js')],
-  outfile: path.join(dist, 'onboarding/onboarding.js'),
+  entryPoints: [path.join(root, 'src/settings/settings.js')],
+  outfile: path.join(dist, 'settings/settings.js'),
   format: 'iife'
 });
 

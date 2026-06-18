@@ -73,7 +73,7 @@ async function openViewerForSnapshot(message, sender) {
 
 chrome.runtime.onInstalled.addListener(details => {
   if (details.reason === 'install') {
-    chrome.tabs.create({ url: chrome.runtime.getURL('onboarding/index.html') });
+    chrome.tabs.create({ url: chrome.runtime.getURL('settings/index.html#about') });
   }
 
   chrome.contextMenus.removeAll(() => {

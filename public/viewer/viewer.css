@@ -152,6 +152,10 @@ input, select { width: 100%; border: 1px solid var(--line); border-radius: 10px;
 .checkbox-row input { width: auto; accent-color: var(--accent); }
 .info-dot { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); background: #fff; font-size: 12px; font-weight: 800; cursor: help; }
 .info-dot:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
+.settings-link-row { margin-top: 10px; width: 100%; padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--panel-2); color: var(--fg); font-size: 13px; font-weight: 750; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 10px; text-align: left; }
+.settings-link-row::after { content: "\2192"; color: var(--muted); font-weight: 800; }
+.settings-link-row:hover { border-color: var(--accent); color: var(--accent); }
+.settings-link-row:hover::after { color: var(--accent); }
 .sidebar-section-title { margin: 18px 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 800; }
 .directory-root-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--fg); text-transform: none; letter-spacing: 0; font-weight: 800; }
 .directory-root-name[hidden] { display: none; }

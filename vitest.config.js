@@ -18,10 +18,11 @@ export default defineConfig({
       exclude: [
         'src/viewer/app.js',
         'src/popup/popup.js',
-        'src/onboarding/onboarding.js',
+        'src/settings/settings.js',
         'src/content/markdown-autoview.js',
         'src/background/service-worker.js',
-        'src/core/browser/fileUrlAccess.js'
+        'src/core/browser/fileUrlAccess.js',
+        'src/core/ui/chromeTheme.js'
       ],
       thresholds: {
         statements: 80,

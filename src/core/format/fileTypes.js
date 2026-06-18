@@ -172,3 +172,58 @@ export function displayNameFromUrl(url = '') {
     return parts.at(-1) || 'Untitled';
   }
 }
+
+const SPECIAL_SOURCE_FILE_DISPLAY = new Map([
+  ['dockerfile', 'Dockerfile'],
+  ['containerfile', 'Containerfile'],
+  ['makefile', 'Makefile'],
+  ['gnumakefile', 'GNUmakefile'],
+  ['cmakelists.txt', 'CMakeLists.txt'],
+  ['rakefile', 'Rakefile'],
+  ['gemfile', 'Gemfile'],
+  ['podfile', 'Podfile'],
+  ['gradlefile', 'Gradlefile'],
+  ['justfile', 'Justfile'],
+  ['procfile', 'Procfile']
+]);
+
+function toExtensionItems(extensions) {
+  return [...extensions].map(ext => ({ key: ext, label: ext }));
+}
+
+// Categories rendered by the options-page auto-open settings UI. Each item's
+// `key` is what matchedAutoOpenKey() returns and what the disabled list stores.
+export const AUTO_OPEN_CATEGORIES = Object.freeze([
+  { id: 'markdown', labelKey: 'catMarkdown', items: toExtensionItems(DOCUMENT_EXTENSIONS) },
+  { id: 'diff', labelKey: 'catDiff', items: toExtensionItems(DIFF_EXTENSIONS) },
+  { id: 'source', labelKey: 'catSource', items: toExtensionItems(SOURCE_CODE_EXTENSIONS) },
+  { id: 'text', labelKey: 'catText', items: toExtensionItems(TEXT_EXTENSIONS) },
+  {
+    id: 'special',
+    labelKey: 'catSpecial',
+    items: [...SPECIAL_SOURCE_FILE_NAMES.keys()].map(name => ({
+      key: name,
+      label: SPECIAL_SOURCE_FILE_DISPLAY.get(name) || name
+    }))
+  }
+]);
+
+const ALL_AUTO_OPEN_EXTENSIONS = new Set([
+  ...DOCUMENT_EXTENSIONS,
+  ...DIFF_EXTENSIONS,
+  ...TEXT_EXTENSIONS,
+  ...SOURCE_CODE_EXTENSIONS
+]);
+
+// Returns the catalog key that makes `value` eligible for auto-open: an
+// extension like ".md" or a special filename like "dockerfile". Returns "" when
+// the file is not a supported type. Mirrors isSupportedViewerFile() membership.
+export function matchedAutoOpenKey(value = '') {
+  // Check special filenames first (matching sourceLanguageFromPath), so a file
+  // like CMakeLists.txt maps to its special key rather than the ".txt" key.
+  const fileName = getFileName(value).toLowerCase();
+  if (SPECIAL_SOURCE_FILE_NAMES.has(fileName)) return fileName;
+  const extension = getExtension(value);
+  if (extension && ALL_AUTO_OPEN_EXTENSIONS.has(extension)) return extension;
+  return '';
+}

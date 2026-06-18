@@ -1,14 +1,63 @@
 :root {
   color-scheme: light;
   --bg: #ffffff;
+  --panel: #ffffff;
+  --panel-2: #f8f9fc;
   --fg: #18202f;
-  --muted: #677084;
+  --muted: #5b6473;
   --line: #e6e8ef;
   --accent: #335cff;
   --accent-soft: #eef2ff;
-  --success: #027a48;
-  --warning: #b54708;
-  --warning-bg: #fff7ed;
+  --ring: rgba(51, 92, 255, .35);
+  --ok-bg: #f2fff8;
+  --ok-border: #c9f0dc;
+  --ok-fg: #027a48;
+  --warn-bg: #fff7ed;
+  --warn-border: #fed7aa;
+  --warn-fg: #b54708;
+}
+
+/* Dark palette (mirrors the settings page). data-theme is set by JS to match
+   the viewer theme; the media query covers the pre-JS paint when no explicit
+   theme is set and the OS prefers dark. JS overrides --accent per theme. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #11161f;
+  --panel: #171d29;
+  --panel-2: #11161f;
+  --fg: #e6e9f2;
+  --muted: #9aa4b8;
+  --line: #262f40;
+  --accent: #6f8cff;
+  --accent-soft: rgba(111, 140, 255, .16);
+  --ring: rgba(111, 140, 255, .45);
+  --ok-bg: rgba(34, 197, 94, .12);
+  --ok-border: rgba(34, 197, 94, .35);
+  --ok-fg: #6ee7a8;
+  --warn-bg: rgba(245, 158, 11, .12);
+  --warn-border: rgba(245, 158, 11, .35);
+  --warn-fg: #fbbf6b;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --bg: #11161f;
+    --panel: #171d29;
+    --panel-2: #11161f;
+    --fg: #e6e9f2;
+    --muted: #9aa4b8;
+    --line: #262f40;
+    --accent: #6f8cff;
+    --accent-soft: rgba(111, 140, 255, .16);
+    --ring: rgba(111, 140, 255, .45);
+    --ok-bg: rgba(34, 197, 94, .12);
+    --ok-border: rgba(34, 197, 94, .35);
+    --ok-fg: #6ee7a8;
+    --warn-bg: rgba(245, 158, 11, .12);
+    --warn-border: rgba(245, 158, 11, .35);
+    --warn-fg: #fbbf6b;
+  }
 }
 
 * { box-sizing: border-box; }
@@ -18,13 +67,12 @@ header { display: flex; gap: 10px; align-items: center; margin-bottom: 14px; }
 .logo { width: 38px; height: 38px; border-radius: 12px; display: block; object-fit: cover; flex: 0 0 auto; box-shadow: 0 8px 18px rgba(51, 92, 255, .18); }
 h1 { margin: 0; font-size: 16px; }
 p { margin: 2px 0 0; color: var(--muted); }
-button { width: 100%; border: 1px solid var(--line); background: #fff; color: var(--fg); border-radius: 10px; padding: 10px 12px; font-weight: 650; cursor: pointer; margin-top: 8px; }
+button { width: 100%; border: 1px solid var(--line); background: var(--panel); color: var(--fg); border-radius: 10px; padding: 10px 12px; font-weight: 650; cursor: pointer; margin-top: 8px; transition: border-color .15s ease, color .15s ease, background .15s ease; }
 button:hover { border-color: var(--accent); color: var(--accent); }
-.file-url-card, .hint { margin-top: 14px; padding: 10px; border-radius: 10px; background: #f8f9fc; color: var(--muted); display: grid; gap: 5px; border: 1px solid transparent; }
-.file-url-card strong, .hint strong { color: var(--fg); }
-.file-url-card[data-state="enabled"] { background: #f2fff8; border-color: #c9f0dc; }
-.file-url-card[data-state="disabled"] { background: var(--warning-bg); border-color: #fed7aa; }
-.file-url-card[data-state="enabled"] span { color: var(--success); }
-.file-url-card[data-state="disabled"] span { color: var(--warning); }
-.file-url-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.file-url-actions button { margin-top: 4px; padding: 8px 10px; }
+button:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.file-url-card { margin-top: 14px; padding: 10px; border-radius: 10px; background: var(--panel-2); color: var(--muted); display: grid; gap: 5px; border: 1px solid var(--line); }
+.file-url-card strong { color: var(--fg); }
+.file-url-card[data-state="enabled"] { background: var(--ok-bg); border-color: var(--ok-border); }
+.file-url-card[data-state="disabled"] { background: var(--warn-bg); border-color: var(--warn-border); }
+.file-url-card[data-state="enabled"] span { color: var(--ok-fg); }
+.file-url-card[data-state="disabled"] span { color: var(--warn-fg); }

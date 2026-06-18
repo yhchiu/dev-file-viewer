@@ -171,7 +171,7 @@ src/
   features/sidebar/    local directory tree UI
   plugins/             syntax/plugin lifecycle
   viewer/              app shell and orchestration
-  onboarding/          first-run and permission guidance
+  settings/            multi-category settings page (auto-open, about)
   content/             auto-detect Markdown URL pages
   background/          context menu and tab actions
 ```

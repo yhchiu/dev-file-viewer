@@ -13,6 +13,8 @@ import {
   detectLineEnding,
   lineEndingLabel,
   displayNameFromUrl,
+  matchedAutoOpenKey,
+  AUTO_OPEN_CATEGORIES,
   FORMAT_IDS
 } from '../../../src/core/format/fileTypes.js';
 
@@ -53,6 +55,31 @@ describe('isSupported* predicates', () => {
     expect(isSupportedViewerFile('notes.txt')).toBe(true);
     expect(isSupportedViewerFile('a.rs')).toBe(true);
     expect(isSupportedViewerFile('a.exe')).toBe(false);
+  });
+});
+
+describe('matchedAutoOpenKey / AUTO_OPEN_CATEGORIES', () => {
+  it('returns the extension for files matched by extension', () => {
+    expect(matchedAutoOpenKey('https://x.com/d/readme.md?x=1')).toBe('.md');
+    expect(matchedAutoOpenKey('a.PATCH')).toBe('.patch');
+    expect(matchedAutoOpenKey('notes.txt')).toBe('.txt');
+  });
+
+  it('returns the lower-cased name for extensionless special files', () => {
+    expect(matchedAutoOpenKey('/repo/Dockerfile')).toBe('dockerfile');
+    expect(matchedAutoOpenKey('C:\\repo\\Makefile')).toBe('makefile');
+    expect(matchedAutoOpenKey('CMakeLists.txt')).toBe('cmakelists.txt');
+  });
+
+  it('returns empty string for unsupported files', () => {
+    expect(matchedAutoOpenKey('image.png')).toBe('');
+    expect(matchedAutoOpenKey('https://x.com/')).toBe('');
+  });
+
+  it('exposes a catalog whose keys all match back', () => {
+    const special = AUTO_OPEN_CATEGORIES.find(category => category.id === 'special');
+    expect(special.items.some(item => item.key === 'dockerfile')).toBe(true);
+    expect(matchedAutoOpenKey('Dockerfile')).toBe('dockerfile');
   });
 });
 

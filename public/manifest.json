@@ -52,5 +52,5 @@
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'; base-uri 'none'; frame-ancestors 'none';"
   },
-  "options_page": "onboarding/index.html"
+  "options_page": "settings/index.html"
 }

@@ -1,7 +1,9 @@
-import { copyExtensionSettingsUrl, isFileUrlAccessAllowed, openExtensionSettings } from '../core/browser/fileUrlAccess.js';
+import { isFileUrlAccessAllowed } from '../core/browser/fileUrlAccess.js';
 import { localizeDocument, t } from '../core/i18n/i18n.js';
+import { syncChromeTheme } from '../core/ui/chromeTheme.js';
 
 localizeDocument();
+syncChromeTheme();
 
 const SNAPSHOT_PREFIX = 'sourceSnapshot:';
 
@@ -80,19 +82,9 @@ document.querySelector('#open-viewer').addEventListener('click', async () => {
   window.close();
 });
 
-document.querySelector('#open-settings').addEventListener('click', async () => {
-  await openExtensionSettings();
+document.querySelector('#open-app-settings').addEventListener('click', async () => {
+  await chrome.runtime.openOptionsPage();
   window.close();
-});
-
-document.querySelector('#copy-settings-link').addEventListener('click', async () => {
-  const status = document.querySelector('#file-url-status');
-  try {
-    const url = await copyExtensionSettingsUrl();
-    status.textContent = t('statusCopied', [url]);
-  } catch (error) {
-    status.textContent = error?.message || String(error);
-  }
 });
 
 refreshFileUrlStatus().catch(error => {

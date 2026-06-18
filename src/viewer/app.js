@@ -102,6 +102,7 @@ class DevFileViewerApp {
       useOpenFile: document.querySelector('#btn-use-open-file'),
       contentWidth: document.querySelector('#content-width-select'),
       theme: document.querySelector('#theme-select'),
+      manageAutoOpen: document.querySelector('#btn-manage-auto-open'),
       viewerFontSizeRange: document.querySelector('#viewer-font-size-range'),
       viewerFontSizeInput: document.querySelector('#viewer-font-size-input'),
       activityRailButtons: document.querySelectorAll('[data-rail-target]'),
@@ -253,6 +254,7 @@ class DevFileViewerApp {
     this.elements.rememberScroll.addEventListener('change', () => this.setRememberScroll(this.elements.rememberScroll.checked));
     this.elements.contentWidth.addEventListener('change', () => this.setContentWidth(this.elements.contentWidth.value));
     this.elements.theme?.addEventListener('change', () => this.setThemePreference(this.elements.theme.value));
+    this.elements.manageAutoOpen?.addEventListener('click', () => chrome.runtime.openOptionsPage());
     this.elements.viewerFontSizeRange?.addEventListener('input', () => this.applyViewerFontSize(this.elements.viewerFontSizeRange.value));
     this.elements.viewerFontSizeRange?.addEventListener('change', () => this.setViewerFontSize(this.elements.viewerFontSizeRange.value));
     this.elements.viewerFontSizeInput?.addEventListener('change', () => this.setViewerFontSize(this.elements.viewerFontSizeInput.value));
