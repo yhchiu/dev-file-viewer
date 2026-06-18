@@ -49,13 +49,9 @@ import { nextFrame } from './domUtils.js';
 import { AppearanceController } from './controllers/AppearanceController.js';
 import { ScrollMemoryController } from './controllers/ScrollMemoryController.js';
 import { DropController } from './controllers/DropController.js';
+import { SidebarController } from './controllers/SidebarController.js';
 
-const SIDEBAR_COLLAPSED_KEY = 'devFileViewer:sidebarCollapsed';
-const SIDEBAR_WIDTH_KEY = 'devFileViewer:sidebarWidth';
 const TOC_POPOVER_PINNED_KEY = 'devFileViewer:tocPopoverPinned';
-const DEFAULT_SIDEBAR_WIDTH = 322;
-const MIN_SIDEBAR_WIDTH = 240;
-const MAX_SIDEBAR_WIDTH = 560;
 const TOC_FILTER_THRESHOLD = 12;
 const DEFAULT_TOC_MAX_LEVEL = 3;
 const TOC_DEPTH_LEVELS = new Set([2, 3, 4, 5, 6]);
@@ -150,6 +146,7 @@ class DevFileViewerApp {
     this.appearance = new AppearanceController(this);
     this.scrollMemory = new ScrollMemoryController(this);
     this.drop = new DropController(this);
+    this.sidebar = new SidebarController(this);
 
     this.currentDoc = null;
     this.currentDocKey = '';
@@ -162,12 +159,6 @@ class DevFileViewerApp {
     this.ignoreNextFileTabClick = false;
     this.currentFolderLoaded = false;
     this.currentFolderName = '';
-    this.sidebarCollapsed = false;
-    this.sidebarWidth = DEFAULT_SIDEBAR_WIDTH;
-    this.resizeDrag = null;
-    this.activeSidebarPanel = 'open';
-    this.activeSidebarTab = 'files';
-    this.activeRailTarget = 'open-file';
     this.outlineType = 'markdown';
     this.headings = [];
     this.headingTree = { nodes: [], roots: [], byId: new Map() };
@@ -194,11 +185,10 @@ class DevFileViewerApp {
     this.showLaunchLoadingIfPending();
     await this.plugins.init();
     await this.appearance.restore();
-    await this.restoreSidebarWidth();
-    await this.restoreSidebarState();
+    await this.sidebar.restore();
     await this.restoreTocPopoverPinState();
-    this.applySidebarTab('files', { showPanel: false });
-    this.setSidebarPanel('open', { activeTarget: 'open-file' });
+    this.sidebar.applySidebarTab('files', { showPanel: false });
+    this.sidebar.setSidebarPanel('open', { activeTarget: 'open-file' });
     await this.scrollMemory.restore();
     this.bindEvents();
     await this.refreshFileUrlAccessStatus();
@@ -206,11 +196,6 @@ class DevFileViewerApp {
   }
 
   bindEvents() {
-    this.elements.sidebarToggle.addEventListener('click', () => this.setSidebarCollapsed(true));
-    this.elements.sidebarRestore.addEventListener('click', () => this.setSidebarCollapsed(false));
-    this.elements.activityRail?.addEventListener('click', event =>
-      this.handleActivityRailFrameClick(event)
-    );
     this.elements.floatingOutline.addEventListener('pointerdown', event =>
       this.startFloatingOutlineDrag(event)
     );
@@ -231,25 +216,18 @@ class DevFileViewerApp {
       this.setTocPopoverPinned(!this.tocPopoverPinned)
     );
     this.elements.popoutOutline.addEventListener('click', () => this.toggleOutlinePopout());
-    this.elements.sidebarResizer.addEventListener('pointerdown', event =>
-      this.startSidebarResize(event)
-    );
-    this.elements.sidebarResizer.addEventListener('keydown', event =>
-      this.handleSidebarResizeKey(event)
-    );
-    this.elements.sidebarResizer.addEventListener('dblclick', () => this.resetSidebarWidth());
     this.elements.openFile.addEventListener('click', () => {
-      this.setSidebarPanel('open', { activeTarget: 'open-file' });
+      this.sidebar.setSidebarPanel('open', { activeTarget: 'open-file' });
       this.openLocalFile();
     });
     this.elements.reloadDocument.addEventListener('click', () => this.reloadCurrentDocument());
     this.elements.openFolder.addEventListener('click', () => {
-      this.setSidebarPanel('open', { activeTarget: 'open-folder' });
+      this.sidebar.setSidebarPanel('open', { activeTarget: 'open-folder' });
       this.openLocalFolder();
     });
     this.elements.reloadFolder.addEventListener('click', () => this.reloadCurrentFolder());
     this.elements.openUrl.addEventListener('click', () => {
-      this.setSidebarPanel('open', { activeTarget: 'open-url' });
+      this.sidebar.setSidebarPanel('open', { activeTarget: 'open-url' });
       this.elements.urlBox.hidden = !this.elements.urlBox.hidden;
       if (!this.elements.urlBox.hidden) this.elements.urlInput.focus();
     });
@@ -264,13 +242,14 @@ class DevFileViewerApp {
     );
     this.elements.copySettingsLink.addEventListener('click', () => this.copySettingsUrl());
     this.elements.useOpenFile.addEventListener('click', () => {
-      this.setSidebarPanel('open', { activeTarget: 'open-file' });
+      this.sidebar.setSidebarPanel('open', { activeTarget: 'open-file' });
       this.openLocalFile();
     });
     this.elements.manageAutoOpen?.addEventListener('click', () => chrome.runtime.openOptionsPage());
     this.appearance.bindEvents();
     this.scrollMemory.bindEvents();
     this.drop.bindEvents();
+    this.sidebar.bindEvents();
     this.elements.tocDepth.addEventListener('change', () =>
       this.setTocDepth(this.elements.tocDepth.value)
     );
@@ -289,17 +268,6 @@ class DevFileViewerApp {
       this.reflowFloatingTocPosition();
       this.scheduleUpdateFileTabsOverflowState();
     });
-    for (const tab of this.elements.sidebarTabs) {
-      tab.addEventListener('click', () => this.setSidebarTab(tab.dataset.sidebarTab));
-    }
-    for (const button of this.elements.activityRailButtons) {
-      button.addEventListener('click', () => {
-        this.handleActivityRailClick(button.dataset.railTarget).catch(error => {
-          this.clearViewerLoading();
-          this.setStatus(error?.message || String(error), 'error');
-        });
-      });
-    }
     this.elements.fileTabsScrollLeft?.addEventListener('click', () => this.scrollFileTabs(-1));
     this.elements.fileTabsScrollRight?.addEventListener('click', () => this.scrollFileTabs(1));
     this.elements.fileTabsList?.addEventListener(
@@ -392,7 +360,8 @@ class DevFileViewerApp {
     }
 
     const shouldShow =
-      hasHeadings && (this.sidebarCollapsed || this.tocPopoverPinned || this.outlinePopoutEnabled);
+      hasHeadings &&
+      (this.sidebar.sidebarCollapsed || this.tocPopoverPinned || this.outlinePopoutEnabled);
     const wasFloatingHidden = this.elements.floatingOutline.hidden;
     this.elements.floatingOutline.hidden = !shouldShow;
     this.updateOutlinePopoutControl();
@@ -403,7 +372,8 @@ class DevFileViewerApp {
     }
 
     this.reflowFloatingTocPosition();
-    const shouldAutoOpen = options.openPopover || (this.sidebarCollapsed && wasFloatingHidden);
+    const shouldAutoOpen =
+      options.openPopover || (this.sidebar.sidebarCollapsed && wasFloatingHidden);
     if ((this.tocPopoverPinned || shouldAutoOpen) && !this.tocPopoverOpen) {
       this.openTocPopover({ focus: false });
     }
@@ -674,119 +644,6 @@ class DevFileViewerApp {
     popover.style.maxHeight = `${Math.round(popoverHeight)}px`;
   }
 
-  setSidebarTab(tab) {
-    this.applySidebarTab(tab);
-  }
-
-  applySidebarTab(tab, options = {}) {
-    const nextTab = tab === 'outline' ? 'outline' : 'files';
-    this.activeSidebarTab = nextTab;
-
-    this.elements.filesTab.classList.toggle('active', nextTab === 'files');
-    this.elements.outlineTab.classList.toggle('active', nextTab === 'outline');
-    this.elements.filesTab.setAttribute('aria-selected', String(nextTab === 'files'));
-    this.elements.outlineTab.setAttribute('aria-selected', String(nextTab === 'outline'));
-    this.elements.filesTab.tabIndex = nextTab === 'files' ? 0 : -1;
-    this.elements.outlineTab.tabIndex = nextTab === 'outline' ? 0 : -1;
-
-    this.elements.filesPanel.hidden = nextTab !== 'files';
-    this.elements.outlinePanel.hidden = nextTab !== 'outline';
-    if (options.showPanel !== false) {
-      this.setSidebarPanel('navigator');
-      return;
-    }
-
-    this.syncActivityRail();
-  }
-
-  setSidebarPanel(panel, options = {}) {
-    const nextPanel = ['open', 'settings', 'navigator'].includes(panel) ? panel : 'open';
-    this.activeSidebarPanel = nextPanel;
-
-    for (const sidebarPanel of this.elements.sidebarPanels) {
-      const isActive = sidebarPanel.dataset.sidebarPanel === nextPanel;
-      // `hidden` already removes the panel from layout, the a11y tree, and the
-      // focus order, so an explicit aria-hidden is redundant. Setting it while a
-      // descendant still holds focus is what Chrome blocks, so we omit it.
-      sidebarPanel.hidden = !isActive;
-    }
-
-    if (options.activeTarget) {
-      this.activeRailTarget = options.activeTarget;
-    } else if (nextPanel === 'settings') {
-      this.activeRailTarget = 'settings';
-    } else if (nextPanel === 'navigator') {
-      this.activeRailTarget = this.activeSidebarTab === 'outline' ? 'outline' : 'files';
-    } else if (!['open-file', 'open-folder', 'open-url'].includes(this.activeRailTarget)) {
-      this.activeRailTarget = 'open-file';
-    }
-
-    this.syncActivityRail();
-  }
-
-  async revealSidebarPanel(panel, options = {}) {
-    if (this.sidebarCollapsed) {
-      await this.setSidebarCollapsed(false);
-    }
-
-    this.setSidebarPanel(panel, options);
-    await nextFrame();
-  }
-
-  async handleActivityRailClick(target) {
-    if (target === 'open-file') {
-      await this.revealSidebarPanel('open', { activeTarget: 'open-file' });
-      await this.openLocalFile();
-      return;
-    }
-
-    if (target === 'open-folder') {
-      await this.revealSidebarPanel('open', { activeTarget: 'open-folder' });
-      await this.openLocalFolder();
-      return;
-    }
-
-    if (target === 'open-url') {
-      await this.revealSidebarPanel('open', { activeTarget: 'open-url' });
-      this.elements.urlBox.hidden = false;
-      this.elements.urlInput?.focus();
-      return;
-    }
-
-    if (target === 'files') {
-      await this.revealSidebarPanel('navigator');
-      this.setSidebarTab('files');
-      this.elements.filesTab?.focus();
-      return;
-    }
-
-    if (target === 'outline') {
-      await this.revealSidebarPanel('navigator');
-      this.setSidebarTab('outline');
-      this.elements.outlineTab?.focus();
-      return;
-    }
-
-    if (target === 'settings') {
-      await this.revealSidebarPanel('settings', { activeTarget: 'settings' });
-      this.elements.contentWidth?.focus();
-    }
-  }
-
-  syncActivityRail() {
-    for (const button of this.elements.activityRailButtons) {
-      const isActive = button.dataset.railTarget === this.activeRailTarget;
-      button.classList.toggle('is-active', isActive);
-      button.removeAttribute('aria-current');
-    }
-  }
-
-  handleActivityRailFrameClick(event) {
-    const target = event.target;
-    if (target.closest?.('button, a, input, select, textarea, [role="button"]')) return;
-    this.setSidebarCollapsed(!this.sidebarCollapsed);
-  }
-
   setDirectoryRootName(name) {
     this.currentFolderName = String(name || '').trim();
     if (!this.elements.directoryRootName) return;
@@ -800,144 +657,11 @@ class DevFileViewerApp {
 
   showDirectoryLoading(message = t('statusOpeningFolder'), folderName = '') {
     if (folderName) this.setDirectoryRootName(folderName);
-    if (this.sidebarCollapsed) {
-      this.setSidebarCollapsed(false).catch(() => {});
+    if (this.sidebar.sidebarCollapsed) {
+      this.sidebar.setSidebarCollapsed(false).catch(() => {});
     }
-    this.applySidebarTab('files');
+    this.sidebar.applySidebarTab('files');
     this.setDirectoryTreeLoading(message);
-  }
-
-  async restoreSidebarWidth() {
-    const stored = await chrome.storage.local.get(SIDEBAR_WIDTH_KEY);
-    const width = this.clampSidebarWidth(Number(stored[SIDEBAR_WIDTH_KEY]));
-    this.applySidebarWidth(width, { updateAria: true });
-  }
-
-  clampSidebarWidth(width) {
-    const viewportLimit = Math.max(
-      MIN_SIDEBAR_WIDTH,
-      Math.min(MAX_SIDEBAR_WIDTH, Math.floor(window.innerWidth * 0.6))
-    );
-    const numericWidth = Number.isFinite(width) && width > 0 ? width : DEFAULT_SIDEBAR_WIDTH;
-    return Math.min(Math.max(Math.round(numericWidth), MIN_SIDEBAR_WIDTH), viewportLimit);
-  }
-
-  applySidebarWidth(width, options = {}) {
-    this.sidebarWidth = this.clampSidebarWidth(width);
-    this.elements.app.style.setProperty('--sidebar-width', `${this.sidebarWidth}px`);
-    if (options.updateAria !== false) {
-      this.elements.sidebarResizer.setAttribute('aria-valuenow', String(this.sidebarWidth));
-      this.elements.sidebarResizer.setAttribute('aria-valuetext', `${this.sidebarWidth} pixels`);
-    }
-  }
-
-  async persistSidebarWidth() {
-    await chrome.storage.local.set({ [SIDEBAR_WIDTH_KEY]: this.sidebarWidth });
-  }
-
-  startSidebarResize(event) {
-    if (this.sidebarCollapsed || event.button !== 0) return;
-    event.preventDefault();
-    this.resizeDrag = {
-      pointerId: event.pointerId,
-      startX: event.clientX,
-      startWidth: this.sidebarWidth
-    };
-    this.elements.sidebarResizer.setPointerCapture(event.pointerId);
-    this.elements.app.classList.add('sidebar-resizing');
-
-    const onMove = moveEvent => this.updateSidebarResize(moveEvent);
-    const onEnd = endEvent => {
-      this.finishSidebarResize(endEvent);
-      window.removeEventListener('pointermove', onMove);
-      window.removeEventListener('pointerup', onEnd);
-      window.removeEventListener('pointercancel', onEnd);
-    };
-
-    window.addEventListener('pointermove', onMove, { passive: false });
-    window.addEventListener('pointerup', onEnd);
-    window.addEventListener('pointercancel', onEnd);
-  }
-
-  updateSidebarResize(event) {
-    if (!this.resizeDrag) return;
-    event.preventDefault();
-    const nextWidth = this.resizeDrag.startWidth + event.clientX - this.resizeDrag.startX;
-    this.applySidebarWidth(nextWidth);
-    this.reflowFloatingTocPosition();
-  }
-
-  async finishSidebarResize() {
-    if (!this.resizeDrag) return;
-    try {
-      if (this.elements.sidebarResizer.hasPointerCapture?.(this.resizeDrag.pointerId)) {
-        this.elements.sidebarResizer.releasePointerCapture(this.resizeDrag.pointerId);
-      }
-    } catch {
-      // Pointer capture can already be released by the browser.
-    }
-    this.resizeDrag = null;
-    this.elements.app.classList.remove('sidebar-resizing');
-    await this.persistSidebarWidth();
-    await nextFrame();
-    this.reflowFloatingTocPosition();
-  }
-
-  async handleSidebarResizeKey(event) {
-    const keys = new Set(['ArrowLeft', 'ArrowRight', 'Home', 'End']);
-    if (!keys.has(event.key)) return;
-    event.preventDefault();
-
-    if (event.key === 'Home') {
-      this.applySidebarWidth(MIN_SIDEBAR_WIDTH);
-    } else if (event.key === 'End') {
-      this.applySidebarWidth(MAX_SIDEBAR_WIDTH);
-    } else {
-      const step = event.shiftKey ? 48 : 16;
-      this.applySidebarWidth(this.sidebarWidth + (event.key === 'ArrowRight' ? step : -step));
-    }
-
-    await this.persistSidebarWidth();
-    this.reflowFloatingTocPosition();
-  }
-
-  async resetSidebarWidth() {
-    this.applySidebarWidth(DEFAULT_SIDEBAR_WIDTH);
-    await this.persistSidebarWidth();
-    this.reflowFloatingTocPosition();
-  }
-
-  async restoreSidebarState() {
-    const stored = await chrome.storage.local.get(SIDEBAR_COLLAPSED_KEY);
-    await this.setSidebarCollapsed(Boolean(stored[SIDEBAR_COLLAPSED_KEY]), { persist: false });
-  }
-
-  async setSidebarCollapsed(collapsed, options = {}) {
-    const shouldPersist = options.persist !== false;
-    const wasCollapsed = this.sidebarCollapsed;
-    this.sidebarCollapsed = Boolean(collapsed);
-    this.elements.app.classList.toggle('sidebar-collapsed', this.sidebarCollapsed);
-    this.elements.sidebarToggle.hidden = this.sidebarCollapsed;
-    this.elements.sidebarRestore.tabIndex = this.sidebarCollapsed ? 0 : -1;
-    this.elements.sidebarRestore.setAttribute('aria-hidden', String(!this.sidebarCollapsed));
-    this.elements.sidebarResizer.setAttribute('aria-hidden', String(this.sidebarCollapsed));
-    this.elements.sidebarResizer.tabIndex = this.sidebarCollapsed ? -1 : 0;
-    this.elements.sidebarToggle.setAttribute('aria-expanded', String(!this.sidebarCollapsed));
-    this.elements.sidebarToggle.setAttribute('aria-label', t('a11yHideSidebar'));
-    this.elements.sidebarToggle.title = t('a11yHideSidebar');
-    this.elements.sidebarRestore.setAttribute('aria-expanded', String(!this.sidebarCollapsed));
-    this.elements.sidebarRestore.setAttribute('aria-label', t('a11yShowSidebar'));
-    this.elements.sidebarRestore.title = t('a11yShowSidebar');
-    // When collapsed, `.sidebar-body` is display:none in every theme, which
-    // already hides it from the a11y tree and focus order; an explicit
-    // aria-hidden is redundant and Chrome blocks it if focus is still inside.
-
-    if (shouldPersist) {
-      await chrome.storage.local.set({ [SIDEBAR_COLLAPSED_KEY]: this.sidebarCollapsed });
-    }
-
-    await nextFrame();
-    this.updateFloatingOutlineState({ openPopover: !wasCollapsed && this.sidebarCollapsed });
   }
 
   showLaunchLoadingIfPending() {
@@ -1030,7 +754,7 @@ class DevFileViewerApp {
       this.setFolderReloadEnabled(true);
       this.clearViewerForFolder(t('statusFolderLoaded'));
       this.elements.scrollMemoryCard.hidden = false;
-      this.applySidebarTab('files');
+      this.sidebar.applySidebarTab('files');
       this.setStatus(t('statusFolderLoaded'), 'success');
     } catch (error) {
       this.clearDirectoryTreeLoading();
@@ -1823,7 +1547,7 @@ class DevFileViewerApp {
         } else {
           this.buildSourceSymbols(doc, sourceLanguage, outlineOptions);
           if (doc.sourceType !== 'directory-file' && this.headings.length) {
-            this.applySidebarTab('outline');
+            this.sidebar.applySidebarTab('outline');
           }
         }
         this.activateRenderedDocument(doc, nextDocKey);
@@ -1849,7 +1573,7 @@ class DevFileViewerApp {
         });
         this.buildDiffOutline(diffOutline?.files || [], doc, outlineOptions);
         if (doc.sourceType !== 'directory-file' && diffOutline?.files?.length) {
-          this.applySidebarTab('outline');
+          this.sidebar.applySidebarTab('outline');
         }
         this.activateRenderedDocument(doc, nextDocKey);
         await this.scrollMemory.restoreOrResetScroll(doc, scrollOptions);
@@ -1865,7 +1589,7 @@ class DevFileViewerApp {
       this.buildToc(outlineOptions);
       this.updateTocTitle(doc);
       if (doc.sourceType !== 'directory-file' && this.headings.length) {
-        this.applySidebarTab('outline');
+        this.sidebar.applySidebarTab('outline');
       }
 
       this.activateRenderedDocument(doc, nextDocKey);
@@ -2488,7 +2212,7 @@ class DevFileViewerApp {
     if (
       shouldScrollToc &&
       panelItem &&
-      this.activeSidebarTab === 'outline' &&
+      this.sidebar.activeSidebarTab === 'outline' &&
       !this.elements.outlinePanel.hidden &&
       this.isTocItemVisible(panelItem)
     ) {
