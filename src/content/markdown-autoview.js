@@ -1,25 +1,7 @@
-(() => {
-  const EXTENSIONS = [
-    '.md', '.mkd', '.mdx', '.markdown',
-    '.diff', '.patch',
-    '.js', '.mjs', '.cjs', '.jsx', '.ts', '.tsx',
-    '.html', '.htm', '.css', '.json', '.jsonc', '.yaml', '.yml', '.toml', '.ini',
-    '.xml', '.svg', '.sh', '.bash', '.zsh', '.ps1', '.py', '.go', '.java',
-    '.c', '.h', '.cpp', '.cc', '.cxx', '.hpp', '.hh', '.hxx', '.rs', '.cs',
-    '.php', '.rb', '.sql', '.swift', '.kt', '.kts', '.scala', '.dart', '.lua',
-    '.r', '.pl', '.pm', '.ex', '.exs', '.erl', '.hrl', '.clj', '.cljs',
-    '.groovy', '.gradle', '.vue', '.svelte', '.dockerfile', '.makefile', '.cmake'
-  ];
-  const REDIRECT_FLAG = 'devFileViewerRedirecting';
+import { isSupportedViewerFile } from '../core/format/fileTypes.js';
 
-  function hasSupportedExtension(url) {
-    try {
-      const path = new URL(url).pathname.toLowerCase();
-      return EXTENSIONS.some(ext => path.endsWith(ext));
-    } catch {
-      return false;
-    }
-  }
+(() => {
+  const REDIRECT_FLAG = 'devFileViewerRedirecting';
 
   function isPlainTextDocument() {
     const contentType = document.contentType || '';
@@ -31,7 +13,7 @@
   }
 
   function shouldOpenInViewer() {
-    if (!hasSupportedExtension(location.href)) return false;
+    if (!isSupportedViewerFile(location.href)) return false;
     if (sessionStorage.getItem(REDIRECT_FLAG) === '1') return false;
     if (!['http:', 'https:', 'file:'].includes(location.protocol)) return false;
     return isPlainTextDocument();
