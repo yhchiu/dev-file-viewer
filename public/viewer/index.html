@@ -100,6 +100,13 @@
           <section id="sidebar-panel-settings" class="sidebar-content-panel" data-sidebar-panel="settings" data-i18n-aria-label="sidebarSettingsPanel" aria-label="Settings" hidden>
             <div class="sidebar-section-title" data-i18n="sidebarSettingsPanel">Settings</div>
 
+            <section id="scroll-memory-card" class="scroll-memory-card" hidden>
+              <label class="checkbox-row" data-i18n-title="scrollMemoryTooltip" title="Uses local session storage only. Positions are deleted when the browser session ends and are never sent anywhere.">
+                <input id="remember-scroll" type="checkbox" />                                                                 <span data-i18n="rememberScrollLabel">Remember scroll position</span>
+              </label>
+              <span class="info-dot" tabindex="0" data-i18n-aria-label="scrollMemoryTooltip" data-i18n-title="scrollMemoryTooltip" aria-label="Uses local session storage only. Positions are deleted when the browser session ends and are never sent anywhere." title="Uses local session storage only. Positions are deleted when the browser session ends and are never sent anywhere.">?</span>
+            </section>
+
             <section class="content-width-card" data-i18n-aria-label="a11yContentWidthSetting" aria-label="Content width setting">
               <label for="content-width-select" data-i18n="contentWidthLabel">Content Width</label>
               <select id="content-width-select" data-i18n-aria-label="a11yContentWidth" aria-label="Content width">
@@ -123,14 +130,6 @@
           </section>
 
           <section id="sidebar-panel-navigator" class="sidebar-content-panel" data-sidebar-panel="navigator" data-i18n-aria-label="sidebarNavigatorPanel" aria-label="Navigator" hidden>
-            <section id="scroll-memory-card" class="scroll-memory-card" hidden>
-              <label class="checkbox-row" data-i18n-title="scrollMemoryTooltip" title="Uses local session storage only. Positions are deleted when the browser session ends and are never sent anywhere.">
-                <input id="remember-scroll" type="checkbox" />
-                <span data-i18n="rememberScrollLabel">Remember scroll position</span>
-              </label>
-              <span class="info-dot" tabindex="0" data-i18n-aria-label="scrollMemoryTooltip" data-i18n-title="scrollMemoryTooltip" aria-label="Uses local session storage only. Positions are deleted when the browser session ends and are never sent anywhere." title="Uses local session storage only. Positions are deleted when the browser session ends and are never sent anywhere.">?</span>
-            </section>
-
             <div class="sidebar-tabs-row">
               <div class="sidebar-tabs" role="tablist" data-i18n-aria-label="a11ySidebarNavigation" aria-label="Sidebar navigation">
                 <button id="tab-files" class="sidebar-tab active" type="button" role="tab" aria-selected="true" aria-controls="files-panel" data-sidebar-tab="files" data-i18n="tabFiles">Files</button>
