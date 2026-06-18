@@ -4,6 +4,7 @@ import { AUTO_OPEN_CATEGORIES } from '../core/format/fileTypes.js';
 import { syncChromeTheme } from '../core/ui/chromeTheme.js';
 
 const AUTO_OPEN_KEY = 'devFileViewer:autoOpen';
+const WEB_ACCESS_ORIGINS = ['http://*/*', 'https://*/*'];
 
 localizeDocument();
 
@@ -156,6 +157,38 @@ function setupAutoOpenControls() {
   });
 }
 
+/* ---------- Website access (opt-in http/https) ---------- */
+
+async function refreshWebAccessToggle() {
+  const toggle = document.querySelector('#web-access-toggle');
+  if (!toggle) return;
+  try {
+    toggle.checked = await chrome.permissions.contains({ origins: WEB_ACCESS_ORIGINS });
+  } catch {
+    toggle.checked = false;
+  }
+}
+
+function setupWebAccessToggle() {
+  const toggle = document.querySelector('#web-access-toggle');
+  if (!toggle) return;
+
+  toggle.addEventListener('change', async () => {
+    // Must call request()/remove() directly off the user gesture. The service
+    // worker reacts to permissions.onAdded/onRemoved to (un)register the script.
+    try {
+      if (toggle.checked) {
+        toggle.checked = await chrome.permissions.request({ origins: WEB_ACCESS_ORIGINS });
+      } else {
+        await chrome.permissions.remove({ origins: WEB_ACCESS_ORIGINS });
+        await refreshWebAccessToggle();
+      }
+    } catch {
+      await refreshWebAccessToggle();
+    }
+  });
+}
+
 /* ---------- file:// access status ---------- */
 
 async function refreshFileUrlStatus() {
@@ -197,12 +230,14 @@ async function init() {
   syncChromeTheme();
   setupCategoryNav();
   setupAutoOpenControls();
+  setupWebAccessToggle();
   setupFileUrlActions();
   setupAbout();
 
   await loadConfig();
   buildTypeList();
   syncUI();
+  refreshWebAccessToggle();
 
   refreshFileUrlStatus().catch(error => {
     document.querySelector('#file-url-status').textContent = error?.message || String(error);

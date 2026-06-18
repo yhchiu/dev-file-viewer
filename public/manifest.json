@@ -29,18 +29,20 @@
   "permissions": [
     "contextMenus",
     "storage",
-    "tabs"
+    "tabs",
+    "activeTab",
+    "scripting"
   ],
   "host_permissions": [
-    "http://*/*",
-    "https://*/*",
     "file:///*"
+  ],
+  "optional_host_permissions": [
+    "http://*/*",
+    "https://*/*"
   ],
   "content_scripts": [
     {
       "matches": [
-        "http://*/*",
-        "https://*/*",
         "file:///*"
       ],
       "js": [

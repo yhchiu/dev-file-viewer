@@ -1,4 +1,5 @@
 import { t } from '../core/i18n/i18n.js';
+import { affectsWebOrigins, syncWebAutoviewRegistration } from './webAutoview.js';
 
 const DOCUMENT_EXTENSIONS = [
     '.md', '.mkd', '.mdx', '.markdown',
@@ -88,6 +89,22 @@ chrome.runtime.onInstalled.addListener(details => {
       contexts: ['link']
     });
   });
+
+  syncWebAutoviewRegistration();
+});
+
+// Keep the opt-in http(s) autoview registration in sync across restarts and
+// whenever the user grants or revokes the web host permission.
+chrome.runtime.onStartup.addListener(() => {
+  syncWebAutoviewRegistration();
+});
+
+chrome.permissions.onAdded.addListener(permissions => {
+  if (affectsWebOrigins(permissions)) syncWebAutoviewRegistration();
+});
+
+chrome.permissions.onRemoved.addListener(permissions => {
+  if (affectsWebOrigins(permissions)) syncWebAutoviewRegistration();
 });
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
