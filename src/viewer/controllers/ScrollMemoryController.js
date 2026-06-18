@@ -76,7 +76,7 @@ export class ScrollMemoryController {
 
     const saved = this.enabled ? this.positions[docKey] : null;
     this.host.scrollRoot.scrollTop = resolveRestoreScrollTop(saved?.top, options.scrollTop);
-    this.host.saveActiveTabRuntimeScroll();
+    this.host.fileTabs.saveActiveTabRuntimeScroll();
     this.host.outline.scheduleActiveHeadingUpdate();
   }
 }
