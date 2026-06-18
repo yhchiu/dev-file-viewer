@@ -10,18 +10,64 @@
     <div class="settings-shell">
       <aside class="settings-nav">
         <div class="settings-brand">
-          <img class="settings-brand-mark" src="../assets/icons/icon48.png" srcset="../assets/icons/icon48.png 1x, ../assets/icons/icon128.png 2x" width="32" height="32" alt="" aria-hidden="true" />
+          <img
+            class="settings-brand-mark"
+            src="../assets/icons/icon48.png"
+            srcset="../assets/icons/icon48.png 1x, ../assets/icons/icon128.png 2x"
+            width="32"
+            height="32"
+            alt=""
+            aria-hidden="true"
+          />
           <span data-i18n="appName">Dev File Viewer</span>
         </div>
-        <nav class="settings-nav-list" role="tablist" data-i18n-aria-label="a11ySettingsNav" aria-label="Settings categories" aria-orientation="vertical">
-          <button class="settings-nav-item active" type="button" role="tab" aria-selected="true" data-settings-nav="auto-open">
-            <svg class="settings-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <nav
+          class="settings-nav-list"
+          role="tablist"
+          data-i18n-aria-label="a11ySettingsNav"
+          aria-label="Settings categories"
+          aria-orientation="vertical"
+        >
+          <button
+            class="settings-nav-item active"
+            type="button"
+            role="tab"
+            aria-selected="true"
+            data-settings-nav="auto-open"
+          >
+            <svg
+              class="settings-nav-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.7"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+              focusable="false"
+            >
               <path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z" />
             </svg>
             <span data-i18n="navAutoOpen">Auto-open</span>
           </button>
-          <button class="settings-nav-item" type="button" role="tab" aria-selected="false" data-settings-nav="about">
-            <svg class="settings-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <button
+            class="settings-nav-item"
+            type="button"
+            role="tab"
+            aria-selected="false"
+            data-settings-nav="about"
+          >
+            <svg
+              class="settings-nav-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.7"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+              focusable="false"
+            >
               <circle cx="12" cy="12" r="9" />
               <path d="M12 16v-4" />
               <path d="M12 8h.01" />
@@ -35,15 +81,23 @@
         <section class="settings-panel" data-settings-panel="auto-open" role="tabpanel">
           <header class="settings-panel-head">
             <h1 data-i18n="autoOpenHeading">Automatic file opening</h1>
-            <p class="settings-panel-intro" data-i18n="autoOpenIntro">Control which files open in Dev File Viewer automatically when you view them in the browser.</p>
+            <p class="settings-panel-intro" data-i18n="autoOpenIntro">
+              Control which files open in Dev File Viewer automatically when you view them in the
+              browser.
+            </p>
           </header>
 
           <section class="settings-card">
             <label class="toggle-row">
               <input type="checkbox" id="auto-open-master" />
               <span class="toggle-copy">
-                <span class="toggle-label" data-i18n="autoOpenMasterLabel">Open supported files automatically</span>
-                <span class="toggle-hint" data-i18n="autoOpenMasterHint">When off, files still open via Open File, Open Folder, or the right-click menu.</span>
+                <span class="toggle-label" data-i18n="autoOpenMasterLabel"
+                  >Open supported files automatically</span
+                >
+                <span class="toggle-hint" data-i18n="autoOpenMasterHint"
+                  >When off, files still open via Open File, Open Folder, or the right-click
+                  menu.</span
+                >
               </span>
             </label>
           </section>
@@ -54,22 +108,48 @@
               <input type="checkbox" id="web-access-toggle" />
               <span class="toggle-copy">
                 <span class="toggle-label" data-i18n="webAccessLabel">Enable on websites</span>
-                <span class="toggle-hint" data-i18n="webAccessHint">Lets developer files auto-open while you browse the web, and lets the viewer open any web URL. This grants access to website data; the extension still sends nothing anywhere. You can turn it off anytime.</span>
+                <span class="toggle-hint" data-i18n="webAccessHint"
+                  >Lets developer files auto-open while you browse the web, and lets the viewer open
+                  any web URL. This grants access to website data; the extension still sends nothing
+                  anywhere. You can turn it off anytime.</span
+                >
               </span>
             </label>
           </section>
 
           <section class="settings-card" id="file-url-card">
             <h2 data-i18n="fileAccessHeading">Local file access (file://)</h2>
-            <p id="file-url-status" data-i18n="onboardingAdvancedStatus">Checking current permission status...</p>
+            <p id="file-url-status" data-i18n="onboardingAdvancedStatus">
+              Checking current permission status...
+            </p>
             <ol>
               <li data-i18n="onboardingStep1">Open the extension settings page.</li>
-              <li><span data-i18n="onboardingStep2Pre">Enable </span><strong data-i18n="onboardingAllowFileUrls">Allow access to file URLs</strong><span data-i18n="onboardingStep2Post">.</span></li>
-              <li data-i18n="onboardingStep3">Open a local supported Markdown or source file link again.</li>
+              <li>
+                <span data-i18n="onboardingStep2Pre">Enable </span
+                ><strong data-i18n="onboardingAllowFileUrls">Allow access to file URLs</strong
+                ><span data-i18n="onboardingStep2Post">.</span>
+              </li>
+              <li data-i18n="onboardingStep3">
+                Open a local supported Markdown or source file link again.
+              </li>
             </ol>
             <div class="inline-actions">
-              <button id="open-settings" class="secondary" type="button" data-i18n="onboardingOpenSettings">Open Extension Settings</button>
-              <button id="copy-settings-link" class="secondary" type="button" data-i18n="onboardingCopySettingsLink">Copy Settings Link</button>
+              <button
+                id="open-settings"
+                class="secondary"
+                type="button"
+                data-i18n="onboardingOpenSettings"
+              >
+                Open Extension Settings
+              </button>
+              <button
+                id="copy-settings-link"
+                class="secondary"
+                type="button"
+                data-i18n="onboardingCopySettingsLink"
+              >
+                Copy Settings Link
+              </button>
             </div>
           </section>
 
@@ -77,11 +157,29 @@
             <div class="settings-card-head">
               <h2 data-i18n="autoOpenTypesHeading">File types</h2>
               <div class="settings-card-head-actions">
-                <span id="auto-open-saved" class="saved-flag" role="status" aria-live="polite" hidden data-i18n="autoOpenSavedStatus">Saved</span>
-                <button id="auto-open-reset" class="secondary" type="button" data-i18n="autoOpenReset">Reset to defaults</button>
+                <span
+                  id="auto-open-saved"
+                  class="saved-flag"
+                  role="status"
+                  aria-live="polite"
+                  hidden
+                  data-i18n="autoOpenSavedStatus"
+                  >Saved</span
+                >
+                <button
+                  id="auto-open-reset"
+                  class="secondary"
+                  type="button"
+                  data-i18n="autoOpenReset"
+                >
+                  Reset to defaults
+                </button>
               </div>
             </div>
-            <p class="settings-card-intro" data-i18n="autoOpenTypesIntro">Choose which types open automatically. Files only auto-open when the browser serves them as plain text.</p>
+            <p class="settings-card-intro" data-i18n="autoOpenTypesIntro">
+              Choose which types open automatically. Files only auto-open when the browser serves
+              them as plain text.
+            </p>
             <div id="auto-open-types" class="type-groups"></div>
           </section>
         </section>
@@ -92,14 +190,26 @@
           </header>
 
           <section class="settings-card about-card">
-            <img class="about-logo" src="../assets/icons/icon128.png" data-i18n-alt="onboardingImgAlt" alt="Dev File Viewer" />
+            <img
+              class="about-logo"
+              src="../assets/icons/icon128.png"
+              data-i18n-alt="onboardingImgAlt"
+              alt="Dev File Viewer"
+            />
             <div class="about-body">
               <div class="about-name" data-i18n="appName">Dev File Viewer</div>
               <div class="about-version" id="about-version"></div>
-              <p data-i18n="aboutDescription">Privacy-first previewer for Markdown, diff, source, and other developer files. Everything runs locally in your browser.</p>
-              <p class="about-privacy" data-i18n="aboutPrivacy">No file contents are sent anywhere. The extension runs fully offline.</p>
+              <p data-i18n="aboutDescription">
+                Privacy-first previewer for Markdown, diff, source, and other developer files.
+                Everything runs locally in your browser.
+              </p>
+              <p class="about-privacy" data-i18n="aboutPrivacy">
+                No file contents are sent anywhere. The extension runs fully offline.
+              </p>
               <div class="inline-actions">
-                <button id="open-viewer" type="button" data-i18n="onboardingOpenViewer">Open Viewer</button>
+                <button id="open-viewer" type="button" data-i18n="onboardingOpenViewer">
+                  Open Viewer
+                </button>
               </div>
             </div>
           </section>

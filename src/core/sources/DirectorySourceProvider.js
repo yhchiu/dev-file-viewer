@@ -23,30 +23,29 @@ export class DirectorySourceProvider {
     return this.loadDirectoryHandle(directoryHandle);
   }
 
+  async loadDirectoryHandle(directoryHandle) {
+    this.rootHandle = directoryHandle;
+    this.rootEntry = null;
+    this.tree = await this.buildTree(directoryHandle);
+    this.fileIndex = new Map();
+    this.indexTree(this.tree);
+    return { rootHandle: this.rootHandle, tree: this.tree };
+  }
 
-async loadDirectoryHandle(directoryHandle) {
-  this.rootHandle = directoryHandle;
-  this.rootEntry = null;
-  this.tree = await this.buildTree(directoryHandle);
-  this.fileIndex = new Map();
-  this.indexTree(this.tree);
-  return { rootHandle: this.rootHandle, tree: this.tree };
-}
+  async loadDirectoryEntry(directoryEntry) {
+    this.rootHandle = null;
+    this.rootEntry = directoryEntry;
+    this.tree = await this.buildEntryTree(directoryEntry);
+    this.fileIndex = new Map();
+    this.indexTree(this.tree);
+    return { rootEntry: this.rootEntry, tree: this.tree };
+  }
 
-async loadDirectoryEntry(directoryEntry) {
-  this.rootHandle = null;
-  this.rootEntry = directoryEntry;
-  this.tree = await this.buildEntryTree(directoryEntry);
-  this.fileIndex = new Map();
-  this.indexTree(this.tree);
-  return { rootEntry: this.rootEntry, tree: this.tree };
-}
-
-async reloadDirectory() {
-  if (this.rootHandle) return this.loadDirectoryHandle(this.rootHandle);
-  if (this.rootEntry) return this.loadDirectoryEntry(this.rootEntry);
-  throw new Error(t('errorNoFolderOpen'));
-}
+  async reloadDirectory() {
+    if (this.rootHandle) return this.loadDirectoryHandle(this.rootHandle);
+    if (this.rootEntry) return this.loadDirectoryEntry(this.rootEntry);
+    throw new Error(t('errorNoFolderOpen'));
+  }
 
   async buildTree(directoryHandle, path = '') {
     const node = {
@@ -82,40 +81,40 @@ async reloadDirectory() {
     return node;
   }
 
-async buildEntryTree(directoryEntry, path = '') {
-  const node = {
-    type: 'directory',
-    name: directoryEntry.name,
-    path,
-    entry: directoryEntry,
-    children: []
-  };
+  async buildEntryTree(directoryEntry, path = '') {
+    const node = {
+      type: 'directory',
+      name: directoryEntry.name,
+      path,
+      entry: directoryEntry,
+      children: []
+    };
 
-  const entries = await readDirectoryEntries(directoryEntry);
-  let count = 0;
-  for (const entry of entries) {
-    if (count++ >= MAX_FILES) break;
-    if (entry.name.startsWith('.')) continue;
+    const entries = await readDirectoryEntries(directoryEntry);
+    let count = 0;
+    for (const entry of entries) {
+      if (count++ >= MAX_FILES) break;
+      if (entry.name.startsWith('.')) continue;
 
-    const childPath = path ? `${path}/${entry.name}` : entry.name;
-    if (entry.isDirectory) {
-      node.children.push(await this.buildEntryTree(entry, childPath));
-    } else if (entry.isFile) {
-      node.children.push({
-        type: 'file',
-        name: entry.name,
-        path: childPath,
-        entry
-      });
+      const childPath = path ? `${path}/${entry.name}` : entry.name;
+      if (entry.isDirectory) {
+        node.children.push(await this.buildEntryTree(entry, childPath));
+      } else if (entry.isFile) {
+        node.children.push({
+          type: 'file',
+          name: entry.name,
+          path: childPath,
+          entry
+        });
+      }
     }
-  }
 
-  node.children.sort((a, b) => {
-    if (a.type !== b.type) return a.type === 'directory' ? -1 : 1;
-    return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
-  });
-  return node;
-}
+    node.children.sort((a, b) => {
+      if (a.type !== b.type) return a.type === 'directory' ? -1 : 1;
+      return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+    });
+    return node;
+  }
 
   indexTree(node) {
     if (!node) return;
@@ -171,7 +170,9 @@ async buildEntryTree(directoryEntry, path = '') {
     if (!cleanHref) return '';
 
     const decodedHref = safeDecodeURIComponent(cleanHref).replace(/\\/g, '/');
-    const baseParts = String(fromPath || '').split('/').filter(Boolean);
+    const baseParts = String(fromPath || '')
+      .split('/')
+      .filter(Boolean);
     baseParts.pop();
 
     const parts = decodedHref.startsWith('/') ? [] : baseParts;

@@ -5,21 +5,71 @@ export const DIFF_EXTENSIONS = new Set(['.diff', '.patch']);
 export const TEXT_EXTENSIONS = new Set(['.txt', '.text']);
 
 export const SOURCE_CODE_EXTENSIONS = new Set([
-  '.js', '.mjs', '.cjs', '.jsx',
-  '.ts', '.tsx',
-  '.html', '.htm', '.css', '.scss', '.sass', '.less',
-  '.json', '.jsonc', '.yaml', '.yml', '.toml', '.ini', '.conf', '.cfg', '.env',
-  '.xml', '.svg',
-  '.sh', '.bash', '.zsh', '.ps1',
-  '.py', '.go', '.java',
-  '.c', '.h', '.cpp', '.cc', '.cxx', '.hpp', '.hh', '.hxx',
-  '.rs', '.cs', '.php', '.rb', '.sql',
-  '.swift', '.kt', '.kts', '.scala', '.dart',
-  '.lua', '.r', '.pl', '.pm',
-  '.ex', '.exs', '.erl', '.hrl',
-  '.clj', '.cljs', '.groovy', '.gradle',
-  '.vue', '.svelte',
-  '.dockerfile', '.makefile', '.cmake'
+  '.js',
+  '.mjs',
+  '.cjs',
+  '.jsx',
+  '.ts',
+  '.tsx',
+  '.html',
+  '.htm',
+  '.css',
+  '.scss',
+  '.sass',
+  '.less',
+  '.json',
+  '.jsonc',
+  '.yaml',
+  '.yml',
+  '.toml',
+  '.ini',
+  '.conf',
+  '.cfg',
+  '.env',
+  '.xml',
+  '.svg',
+  '.sh',
+  '.bash',
+  '.zsh',
+  '.ps1',
+  '.py',
+  '.go',
+  '.java',
+  '.c',
+  '.h',
+  '.cpp',
+  '.cc',
+  '.cxx',
+  '.hpp',
+  '.hh',
+  '.hxx',
+  '.rs',
+  '.cs',
+  '.php',
+  '.rb',
+  '.sql',
+  '.swift',
+  '.kt',
+  '.kts',
+  '.scala',
+  '.dart',
+  '.lua',
+  '.r',
+  '.pl',
+  '.pm',
+  '.ex',
+  '.exs',
+  '.erl',
+  '.hrl',
+  '.clj',
+  '.cljs',
+  '.groovy',
+  '.gradle',
+  '.vue',
+  '.svelte',
+  '.dockerfile',
+  '.makefile',
+  '.cmake'
 ]);
 
 // Flat list of every supported extension, for file-picker `accept` filters.
@@ -38,7 +88,9 @@ const CONFIG_DOTFILE_PREFIXES = ['.gitignore', '.gitattributes', '.editorconfig'
 
 export function isConfigDotfile(value = '') {
   const fileName = getFileName(value).toLowerCase();
-  return CONFIG_DOTFILE_PREFIXES.some(prefix => fileName === prefix || fileName.startsWith(`${prefix}.`));
+  return CONFIG_DOTFILE_PREFIXES.some(
+    prefix => fileName === prefix || fileName.startsWith(`${prefix}.`)
+  );
 }
 
 const SPECIAL_SOURCE_FILE_NAMES = new Map([
@@ -56,21 +108,71 @@ const SPECIAL_SOURCE_FILE_NAMES = new Map([
 ]);
 
 const EXTENSION_LANGUAGE_MAP = new Map([
-  ['.js', 'javascript'], ['.mjs', 'javascript'], ['.cjs', 'javascript'], ['.jsx', 'javascript'],
-  ['.ts', 'typescript'], ['.tsx', 'typescript'],
-  ['.html', 'html'], ['.htm', 'html'], ['.css', 'css'], ['.scss', 'css'], ['.sass', 'css'], ['.less', 'css'],
-  ['.json', 'json'], ['.jsonc', 'json'], ['.yaml', 'yaml'], ['.yml', 'yaml'], ['.toml', 'ini'], ['.ini', 'ini'], ['.conf', 'ini'], ['.cfg', 'ini'], ['.env', 'ini'],
-  ['.xml', 'xml'], ['.svg', 'xml'],
-  ['.sh', 'bash'], ['.bash', 'bash'], ['.zsh', 'bash'], ['.ps1', 'powershell'],
-  ['.py', 'python'], ['.go', 'go'], ['.java', 'java'],
-  ['.c', 'c'], ['.h', 'c'], ['.cpp', 'cpp'], ['.cc', 'cpp'], ['.cxx', 'cpp'], ['.hpp', 'cpp'], ['.hh', 'cpp'], ['.hxx', 'cpp'],
-  ['.rs', 'rust'], ['.cs', 'csharp'], ['.php', 'php'], ['.rb', 'ruby'], ['.sql', 'sql'],
-  ['.swift', 'swift'], ['.kt', 'kotlin'], ['.kts', 'kotlin'], ['.scala', 'scala'], ['.dart', 'dart'],
-  ['.lua', 'lua'], ['.r', 'r'], ['.pl', 'perl'], ['.pm', 'perl'],
-  ['.ex', 'elixir'], ['.exs', 'elixir'], ['.erl', 'erlang'], ['.hrl', 'erlang'],
-  ['.clj', 'clojure'], ['.cljs', 'clojure'], ['.groovy', 'groovy'], ['.gradle', 'gradle'],
-  ['.vue', 'xml'], ['.svelte', 'xml'],
-  ['.dockerfile', 'dockerfile'], ['.makefile', 'makefile'], ['.cmake', 'cmake']
+  ['.js', 'javascript'],
+  ['.mjs', 'javascript'],
+  ['.cjs', 'javascript'],
+  ['.jsx', 'javascript'],
+  ['.ts', 'typescript'],
+  ['.tsx', 'typescript'],
+  ['.html', 'html'],
+  ['.htm', 'html'],
+  ['.css', 'css'],
+  ['.scss', 'css'],
+  ['.sass', 'css'],
+  ['.less', 'css'],
+  ['.json', 'json'],
+  ['.jsonc', 'json'],
+  ['.yaml', 'yaml'],
+  ['.yml', 'yaml'],
+  ['.toml', 'ini'],
+  ['.ini', 'ini'],
+  ['.conf', 'ini'],
+  ['.cfg', 'ini'],
+  ['.env', 'ini'],
+  ['.xml', 'xml'],
+  ['.svg', 'xml'],
+  ['.sh', 'bash'],
+  ['.bash', 'bash'],
+  ['.zsh', 'bash'],
+  ['.ps1', 'powershell'],
+  ['.py', 'python'],
+  ['.go', 'go'],
+  ['.java', 'java'],
+  ['.c', 'c'],
+  ['.h', 'c'],
+  ['.cpp', 'cpp'],
+  ['.cc', 'cpp'],
+  ['.cxx', 'cpp'],
+  ['.hpp', 'cpp'],
+  ['.hh', 'cpp'],
+  ['.hxx', 'cpp'],
+  ['.rs', 'rust'],
+  ['.cs', 'csharp'],
+  ['.php', 'php'],
+  ['.rb', 'ruby'],
+  ['.sql', 'sql'],
+  ['.swift', 'swift'],
+  ['.kt', 'kotlin'],
+  ['.kts', 'kotlin'],
+  ['.scala', 'scala'],
+  ['.dart', 'dart'],
+  ['.lua', 'lua'],
+  ['.r', 'r'],
+  ['.pl', 'perl'],
+  ['.pm', 'perl'],
+  ['.ex', 'elixir'],
+  ['.exs', 'elixir'],
+  ['.erl', 'erlang'],
+  ['.hrl', 'erlang'],
+  ['.clj', 'clojure'],
+  ['.cljs', 'clojure'],
+  ['.groovy', 'groovy'],
+  ['.gradle', 'gradle'],
+  ['.vue', 'xml'],
+  ['.svelte', 'xml'],
+  ['.dockerfile', 'dockerfile'],
+  ['.makefile', 'makefile'],
+  ['.cmake', 'cmake']
 ]);
 
 export const FORMAT_IDS = Object.freeze({
@@ -107,13 +209,20 @@ export function isSupportedTextFile(value = '') {
 }
 
 export function isSupportedSourceCodeFile(value = '') {
-  return SOURCE_CODE_EXTENSIONS.has(getExtension(value))
-    || SPECIAL_SOURCE_FILE_NAMES.has(getFileName(value).toLowerCase())
-    || isConfigDotfile(value);
+  return (
+    SOURCE_CODE_EXTENSIONS.has(getExtension(value)) ||
+    SPECIAL_SOURCE_FILE_NAMES.has(getFileName(value).toLowerCase()) ||
+    isConfigDotfile(value)
+  );
 }
 
 export function isSupportedViewerFile(value = '') {
-  return isSupportedDocumentFile(value) || isSupportedDiffFile(value) || isSupportedSourceCodeFile(value) || isSupportedTextFile(value);
+  return (
+    isSupportedDocumentFile(value) ||
+    isSupportedDiffFile(value) ||
+    isSupportedSourceCodeFile(value) ||
+    isSupportedTextFile(value)
+  );
 }
 
 export function sourceLanguageFromPath(value = '') {
@@ -173,10 +282,15 @@ export function detectFormat({ url = '', name = '', mimeType = '' } = {}) {
   if (isSupportedDocumentFile(target)) return FORMAT_IDS.MARKDOWN;
   if (/markdown|mdx/i.test(mimeType)) return FORMAT_IDS.MARKDOWN;
   if (isSupportedDiffFile(target)) return FORMAT_IDS.DIFF;
-  if (/^(text\/x-diff|text\/x-patch)$/i.test(String(mimeType).split(';', 1)[0])) return FORMAT_IDS.DIFF;
+  if (/^(text\/x-diff|text\/x-patch)$/i.test(String(mimeType).split(';', 1)[0]))
+    return FORMAT_IDS.DIFF;
   if (isSupportedSourceCodeFile(target)) return FORMAT_IDS.SOURCE_CODE;
   if (isSupportedTextFile(target)) return FORMAT_IDS.TEXT;
-  if (/application\/(json|javascript|xml)|text\/(css|html|javascript|xml|x-python|x-go|x-c|x-c\+\+|x-java-source|x-shellscript)/i.test(mimeType)) {
+  if (
+    /application\/(json|javascript|xml)|text\/(css|html|javascript|xml|x-python|x-go|x-c|x-c\+\+|x-java-source|x-shellscript)/i.test(
+      mimeType
+    )
+  ) {
     return FORMAT_IDS.SOURCE_CODE;
   }
   if (/^text\/plain\b/i.test(mimeType)) return FORMAT_IDS.TEXT;

@@ -1,18 +1,42 @@
 import { MarkdownEngine } from '../core/markdown/MarkdownEngine.js';
-import { getArrowRightIcon, getFolderClosedIcon, getFileIcon, getPinIcon, getPinFilledIcon, getArrowUpIcon, getArrowDownIcon } from '../core/ui/icons.js';
+import {
+  getArrowRightIcon,
+  getFolderClosedIcon,
+  getFileIcon,
+  getPinIcon,
+  getPinFilledIcon,
+  getArrowUpIcon,
+  getArrowDownIcon
+} from '../core/ui/icons.js';
 import { SourceCodeRenderer } from '../core/source/SourceCodeRenderer.js';
 import { buildSourceSymbolTree, extractSourceSymbols } from '../core/source/sourceSymbols.js';
 import { DiffRenderer } from '../core/diff/DiffRenderer.js';
 import { buildDiffOutlineTree } from '../core/diff/diffOutlineTree.js';
-import { FORMAT_IDS, detectFormat, detectLineEnding, displayNameFromUrl, formatLabel, lineEndingLabel, sourceLanguageFromPath } from '../core/format/fileTypes.js';
+import {
+  FORMAT_IDS,
+  detectFormat,
+  detectLineEnding,
+  displayNameFromUrl,
+  formatLabel,
+  lineEndingLabel,
+  sourceLanguageFromPath
+} from '../core/format/fileTypes.js';
 import { UrlSourceProvider } from '../core/sources/UrlSourceProvider.js';
 import { FilePickerSourceProvider } from '../core/sources/FilePickerSourceProvider.js';
 import { DirectorySourceProvider } from '../core/sources/DirectorySourceProvider.js';
 import { DirectoryTreeView } from '../features/sidebar/DirectoryTreeView.js';
 import { PluginRegistry } from '../plugins/PluginRegistry.js';
 import { mermaidPlugin } from '../plugins/mermaidPlugin.js';
-import { copyExtensionSettingsUrl, isFileUrlAccessAllowed, openExtensionSettings } from '../core/browser/fileUrlAccess.js';
-import { buildHeadingIndex, buildHeadingTree, ensureHeadingAnchors } from '../core/toc/headingIndex.js';
+import {
+  copyExtensionSettingsUrl,
+  isFileUrlAccessAllowed,
+  openExtensionSettings
+} from '../core/browser/fileUrlAccess.js';
+import {
+  buildHeadingIndex,
+  buildHeadingTree,
+  ensureHeadingAnchors
+} from '../core/toc/headingIndex.js';
 import { isLikelyBinaryFile } from '../core/format/binarySniff.js';
 import { localizeDocument, t } from '../core/i18n/i18n.js';
 import {
@@ -209,8 +233,12 @@ class DevFileViewerApp {
   bindEvents() {
     this.elements.sidebarToggle.addEventListener('click', () => this.setSidebarCollapsed(true));
     this.elements.sidebarRestore.addEventListener('click', () => this.setSidebarCollapsed(false));
-    this.elements.activityRail?.addEventListener('click', event => this.handleActivityRailFrameClick(event));
-    this.elements.floatingOutline.addEventListener('pointerdown', event => this.startFloatingOutlineDrag(event));
+    this.elements.activityRail?.addEventListener('click', event =>
+      this.handleActivityRailFrameClick(event)
+    );
+    this.elements.floatingOutline.addEventListener('pointerdown', event =>
+      this.startFloatingOutlineDrag(event)
+    );
     this.elements.floatingOutline.addEventListener('click', event => {
       if (this.ignoreNextFloatingOutlineClick) {
         event.preventDefault();
@@ -221,11 +249,19 @@ class DevFileViewerApp {
       }
       this.toggleTocPopover();
     });
-    this.elements.closeTocPopover.addEventListener('click', () => this.closeTocPopover({ force: true }));
-    this.elements.pinTocPopover.addEventListener('click', () => this.setTocPopoverPinned(!this.tocPopoverPinned));
+    this.elements.closeTocPopover.addEventListener('click', () =>
+      this.closeTocPopover({ force: true })
+    );
+    this.elements.pinTocPopover.addEventListener('click', () =>
+      this.setTocPopoverPinned(!this.tocPopoverPinned)
+    );
     this.elements.popoutOutline.addEventListener('click', () => this.toggleOutlinePopout());
-    this.elements.sidebarResizer.addEventListener('pointerdown', event => this.startSidebarResize(event));
-    this.elements.sidebarResizer.addEventListener('keydown', event => this.handleSidebarResizeKey(event));
+    this.elements.sidebarResizer.addEventListener('pointerdown', event =>
+      this.startSidebarResize(event)
+    );
+    this.elements.sidebarResizer.addEventListener('keydown', event =>
+      this.handleSidebarResizeKey(event)
+    );
     this.elements.sidebarResizer.addEventListener('dblclick', () => this.resetSidebarWidth());
     this.elements.openFile.addEventListener('click', () => {
       this.setSidebarPanel('open', { activeTarget: 'open-file' });
@@ -242,23 +278,39 @@ class DevFileViewerApp {
       this.elements.urlBox.hidden = !this.elements.urlBox.hidden;
       if (!this.elements.urlBox.hidden) this.elements.urlInput.focus();
     });
-    this.elements.loadUrl.addEventListener('click', () => this.openUrl(this.elements.urlInput.value.trim()));
+    this.elements.loadUrl.addEventListener('click', () =>
+      this.openUrl(this.elements.urlInput.value.trim())
+    );
     this.elements.urlInput.addEventListener('keydown', event => {
       if (event.key === 'Enter') this.openUrl(this.elements.urlInput.value.trim());
     });
-    this.elements.openExtensionSettings.addEventListener('click', () => this.openExtensionSettingsPage());
+    this.elements.openExtensionSettings.addEventListener('click', () =>
+      this.openExtensionSettingsPage()
+    );
     this.elements.copySettingsLink.addEventListener('click', () => this.copySettingsUrl());
     this.elements.useOpenFile.addEventListener('click', () => {
       this.setSidebarPanel('open', { activeTarget: 'open-file' });
       this.openLocalFile();
     });
-    this.elements.rememberScroll.addEventListener('change', () => this.setRememberScroll(this.elements.rememberScroll.checked));
-    this.elements.contentWidth.addEventListener('change', () => this.setContentWidth(this.elements.contentWidth.value));
-    this.elements.theme?.addEventListener('change', () => this.setThemePreference(this.elements.theme.value));
+    this.elements.rememberScroll.addEventListener('change', () =>
+      this.setRememberScroll(this.elements.rememberScroll.checked)
+    );
+    this.elements.contentWidth.addEventListener('change', () =>
+      this.setContentWidth(this.elements.contentWidth.value)
+    );
+    this.elements.theme?.addEventListener('change', () =>
+      this.setThemePreference(this.elements.theme.value)
+    );
     this.elements.manageAutoOpen?.addEventListener('click', () => chrome.runtime.openOptionsPage());
-    this.elements.viewerFontSizeRange?.addEventListener('input', () => this.applyViewerFontSize(this.elements.viewerFontSizeRange.value));
-    this.elements.viewerFontSizeRange?.addEventListener('change', () => this.setViewerFontSize(this.elements.viewerFontSizeRange.value));
-    this.elements.viewerFontSizeInput?.addEventListener('change', () => this.setViewerFontSize(this.elements.viewerFontSizeInput.value));
+    this.elements.viewerFontSizeRange?.addEventListener('input', () =>
+      this.applyViewerFontSize(this.elements.viewerFontSizeRange.value)
+    );
+    this.elements.viewerFontSizeRange?.addEventListener('change', () =>
+      this.setViewerFontSize(this.elements.viewerFontSizeRange.value)
+    );
+    this.elements.viewerFontSizeInput?.addEventListener('change', () =>
+      this.setViewerFontSize(this.elements.viewerFontSizeInput.value)
+    );
     this.themeMediaQuery?.addEventListener?.('change', () => {
       if (this.themePreference === 'system') this.applyTheme();
     });
@@ -266,10 +318,18 @@ class DevFileViewerApp {
     window.addEventListener('dragover', event => this.handleWindowDragOver(event));
     window.addEventListener('dragleave', event => this.handleWindowDragLeave(event));
     window.addEventListener('drop', event => this.handleWindowDrop(event));
-    this.elements.tocDepth.addEventListener('change', () => this.setTocDepth(this.elements.tocDepth.value));
-    this.elements.tocPopoverDepth.addEventListener('change', () => this.setTocDepth(this.elements.tocPopoverDepth.value));
-    this.elements.tocFilter.addEventListener('input', () => this.setTocFilter(this.elements.tocFilter.value));
-    this.elements.tocPopoverFilter.addEventListener('input', () => this.setTocFilter(this.elements.tocPopoverFilter.value));
+    this.elements.tocDepth.addEventListener('change', () =>
+      this.setTocDepth(this.elements.tocDepth.value)
+    );
+    this.elements.tocPopoverDepth.addEventListener('change', () =>
+      this.setTocDepth(this.elements.tocPopoverDepth.value)
+    );
+    this.elements.tocFilter.addEventListener('input', () =>
+      this.setTocFilter(this.elements.tocFilter.value)
+    );
+    this.elements.tocPopoverFilter.addEventListener('input', () =>
+      this.setTocFilter(this.elements.tocPopoverFilter.value)
+    );
     document.addEventListener('keydown', event => this.handleGlobalKeydown(event));
     document.addEventListener('pointerdown', event => this.handleDocumentPointerDown(event));
     window.addEventListener('resize', () => {
@@ -289,14 +349,26 @@ class DevFileViewerApp {
     }
     this.elements.fileTabsScrollLeft?.addEventListener('click', () => this.scrollFileTabs(-1));
     this.elements.fileTabsScrollRight?.addEventListener('click', () => this.scrollFileTabs(1));
-    this.elements.fileTabsList?.addEventListener('scroll', () => this.updateFileTabsOverflowState(), { passive: true });
-    this.elements.fileTabsViewport?.addEventListener('wheel', event => this.handleFileTabsWheel(event), { passive: false });
+    this.elements.fileTabsList?.addEventListener(
+      'scroll',
+      () => this.updateFileTabsOverflowState(),
+      { passive: true }
+    );
+    this.elements.fileTabsViewport?.addEventListener(
+      'wheel',
+      event => this.handleFileTabsWheel(event),
+      { passive: false }
+    );
     this.elements.preview.addEventListener('click', event => this.handlePreviewAnchorClick(event));
-    this.scrollRoot.addEventListener('scroll', () => {
-      this.saveActiveTabRuntimeScroll();
-      this.scheduleSaveScrollPosition();
-      this.scheduleActiveHeadingUpdate();
-    }, { passive: true });
+    this.scrollRoot.addEventListener(
+      'scroll',
+      () => {
+        this.saveActiveTabRuntimeScroll();
+        this.scheduleSaveScrollPosition();
+        this.scheduleActiveHeadingUpdate();
+      },
+      { passive: true }
+    );
 
     // Set SVG content for scroll buttons
     // eslint-disable-next-line no-unsanitized/property -- trusted static SVG icon
@@ -316,7 +388,6 @@ class DevFileViewerApp {
     });
   }
 
-
   handleGlobalKeydown(event) {
     if (event.key === 'Escape' && this.tocPopoverOpen && !this.tocPopoverPinned) {
       event.preventDefault();
@@ -327,7 +398,8 @@ class DevFileViewerApp {
   handleDocumentPointerDown(event) {
     if (!this.tocPopoverOpen || this.tocPopoverPinned) return;
     const target = event.target;
-    if (this.elements.tocPopover.contains(target) || this.elements.floatingOutline.contains(target)) return;
+    if (this.elements.tocPopover.contains(target) || this.elements.floatingOutline.contains(target))
+      return;
     this.closeTocPopover();
   }
 
@@ -366,7 +438,8 @@ class DevFileViewerApp {
       this.outlinePopoutEnabled = false;
     }
 
-    const shouldShow = hasHeadings && (this.sidebarCollapsed || this.tocPopoverPinned || this.outlinePopoutEnabled);
+    const shouldShow =
+      hasHeadings && (this.sidebarCollapsed || this.tocPopoverPinned || this.outlinePopoutEnabled);
     const wasFloatingHidden = this.elements.floatingOutline.hidden;
     this.elements.floatingOutline.hidden = !shouldShow;
     this.updateOutlinePopoutControl();
@@ -618,25 +691,28 @@ class DevFileViewerApp {
     const availableWidth = Math.max(0, bounds.maxRight - bounds.minLeft);
     const popoverWidth = Math.min(360, Math.max(180, availableWidth));
     const viewportHeight = Math.max(0, bounds.maxBottom - bounds.minTop);
-    const measuredHeight = Math.min(popover.hidden ? 480 : (popover.offsetHeight || 480), viewportHeight || 480);
+    const measuredHeight = Math.min(
+      popover.hidden ? 480 : popover.offsetHeight || 480,
+      viewportHeight || 480
+    );
     const belowTop = buttonRect.bottom + gap;
     const belowSpace = Math.max(0, bounds.maxBottom - belowTop);
     const aboveSpace = Math.max(0, buttonRect.top - gap - bounds.minTop);
-    const targetSpace = belowSpace >= Math.min(measuredHeight, 220) || belowSpace >= aboveSpace
-      ? belowSpace
-      : aboveSpace;
+    const targetSpace =
+      belowSpace >= Math.min(measuredHeight, 220) || belowSpace >= aboveSpace
+        ? belowSpace
+        : aboveSpace;
     const minHeight = Math.min(80, viewportHeight || 80);
     const popoverHeight = Math.min(measuredHeight, Math.max(minHeight, targetSpace));
     let left = buttonRect.left;
-    let top = targetSpace === belowSpace
-      ? belowTop
-      : buttonRect.top - popoverHeight - gap;
+    let top = targetSpace === belowSpace ? belowTop : buttonRect.top - popoverHeight - gap;
 
     if (left + popoverWidth > bounds.maxRight) {
       left = Math.min(buttonRect.right - popoverWidth, bounds.maxRight - popoverWidth);
     }
     if (top < bounds.minTop) top = bounds.minTop;
-    if (top + popoverHeight > bounds.maxBottom) top = Math.max(bounds.minTop, bounds.maxBottom - popoverHeight);
+    if (top + popoverHeight > bounds.maxBottom)
+      top = Math.max(bounds.minTop, bounds.maxBottom - popoverHeight);
     if (left < bounds.minLeft) left = bounds.minLeft;
 
     popover.style.left = `${Math.round(left)}px`;
@@ -762,7 +838,9 @@ class DevFileViewerApp {
     this.currentFolderName = String(name || '').trim();
     if (!this.elements.directoryRootName) return;
 
-    this.elements.directoryRootName.textContent = this.currentFolderName ? `(${this.currentFolderName})` : '';
+    this.elements.directoryRootName.textContent = this.currentFolderName
+      ? `(${this.currentFolderName})`
+      : '';
     this.elements.directoryRootName.title = this.currentFolderName;
     this.elements.directoryRootName.hidden = !this.currentFolderName;
   }
@@ -815,7 +893,9 @@ class DevFileViewerApp {
   }
 
   applyContentWidth(value) {
-    const widthKey = Object.prototype.hasOwnProperty.call(CONTENT_WIDTHS, value) ? value : DEFAULT_CONTENT_WIDTH;
+    const widthKey = Object.prototype.hasOwnProperty.call(CONTENT_WIDTHS, value)
+      ? value
+      : DEFAULT_CONTENT_WIDTH;
     this.contentWidth = widthKey;
     this.elements.contentWidth.value = widthKey;
     this.elements.app.classList.toggle('content-width-full', widthKey === 'full');
@@ -844,11 +924,18 @@ class DevFileViewerApp {
     this.viewerFontSize = this.clampViewerFontSize(value);
     this.elements.preview.style.setProperty('--viewer-font-size', `${this.viewerFontSize}px`);
     if (this.elements.viewerFontSizeRange) {
-      const progress = ((this.viewerFontSize - MIN_VIEWER_FONT_SIZE) / (MAX_VIEWER_FONT_SIZE - MIN_VIEWER_FONT_SIZE)) * 100;
+      const progress =
+        ((this.viewerFontSize - MIN_VIEWER_FONT_SIZE) /
+          (MAX_VIEWER_FONT_SIZE - MIN_VIEWER_FONT_SIZE)) *
+        100;
       this.elements.viewerFontSizeRange.value = String(this.viewerFontSize);
-      this.elements.viewerFontSizeRange.style.setProperty('--viewer-font-size-progress', `${progress}%`);
+      this.elements.viewerFontSizeRange.style.setProperty(
+        '--viewer-font-size-progress',
+        `${progress}%`
+      );
     }
-    if (this.elements.viewerFontSizeInput) this.elements.viewerFontSizeInput.value = String(this.viewerFontSize);
+    if (this.elements.viewerFontSizeInput)
+      this.elements.viewerFontSizeInput.value = String(this.viewerFontSize);
   }
 
   async setViewerFontSize(value) {
@@ -864,7 +951,10 @@ class DevFileViewerApp {
   }
 
   clampSidebarWidth(width) {
-    const viewportLimit = Math.max(MIN_SIDEBAR_WIDTH, Math.min(MAX_SIDEBAR_WIDTH, Math.floor(window.innerWidth * 0.6)));
+    const viewportLimit = Math.max(
+      MIN_SIDEBAR_WIDTH,
+      Math.min(MAX_SIDEBAR_WIDTH, Math.floor(window.innerWidth * 0.6))
+    );
     const numericWidth = Number.isFinite(width) && width > 0 ? width : DEFAULT_SIDEBAR_WIDTH;
     return Math.min(Math.max(Math.round(numericWidth), MIN_SIDEBAR_WIDTH), viewportLimit);
   }
@@ -1007,202 +1097,209 @@ class DevFileViewerApp {
     }
   }
 
-handleWindowDragEnter(event) {
-  if (!this.dragEventHasFiles(event)) return;
-  event.preventDefault();
-  event.stopPropagation();
-  this.dragDepth += 1;
-  this.setDropOverlayVisible(true);
-}
-
-handleWindowDragOver(event) {
-  if (!this.dragEventHasFiles(event)) return;
-  event.preventDefault();
-  event.stopPropagation();
-  event.dataTransfer.dropEffect = 'copy';
-  this.setDropOverlayVisible(true);
-}
-
-handleWindowDragLeave(event) {
-  if (!this.dragEventHasFiles(event)) return;
-  event.preventDefault();
-  event.stopPropagation();
-  this.dragDepth = Math.max(0, this.dragDepth - 1);
-  if (this.dragDepth === 0) this.setDropOverlayVisible(false);
-}
-
-async handleWindowDrop(event) {
-  if (!this.dragEventHasFiles(event)) return;
-  event.preventDefault();
-  event.stopPropagation();
-  this.dragDepth = 0;
-  this.setDropOverlayVisible(false);
-
-  try {
-    this.setStatus(t('statusOpeningDropped'), 'info');
-    const item = await this.resolveDroppedItem(event.dataTransfer);
-    if (!item) {
-      this.setStatus(t('statusNoSupportedDropped'), 'warning');
-      return;
-    }
-
-    if (item.kind === 'directory-handle') {
-      await this.openDroppedDirectoryHandle(item.handle);
-      return;
-    }
-
-    if (item.kind === 'directory-entry') {
-      await this.openDroppedDirectoryEntry(item.entry);
-      return;
-    }
-
-    if (item.kind === 'file-handle') {
-      this.setViewerLoading(t('statusLoadingDocument', [item.handle.name || t('commonDocument')]));
-      const file = await item.handle.getFile();
-      const doc = await this.loadDroppedFileDocument(file, {
-        handle: item.handle,
-        forcePlainText: item.forcePlainText,
-        displayPath: item.handle.name
-      });
-      await this.renderDocument(doc);
-      return;
-    }
-
-    if (item.kind === 'file-entry') {
-      this.setViewerLoading(t('statusLoadingDocument', [item.entry.name || t('commonDocument')]));
-      const file = await fileFromDroppedEntry(item.entry);
-      const doc = await this.loadDroppedFileDocument(file, {
-        forcePlainText: item.forcePlainText,
-        path: normalizeDroppedEntryPath(item.entry.fullPath || item.entry.name || file.name)
-      });
-      await this.renderDocument(doc);
-      return;
-    }
-
-    if (item.kind === 'file') {
-      const relativePath = item.file.webkitRelativePath || '';
-      this.setViewerLoading(t('statusLoadingDocument', [relativePath || item.file.name || t('commonDocument')]));
-      const doc = await this.loadDroppedFileDocument(item.file, {
-        forcePlainText: item.forcePlainText,
-        relativePath,
-        displayPath: relativePath || item.file.name
-      });
-      await this.renderDocument(doc);
-      return;
-    }
-
-    this.setStatus(t('statusNoSupportedDropped'), 'warning');
-  } catch (error) {
-    this.clearViewerLoading();
-    this.clearDirectoryTreeLoading();
-    this.setStatus(error?.message || String(error), 'error');
+  handleWindowDragEnter(event) {
+    if (!this.dragEventHasFiles(event)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    this.dragDepth += 1;
+    this.setDropOverlayVisible(true);
   }
-}
 
-dragEventHasFiles(event) {
-  return Array.from(event.dataTransfer?.types || []).includes('Files');
-}
+  handleWindowDragOver(event) {
+    if (!this.dragEventHasFiles(event)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.dataTransfer.dropEffect = 'copy';
+    this.setDropOverlayVisible(true);
+  }
 
-setDropOverlayVisible(visible) {
-  if (!this.elements.dropOverlay) return;
-  this.elements.dropOverlay.hidden = !visible;
-  this.elements.dropOverlay.setAttribute('aria-hidden', String(!visible));
-  this.elements.app.classList.toggle('is-dragging-file', Boolean(visible));
-}
+  handleWindowDragLeave(event) {
+    if (!this.dragEventHasFiles(event)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    this.dragDepth = Math.max(0, this.dragDepth - 1);
+    if (this.dragDepth === 0) this.setDropOverlayVisible(false);
+  }
 
-async resolveDroppedItem(dataTransfer) {
-  const items = Array.from(dataTransfer?.items || []).filter(item => item.kind === 'file');
+  async handleWindowDrop(event) {
+    if (!this.dragEventHasFiles(event)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    this.dragDepth = 0;
+    this.setDropOverlayVisible(false);
 
-  for (const item of items) {
-    if (typeof item.getAsFileSystemHandle === 'function') {
-      try {
-        const handle = await item.getAsFileSystemHandle();
-        if (handle?.kind === 'directory') return { kind: 'directory-handle', handle };
-        if (handle?.kind === 'file') {
+    try {
+      this.setStatus(t('statusOpeningDropped'), 'info');
+      const item = await this.resolveDroppedItem(event.dataTransfer);
+      if (!item) {
+        this.setStatus(t('statusNoSupportedDropped'), 'warning');
+        return;
+      }
+
+      if (item.kind === 'directory-handle') {
+        await this.openDroppedDirectoryHandle(item.handle);
+        return;
+      }
+
+      if (item.kind === 'directory-entry') {
+        await this.openDroppedDirectoryEntry(item.entry);
+        return;
+      }
+
+      if (item.kind === 'file-handle') {
+        this.setViewerLoading(
+          t('statusLoadingDocument', [item.handle.name || t('commonDocument')])
+        );
+        const file = await item.handle.getFile();
+        const doc = await this.loadDroppedFileDocument(file, {
+          handle: item.handle,
+          forcePlainText: item.forcePlainText,
+          displayPath: item.handle.name
+        });
+        await this.renderDocument(doc);
+        return;
+      }
+
+      if (item.kind === 'file-entry') {
+        this.setViewerLoading(t('statusLoadingDocument', [item.entry.name || t('commonDocument')]));
+        const file = await fileFromDroppedEntry(item.entry);
+        const doc = await this.loadDroppedFileDocument(file, {
+          forcePlainText: item.forcePlainText,
+          path: normalizeDroppedEntryPath(item.entry.fullPath || item.entry.name || file.name)
+        });
+        await this.renderDocument(doc);
+        return;
+      }
+
+      if (item.kind === 'file') {
+        const relativePath = item.file.webkitRelativePath || '';
+        this.setViewerLoading(
+          t('statusLoadingDocument', [relativePath || item.file.name || t('commonDocument')])
+        );
+        const doc = await this.loadDroppedFileDocument(item.file, {
+          forcePlainText: item.forcePlainText,
+          relativePath,
+          displayPath: relativePath || item.file.name
+        });
+        await this.renderDocument(doc);
+        return;
+      }
+
+      this.setStatus(t('statusNoSupportedDropped'), 'warning');
+    } catch (error) {
+      this.clearViewerLoading();
+      this.clearDirectoryTreeLoading();
+      this.setStatus(error?.message || String(error), 'error');
+    }
+  }
+
+  dragEventHasFiles(event) {
+    return Array.from(event.dataTransfer?.types || []).includes('Files');
+  }
+
+  setDropOverlayVisible(visible) {
+    if (!this.elements.dropOverlay) return;
+    this.elements.dropOverlay.hidden = !visible;
+    this.elements.dropOverlay.setAttribute('aria-hidden', String(!visible));
+    this.elements.app.classList.toggle('is-dragging-file', Boolean(visible));
+  }
+
+  async resolveDroppedItem(dataTransfer) {
+    const items = Array.from(dataTransfer?.items || []).filter(item => item.kind === 'file');
+
+    for (const item of items) {
+      if (typeof item.getAsFileSystemHandle === 'function') {
+        try {
+          const handle = await item.getAsFileSystemHandle();
+          if (handle?.kind === 'directory') return { kind: 'directory-handle', handle };
+          if (handle?.kind === 'file') {
+            return {
+              kind: 'file-handle',
+              handle,
+              forcePlainText: !isSupportedDroppedName(handle.name)
+            };
+          }
+        } catch {
+          // Fall through to older APIs.
+        }
+      }
+
+      if (typeof item.webkitGetAsEntry === 'function') {
+        const entry = item.webkitGetAsEntry();
+        if (entry?.isDirectory) return { kind: 'directory-entry', entry };
+        if (entry?.isFile) {
           return {
-            kind: 'file-handle',
-            handle,
-            forcePlainText: !isSupportedDroppedName(handle.name)
+            kind: 'file-entry',
+            entry,
+            forcePlainText: !isSupportedDroppedName(entry.name)
           };
         }
-      } catch {
-        // Fall through to older APIs.
       }
-    }
 
-    if (typeof item.webkitGetAsEntry === 'function') {
-      const entry = item.webkitGetAsEntry();
-      if (entry?.isDirectory) return { kind: 'directory-entry', entry };
-      if (entry?.isFile) {
+      const file = item.getAsFile?.();
+      if (file) {
         return {
-          kind: 'file-entry',
-          entry,
-          forcePlainText: !isSupportedDroppedName(entry.name)
+          kind: 'file',
+          file,
+          forcePlainText: !isSupportedDroppedName(file.name)
         };
       }
     }
 
-    const file = item.getAsFile?.();
-    if (file) {
-      return {
-        kind: 'file',
-        file,
-        forcePlainText: !isSupportedDroppedName(file.name)
-      };
+    const files = Array.from(dataTransfer?.files || []);
+    const supportedFile = files.find(candidate => isSupportedDroppedName(candidate.name));
+    if (supportedFile) return { kind: 'file', file: supportedFile, forcePlainText: false };
+    const firstFile = files[0];
+    return firstFile ? { kind: 'file', file: firstFile, forcePlainText: true } : null;
+  }
+
+  async loadDroppedFileDocument(file, options = {}) {
+    if (options.forcePlainText && (await isLikelyBinaryFile(file))) {
+      throw new Error(t('errorDroppedBinary', [file.name]));
     }
+
+    const doc = await this.fileSource.loadFromFile(
+      file,
+      options.handle ? { handle: options.handle } : {}
+    );
+    doc.sourceType = 'dropped-file';
+    doc.relativePath = options.relativePath || '';
+    doc.displayPath = options.displayPath || doc.relativePath || file.name || doc.name;
+
+    if (options.path) doc.path = options.path;
+
+    if (options.forcePlainText) {
+      doc.format = FORMAT_IDS.SOURCE_CODE;
+      doc.language = 'plaintext';
+      doc.mimeType = file.type || 'text/plain';
+    }
+
+    return doc;
   }
 
-  const files = Array.from(dataTransfer?.files || []);
-  const supportedFile = files.find(candidate => isSupportedDroppedName(candidate.name));
-  if (supportedFile) return { kind: 'file', file: supportedFile, forcePlainText: false };
-  const firstFile = files[0];
-  return firstFile ? { kind: 'file', file: firstFile, forcePlainText: true } : null;
-}
-
-async loadDroppedFileDocument(file, options = {}) {
-  if (options.forcePlainText && await isLikelyBinaryFile(file)) {
-    throw new Error(t('errorDroppedBinary', [file.name]));
+  async openDroppedDirectoryHandle(handle) {
+    this.showDirectoryLoading(t('statusOpeningFolder'), handle?.name || '');
+    const { tree } = await this.directorySource.loadDirectoryHandle(handle);
+    this.renderDirectoryTree(tree);
+    this.currentFolderLoaded = true;
+    this.setFolderReloadEnabled(true);
+    this.clearViewerForFolder(t('statusDroppedFolderLoaded'));
+    this.elements.scrollMemoryCard.hidden = false;
+    this.applySidebarTab('files');
+    this.setStatus(t('statusDroppedFolderLoaded'), 'success');
   }
 
-  const doc = await this.fileSource.loadFromFile(file, options.handle ? { handle: options.handle } : {});
-  doc.sourceType = 'dropped-file';
-  doc.relativePath = options.relativePath || '';
-  doc.displayPath = options.displayPath || doc.relativePath || file.name || doc.name;
-
-  if (options.path) doc.path = options.path;
-
-  if (options.forcePlainText) {
-    doc.format = FORMAT_IDS.SOURCE_CODE;
-    doc.language = 'plaintext';
-    doc.mimeType = file.type || 'text/plain';
+  async openDroppedDirectoryEntry(entry) {
+    this.showDirectoryLoading(t('statusOpeningFolder'), entry?.name || '');
+    const { tree } = await this.directorySource.loadDirectoryEntry(entry);
+    this.renderDirectoryTree(tree);
+    this.currentFolderLoaded = true;
+    this.setFolderReloadEnabled(true);
+    this.clearViewerForFolder(t('statusDroppedFolderLoaded'));
+    this.elements.scrollMemoryCard.hidden = false;
+    this.applySidebarTab('files');
+    this.setStatus(t('statusDroppedFolderLoaded'), 'success');
   }
-
-  return doc;
-}
-
-async openDroppedDirectoryHandle(handle) {
-  this.showDirectoryLoading(t('statusOpeningFolder'), handle?.name || '');
-  const { tree } = await this.directorySource.loadDirectoryHandle(handle);
-  this.renderDirectoryTree(tree);
-  this.currentFolderLoaded = true;
-  this.setFolderReloadEnabled(true);
-  this.clearViewerForFolder(t('statusDroppedFolderLoaded'));
-  this.elements.scrollMemoryCard.hidden = false;
-  this.applySidebarTab('files');
-  this.setStatus(t('statusDroppedFolderLoaded'), 'success');
-}
-
-async openDroppedDirectoryEntry(entry) {
-  this.showDirectoryLoading(t('statusOpeningFolder'), entry?.name || '');
-  const { tree } = await this.directorySource.loadDirectoryEntry(entry);
-  this.renderDirectoryTree(tree);
-  this.currentFolderLoaded = true;
-  this.setFolderReloadEnabled(true);
-  this.clearViewerForFolder(t('statusDroppedFolderLoaded'));
-  this.elements.scrollMemoryCard.hidden = false;
-  this.applySidebarTab('files');
-  this.setStatus(t('statusDroppedFolderLoaded'), 'success');
-}
 
   showLaunchLoadingIfPending() {
     const params = new URLSearchParams(window.location.search);
@@ -1223,7 +1320,8 @@ async openDroppedDirectoryEntry(entry) {
       return;
     }
 
-    if (url) await this.openUrl(url, { anchor: extractHash(window.location.hash) || extractHash(url) });
+    if (url)
+      await this.openUrl(url, { anchor: extractHash(window.location.hash) || extractHash(url) });
   }
 
   async openSnapshot(snapshotId, options = {}) {
@@ -1243,7 +1341,9 @@ async openDroppedDirectoryEntry(entry) {
       baseUrl: snapshot.url || '',
       url: snapshot.url || '',
       mimeType: snapshot.mimeType || '',
-      format: snapshot.format || detectFormat({ url: snapshot.url || '', mimeType: snapshot.mimeType || '' }),
+      format:
+        snapshot.format ||
+        detectFormat({ url: snapshot.url || '', mimeType: snapshot.mimeType || '' }),
       language: snapshot.language || '',
       text: snapshot.text || ''
     };
@@ -1267,7 +1367,8 @@ async openDroppedDirectoryEntry(entry) {
   async openLocalFile() {
     try {
       const doc = await this.fileSource.pickFile({
-        onLoadStart: name => this.setViewerLoading(t('statusLoadingDocument', [name || t('commonDocument')]))
+        onLoadStart: name =>
+          this.setViewerLoading(t('statusLoadingDocument', [name || t('commonDocument')]))
       });
       await this.renderDocument(doc);
     } catch (error) {
@@ -1528,7 +1629,10 @@ async openDroppedDirectoryEntry(entry) {
       tabElement.title = title;
       tabElement.classList.toggle('is-active', active);
       tabElement.classList.toggle('is-pinned', tab.pinned);
-      tabElement.classList.toggle('is-dragging', this.fileTabDrag?.key === tab.key && this.fileTabDrag.moved);
+      tabElement.classList.toggle(
+        'is-dragging',
+        this.fileTabDrag?.key === tab.key && this.fileTabDrag.moved
+      );
       tabElement.addEventListener('click', event => this.handleFileTabClick(event, tab.key));
       tabElement.addEventListener('keydown', event => this.handleFileTabKeydown(event, tab.key));
       tabElement.addEventListener('pointerdown', event => this.startFileTabDrag(event, tab.key));
@@ -1546,7 +1650,10 @@ async openDroppedDirectoryEntry(entry) {
       pinButton.className = 'file-tab-pin';
       pinButton.type = 'button';
       pinButton.setAttribute('aria-pressed', String(tab.pinned));
-      pinButton.setAttribute('aria-label', tab.pinned ? t('a11yUnpinFileTab') : t('a11yPinFileTab'));
+      pinButton.setAttribute(
+        'aria-label',
+        tab.pinned ? t('a11yUnpinFileTab') : t('a11yPinFileTab')
+      );
       pinButton.title = pinButton.getAttribute('aria-label');
       // eslint-disable-next-line no-unsanitized/property -- trusted static SVG icon
       pinButton.innerHTML = tab.pinned
@@ -1627,8 +1734,9 @@ async openDroppedDirectoryEntry(entry) {
   }
 
   focusFileTab(key) {
-    const tabElement = Array.from(this.elements.fileTabsList?.querySelectorAll('.file-tab') || [])
-      .find(element => element.dataset.tabKey === key);
+    const tabElement = Array.from(
+      this.elements.fileTabsList?.querySelectorAll('.file-tab') || []
+    ).find(element => element.dataset.tabKey === key);
     tabElement?.focus();
   }
 
@@ -1677,7 +1785,7 @@ async openDroppedDirectoryEntry(entry) {
     if (!scroller) return;
     const amount = Math.max(240, Math.floor(scroller.clientWidth * 0.92));
     const maxScrollLeft = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
-    const nextLeft = Math.max(0, Math.min(maxScrollLeft, scroller.scrollLeft + (direction * amount)));
+    const nextLeft = Math.max(0, Math.min(maxScrollLeft, scroller.scrollLeft + direction * amount));
     this.animateFileTabsScroll(nextLeft);
   }
 
@@ -1713,7 +1821,7 @@ async openDroppedDirectoryEntry(entry) {
 
     const step = now => {
       const progress = Math.min(1, (now - startTime) / duration);
-      scroller.scrollLeft = startLeft + (distance * easeOutCubic(progress));
+      scroller.scrollLeft = startLeft + distance * easeOutCubic(progress);
       this.updateFileTabsOverflowState();
 
       if (progress < 1) {
@@ -1736,9 +1844,8 @@ async openDroppedDirectoryEntry(entry) {
     const maxScrollLeft = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
     if (maxScrollLeft <= 1) return;
 
-    const dominantDelta = Math.abs(event.deltaX) > Math.abs(event.deltaY)
-      ? event.deltaX
-      : event.deltaY;
+    const dominantDelta =
+      Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
     if (!dominantDelta) return;
 
     event.preventDefault();
@@ -1784,13 +1891,20 @@ async openDroppedDirectoryEntry(entry) {
     event.preventDefault();
     this.elements.fileTabs?.classList.add('is-tab-dragging');
 
-    const targetTab = document.elementFromPoint(event.clientX, event.clientY)?.closest('.file-tab[data-tab-key]');
+    const targetTab = document
+      .elementFromPoint(event.clientX, event.clientY)
+      ?.closest('.file-tab[data-tab-key]');
     if (!targetTab || !this.elements.fileTabsList?.contains(targetTab)) {
       this.renderFileTabs();
       return;
     }
 
-    const moved = this.moveFileTabByPointer(drag.key, targetTab.dataset.tabKey, event.clientX, targetTab.getBoundingClientRect());
+    const moved = this.moveFileTabByPointer(
+      drag.key,
+      targetTab.dataset.tabKey,
+      event.clientX,
+      targetTab.getBoundingClientRect()
+    );
     if (moved) this.renderFileTabs();
   }
 
@@ -1823,7 +1937,7 @@ async openDroppedDirectoryEntry(entry) {
     const targetIndex = this.openTabs.findIndex(tab => tab.key === targetKey);
     if (fromIndex < 0 || targetIndex < 0) return false;
 
-    const insertAfter = clientX > targetRect.left + (targetRect.width / 2);
+    const insertAfter = clientX > targetRect.left + targetRect.width / 2;
     let insertIndex = targetIndex + (insertAfter ? 1 : 0);
     const [tab] = this.openTabs.splice(fromIndex, 1);
     if (fromIndex < insertIndex) insertIndex -= 1;
@@ -1904,70 +2018,73 @@ async openDroppedDirectoryEntry(entry) {
     this.elements.reloadFolder.disabled = !enabled;
   }
 
-async reloadCurrentDocument() {
-  if (!this.currentDoc) {
-    this.setStatus(t('statusNoDocumentLoaded'), 'info');
-    return;
-  }
-
-  const previousDoc = this.currentDoc;
-  const previousScrollTop = this.scrollRoot.scrollTop;
-  const hashAnchor = extractHash(window.location.hash);
-
-  try {
-    this.setDocumentReloadEnabled(false);
-    this.setViewerLoading(t('statusLoadingDocument', [previousDoc.name || t('commonDocument')]));
-    this.setStatus(t('statusReloadingDocument', [previousDoc.name || t('commonDocument')]), 'info');
-
-    const doc = await this.reloadDocumentSource(previousDoc);
-    await this.renderDocument(doc, hashAnchor ? { anchor: hashAnchor } : {});
-
-    if (!hashAnchor) {
-      await nextFrame();
-      this.scrollRoot.scrollTop = previousScrollTop;
-      this.scheduleActiveHeadingUpdate();
+  async reloadCurrentDocument() {
+    if (!this.currentDoc) {
+      this.setStatus(t('statusNoDocumentLoaded'), 'info');
+      return;
     }
 
-    this.setStatus(t('statusReloadedDocument', [doc.name || t('commonDocument')]), 'success');
-  } catch (error) {
-    this.clearViewerLoading();
-    this.currentDoc = previousDoc;
-    this.setDocumentReloadEnabled(true);
-    this.setStatus(this.getLoadErrorMessage(error), 'error');
-  }
-}
+    const previousDoc = this.currentDoc;
+    const previousScrollTop = this.scrollRoot.scrollTop;
+    const hashAnchor = extractHash(window.location.hash);
 
-async reloadDocumentSource(doc) {
-  if (doc.sourceType === 'directory-file' && doc.path) {
-    const { doc: reloadedDoc, node } = await this.directorySource.loadPath(doc.path);
-    this.directoryTree.markActivePath(node.path);
-    return reloadedDoc;
-  }
+    try {
+      this.setDocumentReloadEnabled(false);
+      this.setViewerLoading(t('statusLoadingDocument', [previousDoc.name || t('commonDocument')]));
+      this.setStatus(
+        t('statusReloadingDocument', [previousDoc.name || t('commonDocument')]),
+        'info'
+      );
 
-  if (doc.handle) {
-    const reloadedDoc = await this.fileSource.loadFromHandle(doc.handle);
-    reloadedDoc.sourceType = doc.sourceType || 'file';
-    return reloadedDoc;
-  }
+      const doc = await this.reloadDocumentSource(previousDoc);
+      await this.renderDocument(doc, hashAnchor ? { anchor: hashAnchor } : {});
 
-  if (doc.file) {
-    const reloadedDoc = await this.fileSource.loadFromFile(doc.file);
-    reloadedDoc.sourceType = doc.sourceType || 'file';
-    return reloadedDoc;
-  }
+      if (!hashAnchor) {
+        await nextFrame();
+        this.scrollRoot.scrollTop = previousScrollTop;
+        this.scheduleActiveHeadingUpdate();
+      }
 
-  if (doc.url) {
-    return this.urlSource.load(doc.url);
+      this.setStatus(t('statusReloadedDocument', [doc.name || t('commonDocument')]), 'success');
+    } catch (error) {
+      this.clearViewerLoading();
+      this.currentDoc = previousDoc;
+      this.setDocumentReloadEnabled(true);
+      this.setStatus(this.getLoadErrorMessage(error), 'error');
+    }
   }
 
-  throw new Error(t('errorCannotReload'));
-}
+  async reloadDocumentSource(doc) {
+    if (doc.sourceType === 'directory-file' && doc.path) {
+      const { doc: reloadedDoc, node } = await this.directorySource.loadPath(doc.path);
+      this.directoryTree.markActivePath(node.path);
+      return reloadedDoc;
+    }
 
-setDocumentReloadEnabled(enabled) {
-  if (!this.elements.reloadDocument) return;
-  this.elements.reloadDocument.hidden = !enabled;
-  this.elements.reloadDocument.disabled = !enabled;
-}
+    if (doc.handle) {
+      const reloadedDoc = await this.fileSource.loadFromHandle(doc.handle);
+      reloadedDoc.sourceType = doc.sourceType || 'file';
+      return reloadedDoc;
+    }
+
+    if (doc.file) {
+      const reloadedDoc = await this.fileSource.loadFromFile(doc.file);
+      reloadedDoc.sourceType = doc.sourceType || 'file';
+      return reloadedDoc;
+    }
+
+    if (doc.url) {
+      return this.urlSource.load(doc.url);
+    }
+
+    throw new Error(t('errorCannotReload'));
+  }
+
+  setDocumentReloadEnabled(enabled) {
+    if (!this.elements.reloadDocument) return;
+    this.elements.reloadDocument.hidden = !enabled;
+    this.elements.reloadDocument.disabled = !enabled;
+  }
 
   async createDirectoryDocument(fileNode) {
     const doc = await this.directorySource.loadFileNode(fileNode);
@@ -2024,7 +2141,8 @@ setDocumentReloadEnabled(enabled) {
       const nextDocKey = this.getDocumentKey(doc);
       const outlineOptions = { openPopover: nextDocKey !== this.currentDocKey };
       const runtimeScrollTop = this.getRuntimeScrollTopForDocument(nextDocKey, options);
-      const scrollOptions = runtimeScrollTop === null ? options : { ...options, scrollTop: runtimeScrollTop };
+      const scrollOptions =
+        runtimeScrollTop === null ? options : { ...options, scrollTop: runtimeScrollTop };
       if (nextDocKey !== this.currentDocKey && !options.anchor) this.clearUrlHash();
       const fileName = doc.name || t('docTitleUntitled');
       this.elements.title.textContent = fileName;
@@ -2032,14 +2150,24 @@ setDocumentReloadEnabled(enabled) {
       this.elements.scrollNav.hidden = false;
       this.elements.source.textContent = this.getDocumentSourceLabel(doc);
       this.elements.format.textContent = formatLabel(format);
-      this.elements.preview.classList.toggle('source-code-body', format === FORMAT_IDS.SOURCE_CODE || format === FORMAT_IDS.TEXT || format === FORMAT_IDS.UNKNOWN);
+      this.elements.preview.classList.toggle(
+        'source-code-body',
+        format === FORMAT_IDS.SOURCE_CODE ||
+          format === FORMAT_IDS.TEXT ||
+          format === FORMAT_IDS.UNKNOWN
+      );
       this.elements.preview.classList.toggle('diff-body', format === FORMAT_IDS.DIFF);
 
-      if (format === FORMAT_IDS.SOURCE_CODE || format === FORMAT_IDS.TEXT || format === FORMAT_IDS.UNKNOWN) {
+      if (
+        format === FORMAT_IDS.SOURCE_CODE ||
+        format === FORMAT_IDS.TEXT ||
+        format === FORMAT_IDS.UNKNOWN
+      ) {
         if (!this.sourceRenderer) this.sourceRenderer = new SourceCodeRenderer();
-        const sourceLanguage = format === FORMAT_IDS.TEXT || format === FORMAT_IDS.UNKNOWN
-          ? 'plaintext'
-          : doc.language || sourceLanguageFromPath(doc.name || doc.url || doc.path || '');
+        const sourceLanguage =
+          format === FORMAT_IDS.TEXT || format === FORMAT_IDS.UNKNOWN
+            ? 'plaintext'
+            : doc.language || sourceLanguageFromPath(doc.name || doc.url || doc.path || '');
         if (sourceLanguage === 'html') this.elements.format.textContent = 'HTML';
         if (format === FORMAT_IDS.TEXT) {
           const lineEnding = detectLineEnding(doc.text || '');
@@ -2064,7 +2192,10 @@ setDocumentReloadEnabled(enabled) {
         this.setStatus(
           format === FORMAT_IDS.UNKNOWN
             ? t('statusUnsupportedFormat', [format])
-            : t('statusLoaded', [doc.name || (format === FORMAT_IDS.TEXT ? t('commonDocument') : t('commonSourceFile'))]),
+            : t('statusLoaded', [
+                doc.name ||
+                  (format === FORMAT_IDS.TEXT ? t('commonDocument') : t('commonSourceFile'))
+              ]),
           format === FORMAT_IDS.UNKNOWN ? 'error' : 'success'
         );
         return;
@@ -2107,7 +2238,8 @@ setDocumentReloadEnabled(enabled) {
   }
 
   setViewerLoading(message) {
-    const label = message || t('statusLoadingDocument', [t('commonDocument')]) || 'Loading document ...';
+    const label =
+      message || t('statusLoadingDocument', [t('commonDocument')]) || 'Loading document ...';
     this.elements.preview.classList.add('is-loading');
     this.elements.preview.dataset.loadingLabel = label;
     this.elements.preview.setAttribute('aria-busy', 'true');
@@ -2213,7 +2345,13 @@ setDocumentReloadEnabled(enabled) {
   scrollToAnchor(anchor, options = {}) {
     const id = safeDecodeURIComponent(String(anchor || '').replace(/^#/, ''));
     if (!id) return false;
-    const target = Array.from(this.elements.preview.querySelectorAll('[id]')).find(element => element.id === id) || Array.from(this.elements.preview.querySelectorAll('[name]')).find(element => element.getAttribute('name') === id);
+    const target =
+      Array.from(this.elements.preview.querySelectorAll('[id]')).find(
+        element => element.id === id
+      ) ||
+      Array.from(this.elements.preview.querySelectorAll('[name]')).find(
+        element => element.getAttribute('name') === id
+      );
     if (!target) return false;
 
     target.scrollIntoView({ block: 'start', behavior: options.smooth ? 'smooth' : 'auto' });
@@ -2221,7 +2359,11 @@ setDocumentReloadEnabled(enabled) {
 
     if (options.updateHash) {
       const hash = encodeURIComponent(target.id || id);
-      history.replaceState(null, '', `${window.location.pathname}${window.location.search}#${hash}`);
+      history.replaceState(
+        null,
+        '',
+        `${window.location.pathname}${window.location.search}#${hash}`
+      );
     }
 
     return true;
@@ -2273,196 +2415,204 @@ setDocumentReloadEnabled(enabled) {
     this.scheduleActiveHeadingUpdate();
   }
 
+  buildDiffOutline(files, doc, options = {}) {
+    this.outlineType = 'diff';
+    this.headingTree = buildDiffOutlineTree(files);
+    this.headings = this.headingTree.fileNodes;
+    this.tocCollapsedIds = new Set();
+    this.tocItems = new Map();
+    this.activeHeadingId = '';
+    this.tocFilterQuery = '';
+    this.elements.tocTree.innerHTML = '';
+    this.elements.tocPopoverTree.innerHTML = '';
+    this.elements.tocFilter.value = '';
+    this.elements.tocPopoverFilter.value = '';
+    this.updateTocTitle(doc, t('tocChangedFiles'));
+    this.elements.tocDepthRow.hidden = true;
+    this.elements.tocPopoverDepthRow.hidden = true;
 
-buildDiffOutline(files, doc, options = {}) {
-  this.outlineType = 'diff';
-  this.headingTree = buildDiffOutlineTree(files);
-  this.headings = this.headingTree.fileNodes;
-  this.tocCollapsedIds = new Set();
-  this.tocItems = new Map();
-  this.activeHeadingId = '';
-  this.tocFilterQuery = '';
-  this.elements.tocTree.innerHTML = '';
-  this.elements.tocPopoverTree.innerHTML = '';
-  this.elements.tocFilter.value = '';
-  this.elements.tocPopoverFilter.value = '';
-  this.updateTocTitle(doc, t('tocChangedFiles'));
-  this.elements.tocDepthRow.hidden = true;
-  this.elements.tocPopoverDepthRow.hidden = true;
+    if (!this.headingTree.nodes.length) {
+      this.renderTocEmpty(t('tocNoChangedFiles'));
+      this.elements.outlineTab.textContent = t('tabFiles');
+      this.outlinePopoutEnabled = false;
+      this.updateTocFilterVisibility();
+      this.updateFloatingOutlineState(options);
+      return;
+    }
 
-  if (!this.headingTree.nodes.length) {
-    this.renderTocEmpty(t('tocNoChangedFiles'));
-    this.elements.outlineTab.textContent = t('tabFiles');
-    this.outlinePopoutEnabled = false;
+    this.renderTocContainer(this.elements.tocTree, 'panel');
+    this.renderTocContainer(this.elements.tocPopoverTree, 'popover');
+    this.elements.outlineTab.textContent = t('changesTabCount', [String(this.headings.length)]);
     this.updateTocFilterVisibility();
+    this.applyTocFilter();
     this.updateFloatingOutlineState(options);
-    return;
+    this.scheduleActiveHeadingUpdate();
   }
 
-  this.renderTocContainer(this.elements.tocTree, 'panel');
-  this.renderTocContainer(this.elements.tocPopoverTree, 'popover');
-  this.elements.outlineTab.textContent = t('changesTabCount', [String(this.headings.length)]);
-  this.updateTocFilterVisibility();
-  this.applyTocFilter();
-  this.updateFloatingOutlineState(options);
-  this.scheduleActiveHeadingUpdate();
-}
+  buildSourceSymbols(doc, language, options = {}) {
+    this.outlineType = 'source';
+    const symbols = extractSourceSymbols(doc.text || '', {
+      language,
+      name: doc.name || doc.url || doc.path || ''
+    });
+    this.headingTree = buildSourceSymbolTree(symbols, this.elements.preview);
+    this.headings = this.headingTree.symbolNodes;
+    this.tocCollapsedIds = new Set();
+    this.tocItems = new Map();
+    this.activeHeadingId = '';
+    this.tocFilterQuery = '';
+    this.elements.tocTree.innerHTML = '';
+    this.elements.tocPopoverTree.innerHTML = '';
+    this.elements.tocFilter.value = '';
+    this.elements.tocPopoverFilter.value = '';
+    this.updateTocTitle(doc, t('symbolsTitle'));
+    this.elements.tocDepthRow.hidden = true;
+    this.elements.tocPopoverDepthRow.hidden = true;
 
-buildSourceSymbols(doc, language, options = {}) {
-  this.outlineType = 'source';
-  const symbols = extractSourceSymbols(doc.text || '', { language, name: doc.name || doc.url || doc.path || '' });
-  this.headingTree = buildSourceSymbolTree(symbols, this.elements.preview);
-  this.headings = this.headingTree.symbolNodes;
-  this.tocCollapsedIds = new Set();
-  this.tocItems = new Map();
-  this.activeHeadingId = '';
-  this.tocFilterQuery = '';
-  this.elements.tocTree.innerHTML = '';
-  this.elements.tocPopoverTree.innerHTML = '';
-  this.elements.tocFilter.value = '';
-  this.elements.tocPopoverFilter.value = '';
-  this.updateTocTitle(doc, t('symbolsTitle'));
-  this.elements.tocDepthRow.hidden = true;
-  this.elements.tocPopoverDepthRow.hidden = true;
+    if (!this.headingTree.nodes.length) {
+      this.renderTocEmpty(t('tocNoSymbols'));
+      this.elements.outlineTab.textContent = t('symbolsTitle');
+      this.outlinePopoutEnabled = false;
+      this.updateTocFilterVisibility();
+      this.updateFloatingOutlineState(options);
+      return;
+    }
 
-  if (!this.headingTree.nodes.length) {
-    this.renderTocEmpty(t('tocNoSymbols'));
-    this.elements.outlineTab.textContent = t('symbolsTitle');
-    this.outlinePopoutEnabled = false;
+    this.renderTocContainer(this.elements.tocTree, 'panel');
+    this.renderTocContainer(this.elements.tocPopoverTree, 'popover');
+    this.elements.outlineTab.textContent = t('symbolsTabCount', [String(this.headings.length)]);
     this.updateTocFilterVisibility();
+    this.applyTocFilter();
     this.updateFloatingOutlineState(options);
-    return;
+    this.scheduleActiveHeadingUpdate();
   }
 
-  this.renderTocContainer(this.elements.tocTree, 'panel');
-  this.renderTocContainer(this.elements.tocPopoverTree, 'popover');
-  this.elements.outlineTab.textContent = t('symbolsTabCount', [String(this.headings.length)]);
-  this.updateTocFilterVisibility();
-  this.applyTocFilter();
-  this.updateFloatingOutlineState(options);
-  this.scheduleActiveHeadingUpdate();
-}
+  renderTocContainer(container, context) {
+    const list = document.createElement('div');
+    list.className = 'toc-list toc-tree-list';
+    list.dataset.tocContext = context;
 
+    // Parent ids that have at least one expandable (chevron) child. A childless
+    // heading sharing one of these parents sits among chevroned siblings, so it
+    // gets a leaf dot to keep equal visual weight (see immediateParentId()).
+    const parentsWithExpandableChild = new Set();
+    for (const node of this.headingTree.nodes) {
+      if (node.hasChildren) parentsWithExpandableChild.add(immediateParentId(node));
+    }
 
+    for (const heading of this.headingTree.nodes) {
+      const row = document.createElement('div');
+      row.className = `toc-row toc-level-${heading.level}`;
+      row.classList.toggle('toc-kind-diff-directory', heading.kind === 'diff-directory');
+      row.classList.toggle('toc-kind-diff-file', heading.kind === 'diff-file');
+      row.classList.toggle('toc-kind-source-symbol', heading.kind === 'source-symbol');
+      row.dataset.headingId = heading.id;
+      row.dataset.parentIds = heading.parentIds.join(' ');
+      row.dataset.tocText =
+        `${heading.text || ''} ${heading.path || ''} ${heading.filePath || ''}`.toLowerCase();
+      row.dataset.tocContext = context;
 
-renderTocContainer(container, context) {
-  const list = document.createElement('div');
-  list.className = 'toc-list toc-tree-list';
-  list.dataset.tocContext = context;
-
-  // Parent ids that have at least one expandable (chevron) child. A childless
-  // heading sharing one of these parents sits among chevroned siblings, so it
-  // gets a leaf dot to keep equal visual weight (see immediateParentId()).
-  const parentsWithExpandableChild = new Set();
-  for (const node of this.headingTree.nodes) {
-    if (node.hasChildren) parentsWithExpandableChild.add(immediateParentId(node));
-  }
-
-  for (const heading of this.headingTree.nodes) {
-    const row = document.createElement('div');
-    row.className = `toc-row toc-level-${heading.level}`;
-    row.classList.toggle('toc-kind-diff-directory', heading.kind === 'diff-directory');
-    row.classList.toggle('toc-kind-diff-file', heading.kind === 'diff-file');
-    row.classList.toggle('toc-kind-source-symbol', heading.kind === 'source-symbol');
-    row.dataset.headingId = heading.id;
-    row.dataset.parentIds = heading.parentIds.join(' ');
-    row.dataset.tocText = `${heading.text || ''} ${heading.path || ''} ${heading.filePath || ''}`.toLowerCase();
-    row.dataset.tocContext = context;
-
-    const toggle = document.createElement('button');
-    toggle.type = 'button';
-    toggle.className = 'toc-disclosure';
-    toggle.dataset.headingId = heading.id;
-    toggle.dataset.tocContext = context;
-    toggle.setAttribute('aria-label', t('a11yCollapseSection', [heading.text]));
-    toggle.setAttribute('aria-expanded', 'true');
-    // eslint-disable-next-line no-unsanitized/property -- trusted static SVG icon
-    toggle.innerHTML = getArrowRightIcon('button-icon');
-    if (!heading.hasChildren) {
-      toggle.classList.add('is-placeholder');
-      if (parentsWithExpandableChild.has(immediateParentId(heading))) {
-        toggle.classList.add('is-mixed-leaf');
+      const toggle = document.createElement('button');
+      toggle.type = 'button';
+      toggle.className = 'toc-disclosure';
+      toggle.dataset.headingId = heading.id;
+      toggle.dataset.tocContext = context;
+      toggle.setAttribute('aria-label', t('a11yCollapseSection', [heading.text]));
+      toggle.setAttribute('aria-expanded', 'true');
+      // eslint-disable-next-line no-unsanitized/property -- trusted static SVG icon
+      toggle.innerHTML = getArrowRightIcon('button-icon');
+      if (!heading.hasChildren) {
+        toggle.classList.add('is-placeholder');
+        if (parentsWithExpandableChild.has(immediateParentId(heading))) {
+          toggle.classList.add('is-mixed-leaf');
+        }
+        toggle.disabled = true;
+        toggle.setAttribute('aria-hidden', 'true');
+        toggle.removeAttribute('aria-label');
+        toggle.removeAttribute('aria-expanded');
+      } else {
+        toggle.addEventListener('click', event => {
+          event.preventDefault();
+          event.stopPropagation();
+          this.toggleTocGroup(heading.id);
+        });
       }
-      toggle.disabled = true;
-      toggle.setAttribute('aria-hidden', 'true');
-      toggle.removeAttribute('aria-label');
-      toggle.removeAttribute('aria-expanded');
-    } else {
-      toggle.addEventListener('click', event => {
-        event.preventDefault();
-        event.stopPropagation();
-        this.toggleTocGroup(heading.id);
-      });
+
+      const item =
+        heading.kind === 'diff-directory'
+          ? document.createElement('button')
+          : document.createElement('a');
+
+      item.className = 'toc-item';
+      item.dataset.tocContext = context;
+      item.title = heading.path || heading.text;
+
+      if (heading.kind === 'diff-directory') {
+        item.type = 'button';
+        item.classList.add('toc-directory-item');
+        // eslint-disable-next-line no-unsanitized/property -- trusted static markup; label text set via textContent below
+        item.innerHTML = `${tocIconSvg('folder')}<span class="toc-item-label"></span>`;
+        item.querySelector('.toc-item-label').textContent = heading.text;
+        item.addEventListener('click', event => {
+          event.preventDefault();
+          this.toggleTocGroup(heading.id);
+        });
+      } else if (heading.kind === 'diff-file') {
+        item.href = `#${encodeURIComponent(heading.id)}`;
+        // eslint-disable-next-line no-unsanitized/property -- trusted static markup; label/stats text set via textContent below
+        item.innerHTML = `${tocIconSvg('file')}<span class="toc-item-label"></span><span class="toc-item-stats"></span>`;
+        item.querySelector('.toc-item-label').textContent = heading.text;
+        item.querySelector('.toc-item-stats').textContent =
+          `+${heading.stats?.added || 0} −${heading.stats?.removed || 0}`;
+        item.addEventListener('click', event => {
+          event.preventDefault();
+          this.scrollToAnchor(heading.id, { smooth: true, updateHash: true });
+          this.saveCurrentScrollPosition().catch(() => {});
+          if (context === 'popover' && !this.tocPopoverPinned) this.closeTocPopover();
+        });
+        this.registerTocItem(heading.id, item);
+      } else if (heading.kind === 'source-symbol') {
+        const anchorId = heading.anchorId || `L${heading.line}`;
+        item.href = `#${encodeURIComponent(anchorId)}`;
+        // eslint-disable-next-line no-unsanitized/property -- trusted static markup with localized badge + numeric line; label text set via textContent below
+        item.innerHTML = `<span class="toc-symbol-badge">${symbolKindLabel(heading.symbolKind)}</span><span class="toc-item-label"></span><span class="toc-symbol-line">L${heading.line}</span>`;
+        item.querySelector('.toc-item-label').textContent = heading.text;
+        item.addEventListener('click', event => {
+          event.preventDefault();
+          this.scrollToAnchor(anchorId, { smooth: true, updateHash: true });
+          this.highlightSourceLine(anchorId);
+          this.saveCurrentScrollPosition().catch(() => {});
+          if (context === 'popover' && !this.tocPopoverPinned) this.closeTocPopover();
+        });
+        this.registerTocItem(heading.id, item);
+      } else {
+        item.href = `#${encodeURIComponent(heading.id)}`;
+        item.textContent = heading.text;
+        item.addEventListener('click', event => {
+          event.preventDefault();
+          this.scrollToAnchor(heading.id, { smooth: true, updateHash: true });
+          this.saveCurrentScrollPosition().catch(() => {});
+          if (context === 'popover' && !this.tocPopoverPinned) this.closeTocPopover();
+        });
+        this.registerTocItem(heading.id, item);
+      }
+
+      row.append(toggle, item);
+      list.append(row);
     }
 
-    const item = heading.kind === 'diff-directory'
-      ? document.createElement('button')
-      : document.createElement('a');
+    const noMatch = document.createElement('div');
+    noMatch.className = 'toc-empty toc-no-matches';
+    noMatch.textContent =
+      this.outlineType === 'diff'
+        ? t('tocNoMatchingFiles')
+        : this.outlineType === 'source'
+          ? t('tocNoMatchingSymbols')
+          : t('tocNoMatchingHeadings');
+    noMatch.hidden = true;
 
-    item.className = 'toc-item';
-    item.dataset.tocContext = context;
-    item.title = heading.path || heading.text;
-
-    if (heading.kind === 'diff-directory') {
-      item.type = 'button';
-      item.classList.add('toc-directory-item');
-      // eslint-disable-next-line no-unsanitized/property -- trusted static markup; label text set via textContent below
-      item.innerHTML = `${tocIconSvg('folder')}<span class="toc-item-label"></span>`;
-      item.querySelector('.toc-item-label').textContent = heading.text;
-      item.addEventListener('click', event => {
-        event.preventDefault();
-        this.toggleTocGroup(heading.id);
-      });
-    } else if (heading.kind === 'diff-file') {
-      item.href = `#${encodeURIComponent(heading.id)}`;
-      // eslint-disable-next-line no-unsanitized/property -- trusted static markup; label/stats text set via textContent below
-      item.innerHTML = `${tocIconSvg('file')}<span class="toc-item-label"></span><span class="toc-item-stats"></span>`;
-      item.querySelector('.toc-item-label').textContent = heading.text;
-      item.querySelector('.toc-item-stats').textContent = `+${heading.stats?.added || 0} −${heading.stats?.removed || 0}`;
-      item.addEventListener('click', event => {
-        event.preventDefault();
-        this.scrollToAnchor(heading.id, { smooth: true, updateHash: true });
-        this.saveCurrentScrollPosition().catch(() => {});
-        if (context === 'popover' && !this.tocPopoverPinned) this.closeTocPopover();
-      });
-      this.registerTocItem(heading.id, item);
-    } else if (heading.kind === 'source-symbol') {
-      const anchorId = heading.anchorId || `L${heading.line}`;
-      item.href = `#${encodeURIComponent(anchorId)}`;
-      // eslint-disable-next-line no-unsanitized/property -- trusted static markup with localized badge + numeric line; label text set via textContent below
-      item.innerHTML = `<span class="toc-symbol-badge">${symbolKindLabel(heading.symbolKind)}</span><span class="toc-item-label"></span><span class="toc-symbol-line">L${heading.line}</span>`;
-      item.querySelector('.toc-item-label').textContent = heading.text;
-      item.addEventListener('click', event => {
-        event.preventDefault();
-        this.scrollToAnchor(anchorId, { smooth: true, updateHash: true });
-        this.highlightSourceLine(anchorId);
-        this.saveCurrentScrollPosition().catch(() => {});
-        if (context === 'popover' && !this.tocPopoverPinned) this.closeTocPopover();
-      });
-      this.registerTocItem(heading.id, item);
-    } else {
-      item.href = `#${encodeURIComponent(heading.id)}`;
-      item.textContent = heading.text;
-      item.addEventListener('click', event => {
-        event.preventDefault();
-        this.scrollToAnchor(heading.id, { smooth: true, updateHash: true });
-        this.saveCurrentScrollPosition().catch(() => {});
-        if (context === 'popover' && !this.tocPopoverPinned) this.closeTocPopover();
-      });
-      this.registerTocItem(heading.id, item);
-    }
-
-    row.append(toggle, item);
-    list.append(row);
+    container.append(list, noMatch);
   }
-
-  const noMatch = document.createElement('div');
-  noMatch.className = 'toc-empty toc-no-matches';
-  noMatch.textContent = this.outlineType === 'diff' ? t('tocNoMatchingFiles') : this.outlineType === 'source' ? t('tocNoMatchingSymbols') : t('tocNoMatchingHeadings');
-  noMatch.hidden = true;
-
-  container.append(list, noMatch);
-}
 
   registerTocItem(id, item) {
     const items = this.tocItems.get(id) || [];
@@ -2532,9 +2682,12 @@ renderTocContainer(container, context) {
   }
 
   setTocFilter(value) {
-    this.tocFilterQuery = String(value || '').trim().toLowerCase();
+    this.tocFilterQuery = String(value || '')
+      .trim()
+      .toLowerCase();
     if (this.elements.tocFilter.value !== value) this.elements.tocFilter.value = value;
-    if (this.elements.tocPopoverFilter.value !== value) this.elements.tocPopoverFilter.value = value;
+    if (this.elements.tocPopoverFilter.value !== value)
+      this.elements.tocPopoverFilter.value = value;
     this.applyTocFilter();
   }
 
@@ -2582,14 +2735,13 @@ renderTocContainer(container, context) {
     this.updateTocDisclosureStates();
   }
 
-
-collectTocDescendantIds(node, targetSet) {
-  if (!node?.children?.length) return;
-  for (const child of node.children) {
-    targetSet.add(child.id);
-    this.collectTocDescendantIds(child, targetSet);
+  collectTocDescendantIds(node, targetSet) {
+    if (!node?.children?.length) return;
+    for (const child of node.children) {
+      targetSet.add(child.id);
+      this.collectTocDescendantIds(child, targetSet);
+    }
   }
-}
 
   updateTocDisclosureStates() {
     const query = this.tocFilterQuery;
@@ -2597,7 +2749,12 @@ collectTocDescendantIds(node, targetSet) {
 
     if (query) {
       for (const heading of this.headingTree.nodes) {
-        if (!`${heading.text || ''} ${heading.path || ''} ${heading.filePath || ''}`.toLowerCase().includes(query)) continue;
+        if (
+          !`${heading.text || ''} ${heading.path || ''} ${heading.filePath || ''}`
+            .toLowerCase()
+            .includes(query)
+        )
+          continue;
         for (const parentId of heading.parentIds) matchedAncestorIds.add(parentId);
       }
     }
@@ -2605,10 +2762,17 @@ collectTocDescendantIds(node, targetSet) {
     for (const container of [this.elements.tocTree, this.elements.tocPopoverTree]) {
       for (const toggle of container.querySelectorAll('.toc-disclosure:not(.is-placeholder)')) {
         const id = toggle.dataset.headingId;
-        const expanded = query ? matchedAncestorIds.has(id) || !this.tocCollapsedIds.has(id) : !this.tocCollapsedIds.has(id);
+        const expanded = query
+          ? matchedAncestorIds.has(id) || !this.tocCollapsedIds.has(id)
+          : !this.tocCollapsedIds.has(id);
         toggle.setAttribute('aria-expanded', String(expanded));
         const node = this.headingTree.byId.get(id);
-        toggle.setAttribute('aria-label', t(expanded ? 'a11yCollapseSection' : 'a11yExpandSection', [node?.text || t('commonSection')]));
+        toggle.setAttribute(
+          'aria-label',
+          t(expanded ? 'a11yCollapseSection' : 'a11yExpandSection', [
+            node?.text || t('commonSection')
+          ])
+        );
       }
     }
   }
@@ -2717,12 +2881,23 @@ collectTocDescendantIds(node, targetSet) {
 
     const shouldScrollToc = !this.tocFilterQuery;
     const panelItem = currentItems.find(item => item.dataset.tocContext === 'panel');
-    if (shouldScrollToc && panelItem && this.activeSidebarTab === 'outline' && !this.elements.outlinePanel.hidden && this.isTocItemVisible(panelItem)) {
+    if (
+      shouldScrollToc &&
+      panelItem &&
+      this.activeSidebarTab === 'outline' &&
+      !this.elements.outlinePanel.hidden &&
+      this.isTocItemVisible(panelItem)
+    ) {
       panelItem.scrollIntoView({ block: 'nearest' });
     }
 
     const popoverItem = currentItems.find(item => item.dataset.tocContext === 'popover');
-    if (shouldScrollToc && popoverItem && this.tocPopoverOpen && this.isTocItemVisible(popoverItem)) {
+    if (
+      shouldScrollToc &&
+      popoverItem &&
+      this.tocPopoverOpen &&
+      this.isTocItemVisible(popoverItem)
+    ) {
       popoverItem.scrollIntoView({ block: 'nearest' });
     }
   }
@@ -2766,7 +2941,9 @@ collectTocDescendantIds(node, targetSet) {
   }
 
   clearSourceLineHighlight() {
-    for (const line of this.elements.preview.querySelectorAll('.source-line.is-symbol-highlighted')) {
+    for (const line of this.elements.preview.querySelectorAll(
+      '.source-line.is-symbol-highlighted'
+    )) {
       line.classList.remove('is-symbol-highlighted');
     }
   }
@@ -2796,7 +2973,6 @@ collectTocDescendantIds(node, targetSet) {
     this.elements.status.textContent = message;
   }
 }
-
 
 function tocIconSvg(kind) {
   if (kind === 'folder') {

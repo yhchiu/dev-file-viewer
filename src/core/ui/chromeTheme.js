@@ -7,9 +7,24 @@
 export const THEME_KEY = 'devFileViewer:theme';
 
 const ACCENT_BY_THEME = {
-  bloom: { accent: '#6d5bf6', soft: 'rgba(109, 91, 246, .14)', border: 'rgba(109, 91, 246, .5)', ring: 'rgba(109, 91, 246, .4)' },
-  forge: { accent: '#3dd7c9', soft: 'rgba(61, 215, 201, .16)', border: 'rgba(61, 215, 201, .55)', ring: 'rgba(61, 215, 201, .4)' },
-  folio: { accent: '#1f5d4c', soft: 'rgba(31, 93, 76, .14)', border: 'rgba(31, 93, 76, .5)', ring: 'rgba(31, 93, 76, .4)' }
+  bloom: {
+    accent: '#6d5bf6',
+    soft: 'rgba(109, 91, 246, .14)',
+    border: 'rgba(109, 91, 246, .5)',
+    ring: 'rgba(109, 91, 246, .4)'
+  },
+  forge: {
+    accent: '#3dd7c9',
+    soft: 'rgba(61, 215, 201, .16)',
+    border: 'rgba(61, 215, 201, .55)',
+    ring: 'rgba(61, 215, 201, .4)'
+  },
+  folio: {
+    accent: '#1f5d4c',
+    soft: 'rgba(31, 93, 76, .14)',
+    border: 'rgba(31, 93, 76, .5)',
+    ring: 'rgba(31, 93, 76, .4)'
+  }
 };
 
 function prefersDarkScheme() {
@@ -67,6 +82,7 @@ export async function syncChromeTheme(doc = document) {
     // onChanged unavailable; the static apply above is enough.
   }
 
-  globalThis.matchMedia?.('(prefers-color-scheme: dark)')
+  globalThis
+    .matchMedia?.('(prefers-color-scheme: dark)')
     ?.addEventListener?.('change', () => applyChromeTheme(doc, preference));
 }

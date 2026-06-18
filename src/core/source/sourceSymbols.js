@@ -2,7 +2,9 @@ const SYMBOL_LIMIT = 1200;
 
 export function extractSourceSymbols(sourceText = '', options = {}) {
   const language = normalizeSymbolLanguage(options.language || '');
-  const lines = String(sourceText || '').replace(/\r\n?/g, '\n').split('\n');
+  const lines = String(sourceText || '')
+    .replace(/\r\n?/g, '\n')
+    .split('\n');
 
   switch (language) {
     case 'javascript':
@@ -33,7 +35,8 @@ export function buildSourceSymbolTree(symbols = [], rootElement) {
   const roots = [];
 
   for (const symbol of symbols.slice(0, SYMBOL_LIMIT)) {
-    const element = rootElement?.querySelector?.(`#${CSS.escape(symbol.anchorId || `L${symbol.line}`)}`) || null;
+    const element =
+      rootElement?.querySelector?.(`#${CSS.escape(symbol.anchorId || `L${symbol.line}`)}`) || null;
     if (!element) continue;
 
     const node = {
@@ -117,14 +120,18 @@ function formatSymbolText(kind, name) {
 }
 
 function slug(value = '') {
-  return String(value || 'symbol')
-    .toLowerCase()
-    .replace(/[^a-z0-9_$.-]+/g, '-')
-    .replace(/^-+|-+$/g, '') || 'symbol';
+  return (
+    String(value || 'symbol')
+      .toLowerCase()
+      .replace(/[^a-z0-9_$.-]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'symbol'
+  );
 }
 
 function stripLineComment(line = '') {
-  return String(line || '').replace(/\/\/.*$/, '').replace(/#.*$/, '');
+  return String(line || '')
+    .replace(/\/\/.*$/, '')
+    .replace(/#.*$/, '');
 }
 
 function countChar(value = '', char) {
@@ -150,7 +157,9 @@ function extractJavaScriptSymbols(lines) {
     while (stack.length && depth <= stack.at(-1).startDepth) stack.pop();
     const parent = stack.findLast(item => ['class', 'interface'].includes(item.kind));
 
-    let match = line.match(/^(?:export\s+default\s+|export\s+)?(?:abstract\s+)?class\s+([A-Za-z_$][\w$]*)/);
+    let match = line.match(
+      /^(?:export\s+default\s+|export\s+)?(?:abstract\s+)?class\s+([A-Za-z_$][\w$]*)/
+    );
     if (match) {
       const symbol = addSymbol(symbols, 'class', match[1], lineNumber, parent?.id || '');
       if (symbol) stack.push({ ...symbol, startDepth: depth, kind: 'class' });
@@ -161,11 +170,22 @@ function extractJavaScriptSymbols(lines) {
       addSymbol(symbols, 'type', match[1], lineNumber, parent?.id || '');
     } else if ((match = line.match(/^(?:export\s+)?enum\s+([A-Za-z_$][\w$]*)/))) {
       addSymbol(symbols, 'enum', match[1], lineNumber, parent?.id || '');
-    } else if ((match = line.match(/^(?:export\s+)?(?:async\s+)?function\*?\s+([A-Za-z_$][\w$]*)/))) {
+    } else if (
+      (match = line.match(/^(?:export\s+)?(?:async\s+)?function\*?\s+([A-Za-z_$][\w$]*)/))
+    ) {
       addSymbol(symbols, 'function', match[1], lineNumber, '');
-    } else if ((match = line.match(/^(?:export\s+)?(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:async\s*)?(?:function\b|\([^)]*\)\s*=>|[A-Za-z_$][\w$]*\s*=>)/))) {
+    } else if (
+      (match = line.match(
+        /^(?:export\s+)?(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:async\s*)?(?:function\b|\([^)]*\)\s*=>|[A-Za-z_$][\w$]*\s*=>)/
+      ))
+    ) {
       addSymbol(symbols, 'function', match[1], lineNumber, '');
-    } else if (parent && (match = line.match(/^(?:public\s+|private\s+|protected\s+|static\s+|async\s+|override\s+|readonly\s+|get\s+|set\s+)*([A-Za-z_$][\w$]*)\s*\([^)]*\)\s*(?::\s*[^={]+)?[{;]?/))) {
+    } else if (
+      parent &&
+      (match = line.match(
+        /^(?:public\s+|private\s+|protected\s+|static\s+|async\s+|override\s+|readonly\s+|get\s+|set\s+)*([A-Za-z_$][\w$]*)\s*\([^)]*\)\s*(?::\s*[^={]+)?[{;]?/
+      ))
+    ) {
       const name = match[1];
       if (!RESERVED_JS_WORDS.has(name)) addSymbol(symbols, 'method', name, lineNumber, parent.id);
     }
@@ -176,7 +196,15 @@ function extractJavaScriptSymbols(lines) {
   return symbols;
 }
 
-const RESERVED_JS_WORDS = new Set(['if', 'for', 'while', 'switch', 'catch', 'function', 'constructor']);
+const RESERVED_JS_WORDS = new Set([
+  'if',
+  'for',
+  'while',
+  'switch',
+  'catch',
+  'function',
+  'constructor'
+]);
 
 function extractPythonSymbols(lines) {
   const symbols = [];
@@ -192,7 +220,13 @@ function extractPythonSymbols(lines) {
     let match = rawLine.match(/^\s*class\s+([A-Za-z_][\w]*)/);
     if (match) {
       const parent = stack.at(-1);
-      const symbol = addSymbol(symbols, 'class', match[1], lineNumber, parent?.kind === 'class' ? parent.id : '');
+      const symbol = addSymbol(
+        symbols,
+        'class',
+        match[1],
+        lineNumber,
+        parent?.kind === 'class' ? parent.id : ''
+      );
       if (symbol) stack.push({ ...symbol, indent, kind: 'class' });
       return;
     }
@@ -200,7 +234,13 @@ function extractPythonSymbols(lines) {
     match = rawLine.match(/^\s*(?:async\s+)?def\s+([A-Za-z_][\w]*)/);
     if (match) {
       const parent = stack.findLast(item => item.kind === 'class');
-      const symbol = addSymbol(symbols, parent ? 'method' : 'function', match[1], lineNumber, parent?.id || '');
+      const symbol = addSymbol(
+        symbols,
+        parent ? 'method' : 'function',
+        match[1],
+        lineNumber,
+        parent?.id || ''
+      );
       if (symbol) stack.push({ ...symbol, indent, kind: 'function' });
     }
   });
@@ -244,17 +284,39 @@ function extractBraceLanguageSymbols(lines, language) {
     while (stack.length && depth <= stack.at(-1).startDepth) stack.pop();
     const parent = stack.findLast(item => ['class', 'interface', 'type'].includes(item.kind));
 
-    let match = line.match(/\b(?:class|interface|enum|record|struct|object|protocol)\s+([A-Za-z_][\w$]*)/);
+    let match = line.match(
+      /\b(?:class|interface|enum|record|struct|object|protocol)\s+([A-Za-z_][\w$]*)/
+    );
     if (match) {
-      const kind = /interface|protocol/.test(line) ? 'interface' : /enum/.test(line) ? 'enum' : 'class';
+      const kind = /interface|protocol/.test(line)
+        ? 'interface'
+        : /enum/.test(line)
+          ? 'enum'
+          : 'class';
       const symbol = addSymbol(symbols, kind, match[1], lineNumber, parent?.id || '');
       if (symbol) stack.push({ ...symbol, startDepth: depth, kind });
-    } else if (parent && (match = line.match(/^(?:@\w+(?:\([^)]*\))?\s*)*(?:(?:public|private|protected|internal|static|final|open|override|abstract|virtual|async|suspend|mutating|func|fun|def|native|synchronized|sealed|readonly|partial)\s+)*(?:[\w<>[\],.?]+\s+)+([A-Za-z_][\w$]*)\s*\([^;{}]*\)\s*(?:throws\s+\w+\s*)?[{;]?/))) {
+    } else if (
+      parent &&
+      (match = line.match(
+        /^(?:@\w+(?:\([^)]*\))?\s*)*(?:(?:public|private|protected|internal|static|final|open|override|abstract|virtual|async|suspend|mutating|func|fun|def|native|synchronized|sealed|readonly|partial)\s+)*(?:[\w<>[\],.?]+\s+)+([A-Za-z_][\w$]*)\s*\([^;{}]*\)\s*(?:throws\s+\w+\s*)?[{;]?/
+      ))
+    ) {
       const name = match[1];
-      if (!RESERVED_METHOD_WORDS.has(name)) addSymbol(symbols, 'method', name, lineNumber, parent.id);
-    } else if (language === 'swift' && (match = line.match(/^(?:public|private|internal|open|static|mutating|override\s+)*func\s+([A-Za-z_]\w*)\s*\(/))) {
+      if (!RESERVED_METHOD_WORDS.has(name))
+        addSymbol(symbols, 'method', name, lineNumber, parent.id);
+    } else if (
+      language === 'swift' &&
+      (match = line.match(
+        /^(?:public|private|internal|open|static|mutating|override\s+)*func\s+([A-Za-z_]\w*)\s*\(/
+      ))
+    ) {
       addSymbol(symbols, parent ? 'method' : 'function', match[1], lineNumber, parent?.id || '');
-    } else if (language === 'kotlin' && (match = line.match(/^(?:public|private|internal|protected|override|suspend\s+)*fun\s+([A-Za-z_]\w*)\s*\(/))) {
+    } else if (
+      language === 'kotlin' &&
+      (match = line.match(
+        /^(?:public|private|internal|protected|override|suspend\s+)*fun\s+([A-Za-z_]\w*)\s*\(/
+      ))
+    ) {
       addSymbol(symbols, parent ? 'method' : 'function', match[1], lineNumber, parent?.id || '');
     }
 
@@ -281,7 +343,11 @@ function extractPhpSymbols(lines) {
     if (match) {
       const symbol = addSymbol(symbols, 'class', match[1], lineNumber);
       if (symbol) stack.push({ ...symbol, startDepth: depth, kind: 'class' });
-    } else if ((match = line.match(/^(?:public|private|protected|static|final|abstract|\s)*function\s+([A-Za-z_]\w*)/))) {
+    } else if (
+      (match = line.match(
+        /^(?:public|private|protected|static|final|abstract|\s)*function\s+([A-Za-z_]\w*)/
+      ))
+    ) {
       addSymbol(symbols, parent ? 'method' : 'function', match[1], lineNumber, parent?.id || '');
     }
 

@@ -28,7 +28,9 @@ export async function hasWebAutoviewPermission() {
 
 async function isWebAutoviewRegistered() {
   try {
-    const scripts = await chrome.scripting.getRegisteredContentScripts({ ids: [WEB_AUTOVIEW_SCRIPT_ID] });
+    const scripts = await chrome.scripting.getRegisteredContentScripts({
+      ids: [WEB_AUTOVIEW_SCRIPT_ID]
+    });
     return scripts.length > 0;
   } catch {
     return false;

@@ -26,28 +26,13 @@
     "service_worker": "background/service-worker.js",
     "type": "module"
   },
-  "permissions": [
-    "contextMenus",
-    "storage",
-    "tabs",
-    "activeTab",
-    "scripting"
-  ],
-  "host_permissions": [
-    "file:///*"
-  ],
-  "optional_host_permissions": [
-    "http://*/*",
-    "https://*/*"
-  ],
+  "permissions": ["contextMenus", "storage", "tabs", "activeTab", "scripting"],
+  "host_permissions": ["file:///*"],
+  "optional_host_permissions": ["http://*/*", "https://*/*"],
   "content_scripts": [
     {
-      "matches": [
-        "file:///*"
-      ],
-      "js": [
-        "content/markdown-autoview.js"
-      ],
+      "matches": ["file:///*"],
+      "js": ["content/markdown-autoview.js"],
       "run_at": "document_idle"
     }
   ],

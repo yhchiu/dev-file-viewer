@@ -29,7 +29,9 @@ export const mermaidPlugin = {
 
   async afterRender(root) {
     const nodes = [];
-    const codeBlocks = root.querySelectorAll('pre > code.language-mermaid, pre > code.lang-mermaid');
+    const codeBlocks = root.querySelectorAll(
+      'pre > code.language-mermaid, pre > code.lang-mermaid'
+    );
 
     for (const code of codeBlocks) {
       const diagramSource = code.textContent || '';

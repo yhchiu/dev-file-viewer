@@ -45,8 +45,50 @@ export class MarkdownEngine {
       // #status / #preview. Heading anchors are regenerated post-sanitise by
       // ensureHeadingAnchors(), so the TOC does not depend on these ids.
       SANITIZE_NAMED_PROPS: true,
-      ADD_TAGS: ['svg', 'g', 'path', 'rect', 'line', 'polyline', 'polygon', 'circle', 'ellipse', 'text', 'tspan', 'marker', 'defs', 'div', 'span'],
-      ADD_ATTR: ['class', 'id', 'style', 'viewBox', 'd', 'x', 'y', 'x1', 'y1', 'x2', 'y2', 'cx', 'cy', 'r', 'rx', 'ry', 'width', 'height', 'fill', 'stroke', 'stroke-width', 'marker-end', 'transform', 'text-anchor', 'dominant-baseline']
+      ADD_TAGS: [
+        'svg',
+        'g',
+        'path',
+        'rect',
+        'line',
+        'polyline',
+        'polygon',
+        'circle',
+        'ellipse',
+        'text',
+        'tspan',
+        'marker',
+        'defs',
+        'div',
+        'span'
+      ],
+      ADD_ATTR: [
+        'class',
+        'id',
+        'style',
+        'viewBox',
+        'd',
+        'x',
+        'y',
+        'x1',
+        'y1',
+        'x2',
+        'y2',
+        'cx',
+        'cy',
+        'r',
+        'rx',
+        'ry',
+        'width',
+        'height',
+        'fill',
+        'stroke',
+        'stroke-width',
+        'marker-end',
+        'transform',
+        'text-anchor',
+        'dominant-baseline'
+      ]
     });
 
     // eslint-disable-next-line no-unsanitized/property -- cleanHtml is DOMPurify-sanitized output

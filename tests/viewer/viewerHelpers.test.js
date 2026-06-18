@@ -51,7 +51,11 @@ describe('isSupportedDroppedName', () => {
 
 describe('normalizeLinkData', () => {
   it('wraps string links and passes objects through', () => {
-    expect(normalizeLinkData('http://x')).toEqual({ href: 'http://x', url: 'http://x', kind: 'absolute-document' });
+    expect(normalizeLinkData('http://x')).toEqual({
+      href: 'http://x',
+      url: 'http://x',
+      kind: 'absolute-document'
+    });
     expect(normalizeLinkData({ href: 'y' })).toEqual({ href: 'y' });
     expect(normalizeLinkData(null)).toEqual({});
   });

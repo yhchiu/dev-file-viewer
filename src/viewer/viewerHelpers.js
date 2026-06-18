@@ -13,14 +13,22 @@ export function immediateParentId(node) {
 
 export function symbolKindLabel(kind) {
   switch (kind) {
-    case 'class': return t('symbolClass');
-    case 'interface': return t('symbolInterface');
-    case 'method': return t('symbolMethod');
-    case 'function': return t('symbolFunction');
-    case 'type': return t('symbolType');
-    case 'enum': return t('symbolEnum');
-    case 'module': return t('symbolModule');
-    default: return t('symbolGeneric');
+    case 'class':
+      return t('symbolClass');
+    case 'interface':
+      return t('symbolInterface');
+    case 'method':
+      return t('symbolMethod');
+    case 'function':
+      return t('symbolFunction');
+    case 'type':
+      return t('symbolType');
+    case 'enum':
+      return t('symbolEnum');
+    case 'module':
+      return t('symbolModule');
+    default:
+      return t('symbolGeneric');
   }
 }
 
@@ -35,9 +43,12 @@ export function isSupportedDroppedName(name = '') {
 
 export function themeLabel(value) {
   switch (normalizeThemePreference(value)) {
-    case 'system': return t('themeSystem');
-    case 'forge': return t('themeForge');
-    case 'folio': return t('themeFolio');
+    case 'system':
+      return t('themeSystem');
+    case 'forge':
+      return t('themeForge');
+    case 'folio':
+      return t('themeFolio');
     case 'bloom':
     default:
       return t('themeBloom');
@@ -52,9 +63,7 @@ export function normalizeThemePreference(value, fallback = 'system') {
 
 export function resolveThemePreference(value, prefersDark = false) {
   const preference = normalizeThemePreference(value);
-  const appTheme = preference === 'system'
-    ? (prefersDark ? 'forge' : 'bloom')
-    : preference;
+  const appTheme = preference === 'system' ? (prefersDark ? 'forge' : 'bloom') : preference;
 
   return {
     appTheme,
@@ -65,9 +74,12 @@ export function resolveThemePreference(value, prefersDark = false) {
 
 export function contentWidthLabel(value) {
   switch (value) {
-    case 'narrow': return t('contentWidthNarrow');
-    case 'wide': return t('contentWidthWide');
-    case 'full': return t('contentWidthFull');
+    case 'narrow':
+      return t('contentWidthNarrow');
+    case 'wide':
+      return t('contentWidthWide');
+    case 'full':
+      return t('contentWidthFull');
     case 'comfortable':
     default:
       return t('contentWidthComfortable');

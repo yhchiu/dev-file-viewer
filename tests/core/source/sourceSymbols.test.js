@@ -54,17 +54,25 @@ describe('extractSourceSymbols', () => {
   });
 
   it('parses Ruby and PHP and a brace language (Java)', () => {
-    const ruby = kindsByName(extractSourceSymbols('class C\n  def m\n  end\nend\ndef top\nend', { language: 'ruby' }));
+    const ruby = kindsByName(
+      extractSourceSymbols('class C\n  def m\n  end\nend\ndef top\nend', { language: 'ruby' })
+    );
     expect(ruby.C).toBe('class');
     expect(ruby.m).toBe('method');
     expect(ruby.top).toBe('function');
 
-    const php = kindsByName(extractSourceSymbols('<?php\nclass C {\n  public function m() {}\n}\nfunction f() {}', { language: 'php' }));
+    const php = kindsByName(
+      extractSourceSymbols('<?php\nclass C {\n  public function m() {}\n}\nfunction f() {}', {
+        language: 'php'
+      })
+    );
     expect(php.C).toBe('class');
     expect(php.m).toBe('method');
     expect(php.f).toBe('function');
 
-    const java = kindsByName(extractSourceSymbols('class C {\n  public void m() {}\n}', { language: 'java' }));
+    const java = kindsByName(
+      extractSourceSymbols('class C {\n  public void m() {}\n}', { language: 'java' })
+    );
     expect(java.C).toBe('class');
     expect(java.m).toBe('method');
   });

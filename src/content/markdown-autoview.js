@@ -35,9 +35,10 @@ import { matchedAutoOpenKey } from '../core/format/fileTypes.js';
   }
 
   function getDocumentText() {
-    const pre = document.body?.children?.length === 1 && document.body.firstElementChild?.tagName === 'PRE'
-      ? document.body.firstElementChild
-      : null;
+    const pre =
+      document.body?.children?.length === 1 && document.body.firstElementChild?.tagName === 'PRE'
+        ? document.body.firstElementChild
+        : null;
     return pre?.innerText ?? document.body?.innerText ?? document.documentElement?.innerText ?? '';
   }
 
@@ -46,19 +47,25 @@ import { matchedAutoOpenKey } from '../core/format/fileTypes.js';
 
     sessionStorage.setItem(REDIRECT_FLAG, '1');
 
-    chrome.runtime.sendMessage({
-      type: 'OPEN_VIEWER_FOR_SNAPSHOT',
-      url: location.href,
-      title: document.title || '',
-      mimeType: document.contentType || '',
-      text: getDocumentText()
-    }, response => {
-      if (chrome.runtime.lastError || !response?.ok) {
-        sessionStorage.removeItem(REDIRECT_FLAG);
-        // Do not navigate to a chrome-extension:// URL from the page context.
-        // Chrome may block that navigation as ERR_BLOCKED_BY_CLIENT.
-        console.warn('Dev File Viewer could not open this document:', chrome.runtime.lastError || response);
+    chrome.runtime.sendMessage(
+      {
+        type: 'OPEN_VIEWER_FOR_SNAPSHOT',
+        url: location.href,
+        title: document.title || '',
+        mimeType: document.contentType || '',
+        text: getDocumentText()
+      },
+      response => {
+        if (chrome.runtime.lastError || !response?.ok) {
+          sessionStorage.removeItem(REDIRECT_FLAG);
+          // Do not navigate to a chrome-extension:// URL from the page context.
+          // Chrome may block that navigation as ERR_BLOCKED_BY_CLIENT.
+          console.warn(
+            'Dev File Viewer could not open this document:',
+            chrome.runtime.lastError || response
+          );
+        }
       }
-    });
+    );
   })();
 })();

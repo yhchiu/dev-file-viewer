@@ -1,7 +1,11 @@
 export const DEFAULT_TOC_MAX_LEVEL = 3;
 
 export function ensureHeadingAnchors(root) {
-  const used = new Set(Array.from(root.querySelectorAll('[id]')).map(element => element.id).filter(Boolean));
+  const used = new Set(
+    Array.from(root.querySelectorAll('[id]'))
+      .map(element => element.id)
+      .filter(Boolean)
+  );
 
   for (const heading of root.querySelectorAll('h1, h2, h3, h4, h5, h6')) {
     if (heading.id) continue;
@@ -67,7 +71,9 @@ export function buildHeadingTree(headings) {
 }
 
 export function normalizeHeadingText(value) {
-  return String(value || '').replace(/\s+/g, ' ').trim();
+  return String(value || '')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 export function getHeadingLevel(element) {

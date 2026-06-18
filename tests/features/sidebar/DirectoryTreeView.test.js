@@ -6,9 +6,12 @@ const tree = {
   name: 'proj',
   path: '',
   children: [
-    { type: 'directory', name: 'src', path: 'src', children: [
-      { type: 'file', name: 'a.js', path: 'src/a.js' }
-    ] },
+    {
+      type: 'directory',
+      name: 'src',
+      path: 'src',
+      children: [{ type: 'file', name: 'a.js', path: 'src/a.js' }]
+    },
     { type: 'file', name: 'README.md', path: 'README.md' }
   ]
 };
@@ -26,8 +29,12 @@ describe('DirectoryTreeView', () => {
     view.render(tree, () => {});
     expect(container.classList.contains('empty')).toBe(false);
     expect(container.querySelectorAll('.tree-folder')).toHaveLength(2); // proj + src
-    expect(container.querySelector('.tree-disclosure[data-path=""]').getAttribute('aria-expanded')).toBe('true');
-    expect(container.querySelector('.tree-disclosure[data-path="src"]').getAttribute('aria-expanded')).toBe('false');
+    expect(
+      container.querySelector('.tree-disclosure[data-path=""]').getAttribute('aria-expanded')
+    ).toBe('true');
+    expect(
+      container.querySelector('.tree-disclosure[data-path="src"]').getAttribute('aria-expanded')
+    ).toBe('false');
     expect(container.querySelector('.tree-children[data-path=""]').hidden).toBe(false);
     expect(container.querySelector('.tree-children[data-path="src"]').hidden).toBe(true);
     expect(container.querySelectorAll('.tree-arrow-icon')).toHaveLength(2);
@@ -85,7 +92,9 @@ describe('DirectoryTreeView', () => {
     view.markActivePath('src/a.js');
 
     expect(srcChildren.hidden).toBe(false);
-    expect(container.querySelector('.tree-disclosure[data-path="src"]').getAttribute('aria-expanded')).toBe('true');
+    expect(
+      container.querySelector('.tree-disclosure[data-path="src"]').getAttribute('aria-expanded')
+    ).toBe('true');
     expect(container.querySelector('.tree-file.active').dataset.path).toBe('src/a.js');
   });
 });

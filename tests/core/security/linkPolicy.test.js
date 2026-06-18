@@ -21,14 +21,18 @@ describe('rewriteLinks — dangerous schemes', () => {
   });
 
   it('removes data: and vbscript: hrefs', () => {
-    const root = build('<a id="d" href="data:text/html,<script>1</script>">d</a><a id="v" href="vbscript:msgbox">v</a>');
+    const root = build(
+      '<a id="d" href="data:text/html,<script>1</script>">d</a><a id="v" href="vbscript:msgbox">v</a>'
+    );
     rewriteLinks(root);
     expect(root.querySelector('#d').hasAttribute('href')).toBe(false);
     expect(root.querySelector('#v').hasAttribute('href')).toBe(false);
   });
 
   it('removes javascript:/data: image sources', () => {
-    const root = build('<img id="a" src="javascript:alert(1)"><img id="b" src="data:image/png;base64,AAAA">');
+    const root = build(
+      '<img id="a" src="javascript:alert(1)"><img id="b" src="data:image/png;base64,AAAA">'
+    );
     rewriteLinks(root);
     expect(root.querySelector('#a').hasAttribute('src')).toBe(false);
     expect(root.querySelector('#b').hasAttribute('src')).toBe(false);

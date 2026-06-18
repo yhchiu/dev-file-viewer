@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { SourceCodeRenderer, MAX_RENDERED_LINES } from '../../../src/core/source/SourceCodeRenderer.js';
+import {
+  SourceCodeRenderer,
+  MAX_RENDERED_LINES
+} from '../../../src/core/source/SourceCodeRenderer.js';
 
 const ZWSP = String.fromCharCode(0x200b);
 
@@ -10,7 +13,9 @@ beforeEach(() => {
 
 describe('SourceCodeRenderer.render', () => {
   it('renders one .source-line per line with numbers and ids', () => {
-    const result = new SourceCodeRenderer().render('const x = 1;\nconst y = 2;', target, { language: 'javascript' });
+    const result = new SourceCodeRenderer().render('const x = 1;\nconst y = 2;', target, {
+      language: 'javascript'
+    });
     const lines = target.querySelectorAll('.source-line');
     expect(lines).toHaveLength(2);
     expect(result.lineCount).toBe(2);
@@ -41,7 +46,10 @@ describe('SourceCodeRenderer.render', () => {
     const total = 15;
     const source = Array.from({ length: total }, (_, i) => `line ${i}`).join('\n');
 
-    const result = new SourceCodeRenderer().render(source, target, { language: 'plaintext', maxLines: 10 });
+    const result = new SourceCodeRenderer().render(source, target, {
+      language: 'plaintext',
+      maxLines: 10
+    });
 
     expect(target.querySelectorAll('.source-line')).toHaveLength(10);
     expect(result.lineCount).toBe(total);

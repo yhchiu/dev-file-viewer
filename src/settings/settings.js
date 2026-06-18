@@ -1,4 +1,8 @@
-import { copyExtensionSettingsUrl, isFileUrlAccessAllowed, openExtensionSettings } from '../core/browser/fileUrlAccess.js';
+import {
+  copyExtensionSettingsUrl,
+  isFileUrlAccessAllowed,
+  openExtensionSettings
+} from '../core/browser/fileUrlAccess.js';
 import { localizeDocument, t } from '../core/i18n/i18n.js';
 import { AUTO_OPEN_CATEGORIES } from '../core/format/fileTypes.js';
 import { syncChromeTheme } from '../core/ui/chromeTheme.js';
@@ -63,7 +67,9 @@ async function persistConfig() {
   if (!flag) return;
   flag.hidden = false;
   clearTimeout(savedFlagTimer);
-  savedFlagTimer = setTimeout(() => { flag.hidden = true; }, 1600);
+  savedFlagTimer = setTimeout(() => {
+    flag.hidden = true;
+  }, 1600);
 }
 
 function buildTypeList() {
@@ -133,7 +139,9 @@ function syncUI() {
       if (on) checkedCount += 1;
     }
 
-    const groupCheckbox = document.querySelector(`input[data-group-id="${CSS.escape(category.id)}"]`);
+    const groupCheckbox = document.querySelector(
+      `input[data-group-id="${CSS.escape(category.id)}"]`
+    );
     if (groupCheckbox) {
       groupCheckbox.checked = checkedCount === category.items.length;
       groupCheckbox.indeterminate = checkedCount > 0 && checkedCount < category.items.length;

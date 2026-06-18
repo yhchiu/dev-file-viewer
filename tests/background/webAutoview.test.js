@@ -16,8 +16,11 @@ describe('webAutoview', () => {
     };
     chrome.scripting = {
       getRegisteredContentScripts: vi.fn(async ({ ids } = {}) =>
-        registered.filter(script => !ids || ids.includes(script.id))),
-      registerContentScripts: vi.fn(async scripts => { registered.push(...scripts); }),
+        registered.filter(script => !ids || ids.includes(script.id))
+      ),
+      registerContentScripts: vi.fn(async scripts => {
+        registered.push(...scripts);
+      }),
       unregisterContentScripts: vi.fn(async ({ ids } = {}) => {
         registered = registered.filter(script => !ids || !ids.includes(script.id));
       })

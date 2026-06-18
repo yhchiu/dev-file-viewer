@@ -55,16 +55,20 @@ export class FilePickerSourceProvider {
       const input = document.createElement('input');
       input.type = 'file';
       input.accept = `${SUPPORTED_EXTENSIONS.join(',')},text/markdown,text/plain,application/json,application/javascript,text/css,text/html,application/xml`;
-      input.addEventListener('change', async () => {
-        try {
-          const file = input.files?.[0];
-          if (!file) return reject(new Error(t('errorNoFileSelected')));
-          options.onLoadStart?.(file.name);
-          resolve(await this.loadFromFile(file));
-        } catch (error) {
-          reject(error);
-        }
-      }, { once: true });
+      input.addEventListener(
+        'change',
+        async () => {
+          try {
+            const file = input.files?.[0];
+            if (!file) return reject(new Error(t('errorNoFileSelected')));
+            options.onLoadStart?.(file.name);
+            resolve(await this.loadFromFile(file));
+          } catch (error) {
+            reject(error);
+          }
+        },
+        { once: true }
+      );
       input.click();
     });
   }

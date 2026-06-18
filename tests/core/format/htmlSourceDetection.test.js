@@ -21,7 +21,9 @@ describe('looksLikeHtmlSource', () => {
     expect(looksLikeHtmlSource('blah blah <body> blah', { mimeType: 'text/html' })).toBe(true);
     expect(looksLikeHtmlSource('prefix </script> suffix', { mimeType: 'text/plain' })).toBe(true);
     // plain text with no strong HTML signal stays false
-    expect(looksLikeHtmlSource('just a sentence with < and >', { mimeType: 'text/plain' })).toBe(false);
+    expect(looksLikeHtmlSource('just a sentence with < and >', { mimeType: 'text/plain' })).toBe(
+      false
+    );
   });
 
   it('strips a BOM before testing', () => {

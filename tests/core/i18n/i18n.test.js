@@ -30,7 +30,9 @@ describe('localizeDocument', () => {
 
     expect(root.querySelector('span').textContent).toBe('Open File');
     expect(root.querySelector('button').getAttribute('title')).toBe('Reload folder');
-    expect(root.querySelector('input').getAttribute('placeholder')).toBe('https://example.com/README.md');
+    expect(root.querySelector('input').getAttribute('placeholder')).toBe(
+      'https://example.com/README.md'
+    );
     expect(root.querySelector('div').getAttribute('aria-label')).toBe('Close outline');
     expect(root.querySelector('img').getAttribute('alt')).toContain('Dev File Viewer');
   });

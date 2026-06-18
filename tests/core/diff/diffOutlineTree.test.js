@@ -3,7 +3,9 @@ import { buildDiffOutlineTree } from '../../../src/core/diff/diffOutlineTree.js'
 
 describe('buildDiffOutlineTree', () => {
   it('places a root-level file directly under the tree', () => {
-    const tree = buildDiffOutlineTree([{ id: 'f1', path: 'README.md', stats: { added: 2, removed: 1 } }]);
+    const tree = buildDiffOutlineTree([
+      { id: 'f1', path: 'README.md', stats: { added: 2, removed: 1 } }
+    ]);
     expect(tree.fileNodes).toHaveLength(1);
     expect(tree.nodes).toHaveLength(1);
     const file = tree.nodes[0];
@@ -43,7 +45,10 @@ describe('buildDiffOutlineTree', () => {
   });
 
   it('defaults missing stats and produces unique ids', () => {
-    const tree = buildDiffOutlineTree([{ id: 'x', path: 'a/x.js' }, { id: 'y', path: 'b/y.js' }]);
+    const tree = buildDiffOutlineTree([
+      { id: 'x', path: 'a/x.js' },
+      { id: 'y', path: 'b/y.js' }
+    ]);
     expect(tree.fileNodes[0].stats).toEqual({ added: 0, removed: 0 });
     const ids = tree.nodes.map(n => n.id);
     expect(new Set(ids).size).toBe(ids.length);

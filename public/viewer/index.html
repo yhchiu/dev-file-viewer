@@ -9,107 +9,367 @@
   </head>
   <body>
     <div id="app" class="app-shell">
-      <button id="btn-floating-outline" class="floating-outline" type="button" data-i18n="outline" data-i18n-aria-label="a11yOpenOutline" data-i18n-title="floatingOutlineHint" aria-label="Open document outline" aria-expanded="false" title="Click to open outline. Drag to move." hidden>Outline</button>
-      <aside id="sidebar" class="sidebar" data-i18n-aria-label="a11yDirectorySidebar" aria-label="Directory sidebar">
-        <nav class="activity-rail" data-i18n-aria-label="a11yPrimaryNavigation" aria-label="Primary navigation">
-          <button id="btn-sidebar-toggle" class="activity-rail-btn sidebar-toggle" type="button" data-i18n-aria-label="a11yHideSidebar" data-i18n-title="a11yHideSidebar" aria-label="Hide sidebar" title="Hide sidebar" aria-expanded="true">
-            <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true" focusable="false">
+      <button
+        id="btn-floating-outline"
+        class="floating-outline"
+        type="button"
+        data-i18n="outline"
+        data-i18n-aria-label="a11yOpenOutline"
+        data-i18n-title="floatingOutlineHint"
+        aria-label="Open document outline"
+        aria-expanded="false"
+        title="Click to open outline. Drag to move."
+        hidden
+      >
+        Outline
+      </button>
+      <aside
+        id="sidebar"
+        class="sidebar"
+        data-i18n-aria-label="a11yDirectorySidebar"
+        aria-label="Directory sidebar"
+      >
+        <nav
+          class="activity-rail"
+          data-i18n-aria-label="a11yPrimaryNavigation"
+          aria-label="Primary navigation"
+        >
+          <button
+            id="btn-sidebar-toggle"
+            class="activity-rail-btn sidebar-toggle"
+            type="button"
+            data-i18n-aria-label="a11yHideSidebar"
+            data-i18n-title="a11yHideSidebar"
+            aria-label="Hide sidebar"
+            title="Hide sidebar"
+            aria-expanded="true"
+          >
+            <svg
+              class="button-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.7"
+              aria-hidden="true"
+              focusable="false"
+            >
               <rect x="4" y="5" width="16" height="14" rx="2" stroke-linejoin="round" />
               <path d="M9 5v14M16 9l-3 3 3 3" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
           </button>
           <div class="activity-rail-mark-slot">
-            <img class="activity-rail-mark" src="../assets/icons/icon48.png" srcset="../assets/icons/icon48.png 1x, ../assets/icons/icon128.png 2x" width="34" height="34" alt="" aria-hidden="true" />
-            <button id="btn-sidebar-restore" class="activity-rail-btn sidebar-restore" type="button" data-i18n-aria-label="a11yShowSidebar" data-i18n-title="a11yShowSidebar" aria-label="Show sidebar" title="Show sidebar" aria-expanded="false" tabindex="-1">
-              <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true" focusable="false">
+            <img
+              class="activity-rail-mark"
+              src="../assets/icons/icon48.png"
+              srcset="../assets/icons/icon48.png 1x, ../assets/icons/icon128.png 2x"
+              width="34"
+              height="34"
+              alt=""
+              aria-hidden="true"
+            />
+            <button
+              id="btn-sidebar-restore"
+              class="activity-rail-btn sidebar-restore"
+              type="button"
+              data-i18n-aria-label="a11yShowSidebar"
+              data-i18n-title="a11yShowSidebar"
+              aria-label="Show sidebar"
+              title="Show sidebar"
+              aria-expanded="false"
+              tabindex="-1"
+            >
+              <svg
+                class="button-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                aria-hidden="true"
+                focusable="false"
+              >
                 <rect x="4" y="5" width="16" height="14" rx="2" stroke-linejoin="round" />
                 <path d="M9 5v14M13 9l3 3-3 3" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
             </button>
           </div>
-          <button class="activity-rail-btn is-active" type="button" data-rail-target="open-file" data-i18n-aria-label="viewerOpenFile" data-i18n-title="viewerOpenFile" aria-label="Open File" title="Open File">
-            <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true" focusable="false">
+          <button
+            class="activity-rail-btn is-active"
+            type="button"
+            data-rail-target="open-file"
+            data-i18n-aria-label="viewerOpenFile"
+            data-i18n-title="viewerOpenFile"
+            aria-label="Open File"
+            title="Open File"
+          >
+            <svg
+              class="button-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.7"
+              aria-hidden="true"
+              focusable="false"
+            >
               <path d="M6 3.75h7l4.5 4.5V20.25H6z" stroke-linejoin="round" />
-              <path d="M13 3.75v4.5h4.5M12 12v5M9.5 14.5h5" stroke-linecap="round" stroke-linejoin="round" />
+              <path
+                d="M13 3.75v4.5h4.5M12 12v5M9.5 14.5h5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </button>
-          <button class="activity-rail-btn" type="button" data-rail-target="open-folder" data-i18n-aria-label="viewerOpenFolder" data-i18n-title="viewerOpenFolder" aria-label="Open Folder" title="Open Folder">
-            <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true" focusable="false">
-              <path d="M3 7.5a2 2 0 0 1 2-2h4.4l2 2H19a2 2 0 0 1 2 2v7.8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke-linecap="round" stroke-linejoin="round" />
+          <button
+            class="activity-rail-btn"
+            type="button"
+            data-rail-target="open-folder"
+            data-i18n-aria-label="viewerOpenFolder"
+            data-i18n-title="viewerOpenFolder"
+            aria-label="Open Folder"
+            title="Open Folder"
+          >
+            <svg
+              class="button-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.7"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                d="M3 7.5a2 2 0 0 1 2-2h4.4l2 2H19a2 2 0 0 1 2 2v7.8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
               <path d="M12 11.25v5M9.5 13.75h5" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
           </button>
-          <button class="activity-rail-btn" type="button" data-rail-target="open-url" data-i18n-aria-label="viewerOpenUrl" data-i18n-title="viewerOpenUrl" aria-label="Open URL" title="Open URL">
-            <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true" focusable="false">
-              <path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1" stroke-linecap="round" stroke-linejoin="round" />
+          <button
+            class="activity-rail-btn"
+            type="button"
+            data-rail-target="open-url"
+            data-i18n-aria-label="viewerOpenUrl"
+            data-i18n-title="viewerOpenUrl"
+            aria-label="Open URL"
+            title="Open URL"
+          >
+            <svg
+              class="button-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.7"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </button>
-          <button class="activity-rail-btn" type="button" data-rail-target="files" data-i18n-aria-label="tabFiles" data-i18n-title="tabFiles" aria-label="Files" title="Files">
-            <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true" focusable="false">
-              <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke-linecap="round" stroke-linejoin="round" />
+          <button
+            class="activity-rail-btn"
+            type="button"
+            data-rail-target="files"
+            data-i18n-aria-label="tabFiles"
+            data-i18n-title="tabFiles"
+            aria-label="Files"
+            title="Files"
+          >
+            <svg
+              class="button-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.7"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </button>
-          <button class="activity-rail-btn" type="button" data-rail-target="outline" data-i18n-aria-label="outline" data-i18n-title="outline" aria-label="Outline" title="Outline">
-            <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true" focusable="false">
-              <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke-linecap="round" stroke-linejoin="round" />
+          <button
+            class="activity-rail-btn"
+            type="button"
+            data-rail-target="outline"
+            data-i18n-aria-label="outline"
+            data-i18n-title="outline"
+            aria-label="Outline"
+            title="Outline"
+          >
+            <svg
+              class="button-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.7"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </button>
           <div class="activity-rail-spacer"></div>
-          <button class="activity-rail-btn" type="button" data-rail-target="settings" data-i18n-aria-label="sidebarSettingsPanel" data-i18n-title="sidebarSettingsPanel" aria-label="Settings" title="Settings">
-            <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true" focusable="false">
+          <button
+            class="activity-rail-btn"
+            type="button"
+            data-rail-target="settings"
+            data-i18n-aria-label="sidebarSettingsPanel"
+            data-i18n-title="sidebarSettingsPanel"
+            aria-label="Settings"
+            title="Settings"
+          >
+            <svg
+              class="button-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.7"
+              aria-hidden="true"
+              focusable="false"
+            >
               <circle cx="12" cy="12" r="3" />
-              <path d="M19.4 15a1.7 1.7 0 0 0 .35 1.86l.04.04a2 2 0 1 1-2.83 2.83l-.04-.04a1.7 1.7 0 0 0-1.86-.35 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.07A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.86.35l-.04.04a2 2 0 1 1-2.83-2.83l.04-.04A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.07A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.35-1.86l-.04-.04a2 2 0 1 1 2.83-2.83l.04.04A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 1 1 4 0v.07A1.7 1.7 0 0 0 15 4.6a1.7 1.7 0 0 0 1.86-.35l.04-.04a2 2 0 1 1 2.83 2.83l-.04.04A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.56 1.03H21a2 2 0 1 1 0 4h-.07A1.7 1.7 0 0 0 19.4 15z" stroke-linecap="round" stroke-linejoin="round" />
+              <path
+                d="M19.4 15a1.7 1.7 0 0 0 .35 1.86l.04.04a2 2 0 1 1-2.83 2.83l-.04-.04a1.7 1.7 0 0 0-1.86-.35 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.07A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.86.35l-.04.04a2 2 0 1 1-2.83-2.83l.04-.04A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.07A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.35-1.86l-.04-.04a2 2 0 1 1 2.83-2.83l.04.04A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 1 1 4 0v.07A1.7 1.7 0 0 0 15 4.6a1.7 1.7 0 0 0 1.86-.35l.04-.04a2 2 0 1 1 2.83 2.83l-.04.04A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.56 1.03H21a2 2 0 1 1 0 4h-.07A1.7 1.7 0 0 0 19.4 15z"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </button>
         </nav>
 
         <div class="sidebar-body">
           <div class="brand">
-            <img class="brand-mark" src="../assets/icons/icon48.png" srcset="../assets/icons/icon48.png 1x, ../assets/icons/icon128.png 2x" width="42" height="42" alt="" aria-hidden="true" />
+            <img
+              class="brand-mark"
+              src="../assets/icons/icon48.png"
+              srcset="../assets/icons/icon48.png 1x, ../assets/icons/icon128.png 2x"
+              width="42"
+              height="42"
+              alt=""
+              aria-hidden="true"
+            />
             <div class="brand-copy">
               <div class="brand-title" data-i18n="appName">Dev File Viewer</div>
-              <div class="brand-subtitle" data-i18n="appTagline">Markdown, Diff &amp; Source Viewer</div>
+              <div class="brand-subtitle" data-i18n="appTagline">
+                Markdown, Diff &amp; Source Viewer
+              </div>
             </div>
           </div>
 
-          <section id="sidebar-panel-open" class="sidebar-content-panel" data-sidebar-panel="open" data-i18n-aria-label="sidebarOpenPanel" aria-label="Open">
+          <section
+            id="sidebar-panel-open"
+            class="sidebar-content-panel"
+            data-sidebar-panel="open"
+            data-i18n-aria-label="sidebarOpenPanel"
+            aria-label="Open"
+          >
             <div class="sidebar-section-title" data-i18n="sidebarOpenPanel">Open</div>
 
             <div class="actions">
               <button id="btn-open-file" type="button" data-i18n="viewerOpenFile">Open File</button>
-              <button id="btn-open-folder" type="button" data-i18n="viewerOpenFolder">Open Folder</button>
+              <button id="btn-open-folder" type="button" data-i18n="viewerOpenFolder">
+                Open Folder
+              </button>
               <button id="btn-open-url" type="button" data-i18n="viewerOpenUrl">Open URL</button>
             </div>
 
             <div class="url-box" id="url-box" hidden>
-              <input id="url-input" type="url" data-i18n-placeholder="urlPlaceholder" placeholder="https://example.com/README.md" />
+              <input
+                id="url-input"
+                type="url"
+                data-i18n-placeholder="urlPlaceholder"
+                placeholder="https://example.com/README.md"
+              />
               <button id="btn-load-url" type="button" data-i18n="viewerLoad">Load</button>
             </div>
 
-            <section id="file-url-card" class="file-url-card" data-i18n-aria-label="a11yFileUrlAccessStatus" aria-label="file URL access status">
-              <div class="file-url-card-title" data-i18n="fileUrlAccessTitle">file:// URL access</div>
-              <p id="file-url-status" data-i18n="fileUrlCheckingStatus">Checking permission status...</p>
-              <div class="file-url-actions">
-                <button id="btn-open-extension-settings" type="button" data-i18n="commonOpenSettings">Open Settings</button>
-                <button id="btn-copy-settings-link" type="button" data-i18n="commonCopyLink">Copy Link</button>
+            <section
+              id="file-url-card"
+              class="file-url-card"
+              data-i18n-aria-label="a11yFileUrlAccessStatus"
+              aria-label="file URL access status"
+            >
+              <div class="file-url-card-title" data-i18n="fileUrlAccessTitle">
+                file:// URL access
               </div>
-              <button id="btn-use-open-file" class="secondary-action" type="button" data-i18n="viewerUseOpenFileInstead">Use Open File instead</button>
+              <p id="file-url-status" data-i18n="fileUrlCheckingStatus">
+                Checking permission status...
+              </p>
+              <div class="file-url-actions">
+                <button
+                  id="btn-open-extension-settings"
+                  type="button"
+                  data-i18n="commonOpenSettings"
+                >
+                  Open Settings
+                </button>
+                <button id="btn-copy-settings-link" type="button" data-i18n="commonCopyLink">
+                  Copy Link
+                </button>
+              </div>
+              <button
+                id="btn-use-open-file"
+                class="secondary-action"
+                type="button"
+                data-i18n="viewerUseOpenFileInstead"
+              >
+                Use Open File instead
+              </button>
             </section>
           </section>
 
-          <section id="sidebar-panel-settings" class="sidebar-content-panel" data-sidebar-panel="settings" data-i18n-aria-label="sidebarSettingsPanel" aria-label="Settings" hidden>
+          <section
+            id="sidebar-panel-settings"
+            class="sidebar-content-panel"
+            data-sidebar-panel="settings"
+            data-i18n-aria-label="sidebarSettingsPanel"
+            aria-label="Settings"
+            hidden
+          >
             <div class="sidebar-section-title" data-i18n="sidebarSettingsPanel">Settings</div>
 
             <section id="scroll-memory-card" class="scroll-memory-card" hidden>
-              <label class="checkbox-row" data-i18n-title="scrollMemoryTooltip" title="Uses local session storage only. Positions are deleted when the browser session ends and are never sent anywhere.">
-                <input id="remember-scroll" type="checkbox" />                                                                 <span data-i18n="rememberScrollLabel">Remember scroll position</span>
+              <label
+                class="checkbox-row"
+                data-i18n-title="scrollMemoryTooltip"
+                title="Uses local session storage only. Positions are deleted when the browser session ends and are never sent anywhere."
+              >
+                <input id="remember-scroll" type="checkbox" />
+                <span data-i18n="rememberScrollLabel">Remember scroll position</span>
               </label>
-              <span class="info-dot" tabindex="0" data-i18n-aria-label="scrollMemoryTooltip" data-i18n-title="scrollMemoryTooltip" aria-label="Uses local session storage only. Positions are deleted when the browser session ends and are never sent anywhere." title="Uses local session storage only. Positions are deleted when the browser session ends and are never sent anywhere.">?</span>
+              <span
+                class="info-dot"
+                tabindex="0"
+                data-i18n-aria-label="scrollMemoryTooltip"
+                data-i18n-title="scrollMemoryTooltip"
+                aria-label="Uses local session storage only. Positions are deleted when the browser session ends and are never sent anywhere."
+                title="Uses local session storage only. Positions are deleted when the browser session ends and are never sent anywhere."
+                >?</span
+              >
             </section>
 
-            <section class="content-width-card" data-i18n-aria-label="a11yContentWidthSetting" aria-label="Content width setting">
+            <section
+              class="content-width-card"
+              data-i18n-aria-label="a11yContentWidthSetting"
+              aria-label="Content width setting"
+            >
               <label for="content-width-select" data-i18n="contentWidthLabel">Content Width</label>
-              <select id="content-width-select" data-i18n-aria-label="a11yContentWidth" aria-label="Content width">
+              <select
+                id="content-width-select"
+                data-i18n-aria-label="a11yContentWidth"
+                aria-label="Content width"
+              >
                 <option value="narrow" data-i18n="contentWidthNarrow">Narrow</option>
                 <option value="comfortable" data-i18n="contentWidthComfortable">Comfortable</option>
                 <option value="wide" data-i18n="contentWidthWide">Wide</option>
@@ -117,7 +377,11 @@
               </select>
             </section>
 
-            <section class="theme-card" data-i18n-aria-label="a11yThemeSetting" aria-label="Theme setting">
+            <section
+              class="theme-card"
+              data-i18n-aria-label="a11yThemeSetting"
+              aria-label="Theme setting"
+            >
               <label for="theme-select" data-i18n="themeLabel">Theme</label>
               <select id="theme-select" data-i18n-aria-label="themeLabel" aria-label="Theme">
                 <option value="system" selected data-i18n="themeSystem">System (Light/Dark)</option>
@@ -128,59 +392,208 @@
               <p data-i18n="themeStoredNote">Theme preference is stored locally in this browser.</p>
             </section>
 
-            <button id="btn-manage-auto-open" class="settings-link-row" type="button" data-i18n="settingsAutoOpenLink">Manage auto-open file types</button>
+            <button
+              id="btn-manage-auto-open"
+              class="settings-link-row"
+              type="button"
+              data-i18n="settingsAutoOpenLink"
+            >
+              Manage auto-open file types
+            </button>
           </section>
 
-          <section id="sidebar-panel-navigator" class="sidebar-content-panel" data-sidebar-panel="navigator" data-i18n-aria-label="sidebarNavigatorPanel" aria-label="Navigator" hidden>
+          <section
+            id="sidebar-panel-navigator"
+            class="sidebar-content-panel"
+            data-sidebar-panel="navigator"
+            data-i18n-aria-label="sidebarNavigatorPanel"
+            aria-label="Navigator"
+            hidden
+          >
             <div class="sidebar-tabs-row">
-              <div class="sidebar-tabs" role="tablist" data-i18n-aria-label="a11ySidebarNavigation" aria-label="Sidebar navigation">
-                <button id="tab-files" class="sidebar-tab active" type="button" role="tab" aria-selected="true" aria-controls="files-panel" data-sidebar-tab="files" data-i18n="tabFiles">Files</button>
-                <button id="tab-outline" class="sidebar-tab" type="button" role="tab" aria-selected="false" aria-controls="outline-panel" data-sidebar-tab="outline" tabindex="-1" data-i18n="outline">Outline</button>
+              <div
+                class="sidebar-tabs"
+                role="tablist"
+                data-i18n-aria-label="a11ySidebarNavigation"
+                aria-label="Sidebar navigation"
+              >
+                <button
+                  id="tab-files"
+                  class="sidebar-tab active"
+                  type="button"
+                  role="tab"
+                  aria-selected="true"
+                  aria-controls="files-panel"
+                  data-sidebar-tab="files"
+                  data-i18n="tabFiles"
+                >
+                  Files
+                </button>
+                <button
+                  id="tab-outline"
+                  class="sidebar-tab"
+                  type="button"
+                  role="tab"
+                  aria-selected="false"
+                  aria-controls="outline-panel"
+                  data-sidebar-tab="outline"
+                  tabindex="-1"
+                  data-i18n="outline"
+                >
+                  Outline
+                </button>
               </div>
-              <button id="btn-popout-outline" class="sidebar-popout-outline icon-button" type="button" data-i18n-aria-label="a11yPopOutOutline" data-i18n-title="popoutNoHeadings" aria-label="Pop out outline" aria-pressed="false" title="No headings in this document" disabled>
+              <button
+                id="btn-popout-outline"
+                class="sidebar-popout-outline icon-button"
+                type="button"
+                data-i18n-aria-label="a11yPopOutOutline"
+                data-i18n-title="popoutNoHeadings"
+                aria-label="Pop out outline"
+                aria-pressed="false"
+                title="No headings in this document"
+                disabled
+              >
                 <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                  <path d="M11 5.5H5.5V18.5H18.5V13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                  <path d="M14 4.5H19.5V10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                  <path d="M19.5 4.5 11 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                  <path
+                    d="M11 5.5H5.5V18.5H18.5V13"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M14 4.5H19.5V10"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M19.5 4.5 11 13"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
                 </svg>
               </button>
             </div>
 
-            <section id="files-panel" class="sidebar-panel" role="tabpanel" aria-labelledby="tab-files">
+            <section
+              id="files-panel"
+              class="sidebar-panel"
+              role="tabpanel"
+              aria-labelledby="tab-files"
+            >
               <div class="sidebar-section-title files-section-title">
                 <span class="files-section-label" data-i18n="filesDirectory">Directory</span>
                 <span id="directory-root-name" class="directory-root-name" hidden></span>
-                <button id="btn-reload-folder" class="sidebar-title-action" type="button" data-i18n-title="a11yReloadFolder" data-i18n-aria-label="a11yReloadFolder" title="Reload folder" aria-label="Reload folder" hidden disabled>
+                <button
+                  id="btn-reload-folder"
+                  class="sidebar-title-action"
+                  type="button"
+                  data-i18n-title="a11yReloadFolder"
+                  data-i18n-aria-label="a11yReloadFolder"
+                  title="Reload folder"
+                  aria-label="Reload folder"
+                  hidden
+                  disabled
+                >
                   <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    <path d="M8 16H3v5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    <path d="M21 3v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    <path
+                      d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                    <path
+                      d="M8 16H3v5"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                    <path
+                      d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                    <path
+                      d="M21 3v5h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
                   </svg>
                 </button>
               </div>
-              <div id="directory-tree" class="directory-tree empty" data-i18n="treeEmptySelectFolder">Select a folder to show supported files.</div>
+              <div
+                id="directory-tree"
+                class="directory-tree empty"
+                data-i18n="treeEmptySelectFolder"
+              >
+                Select a folder to show supported files.
+              </div>
             </section>
 
-            <section id="outline-panel" class="sidebar-panel" role="tabpanel" aria-labelledby="tab-outline" hidden>
-              <div class="sidebar-section-title toc-title"><span id="toc-title-label" data-i18n="tocOnThisPage">On this page</span> <span id="toc-file-name" class="toc-file-name"></span></div>
+            <section
+              id="outline-panel"
+              class="sidebar-panel"
+              role="tabpanel"
+              aria-labelledby="tab-outline"
+              hidden
+            >
+              <div class="sidebar-section-title toc-title">
+                <span id="toc-title-label" data-i18n="tocOnThisPage">On this page</span>
+                <span id="toc-file-name" class="toc-file-name"></span>
+              </div>
               <div id="toc-depth-row" class="toc-depth-row" hidden>
                 <label for="toc-depth-select" data-i18n="outlineDepthLabel">Outline depth</label>
-                <select id="toc-depth-select" data-i18n-aria-label="outlineDepthLabel" aria-label="Outline depth">
-
-              <option value="2" data-i18n="depthH1H2">H1-H2</option>
-              <option value="3" selected data-i18n="depthH1H3">H1-H3</option>
-              <option value="4" data-i18n="depthH1H4">H1-H4</option>
-              <option value="5" data-i18n="depthH1H5">H1-H5</option>
-              <option value="6" data-i18n="depthH1H6">H1-H6</option>
-
+                <select
+                  id="toc-depth-select"
+                  data-i18n-aria-label="outlineDepthLabel"
+                  aria-label="Outline depth"
+                >
+                  <option value="2" data-i18n="depthH1H2">H1-H2</option>
+                  <option value="3" selected data-i18n="depthH1H3">H1-H3</option>
+                  <option value="4" data-i18n="depthH1H4">H1-H4</option>
+                  <option value="5" data-i18n="depthH1H5">H1-H5</option>
+                  <option value="6" data-i18n="depthH1H6">H1-H6</option>
                 </select>
               </div>
               <div id="toc-filter-row" class="toc-filter-row" hidden>
-                <input id="toc-filter" type="search" data-i18n-placeholder="filterHeadingsPlaceholder" data-i18n-aria-label="a11yFilterHeadings" placeholder="Filter headings..." aria-label="Filter headings" autocomplete="off" />
+                <input
+                  id="toc-filter"
+                  type="search"
+                  data-i18n-placeholder="filterHeadingsPlaceholder"
+                  data-i18n-aria-label="a11yFilterHeadings"
+                  placeholder="Filter headings..."
+                  aria-label="Filter headings"
+                  autocomplete="off"
+                />
               </div>
-              <nav id="toc-tree" class="toc-tree" data-i18n-aria-label="a11yTableOfContents" aria-label="Table of contents">
-                <div class="toc-empty" data-i18n="tocEmptyMarkdown">Open a Markdown document to show its outline. Source files do not have an outline yet.</div>
+              <nav
+                id="toc-tree"
+                class="toc-tree"
+                data-i18n-aria-label="a11yTableOfContents"
+                aria-label="Table of contents"
+              >
+                <div class="toc-empty" data-i18n="tocEmptyMarkdown">
+                  Open a Markdown document to show its outline. Source files do not have an outline
+                  yet.
+                </div>
               </nav>
             </section>
           </section>
@@ -202,114 +615,330 @@
         title="Drag to resize sidebar. Double-click to reset."
       ></div>
 
-      <section id="toc-popover" class="toc-popover" data-i18n-aria-label="a11yTableOfContentsPopover" aria-label="Table of contents popover" hidden>
+      <section
+        id="toc-popover"
+        class="toc-popover"
+        data-i18n-aria-label="a11yTableOfContentsPopover"
+        aria-label="Table of contents popover"
+        hidden
+      >
         <div class="toc-popover-header">
-          <div class="toc-popover-title"><span id="toc-popover-title-label" data-i18n="tocOnThisPage">On this page</span> <span id="toc-popover-file-name" class="toc-file-name"></span></div>
+          <div class="toc-popover-title">
+            <span id="toc-popover-title-label" data-i18n="tocOnThisPage">On this page</span>
+            <span id="toc-popover-file-name" class="toc-file-name"></span>
+          </div>
           <div class="toc-popover-actions">
-            <button id="btn-pin-toc-popover" class="toc-popover-pin icon-button" type="button" data-i18n-aria-label="a11yPinOutlinePopover" data-i18n-title="a11yPinOutlinePopover" aria-label="Pin outline popover" aria-pressed="false" title="Pin outline popover">
-              <svg class="button-icon pin-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <path d="M12 17v5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                <path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <button
+              id="btn-pin-toc-popover"
+              class="toc-popover-pin icon-button"
+              type="button"
+              data-i18n-aria-label="a11yPinOutlinePopover"
+              data-i18n-title="a11yPinOutlinePopover"
+              aria-label="Pin outline popover"
+              aria-pressed="false"
+              title="Pin outline popover"
+            >
+              <svg
+                class="button-icon pin-icon"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path
+                  d="M12 17v5"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1Z"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
               </svg>
             </button>
-            <button id="btn-close-toc-popover" class="toc-popover-close" type="button" data-i18n-aria-label="a11yCloseOutline" aria-label="Close outline">×</button>
+            <button
+              id="btn-close-toc-popover"
+              class="toc-popover-close"
+              type="button"
+              data-i18n-aria-label="a11yCloseOutline"
+              aria-label="Close outline"
+            >
+              ×
+            </button>
           </div>
         </div>
         <div id="toc-popover-depth-row" class="toc-depth-row" hidden>
           <label for="toc-popover-depth-select" data-i18n="outlineDepthLabel">Outline depth</label>
-          <select id="toc-popover-depth-select" data-i18n-aria-label="outlineDepthLabel" aria-label="Outline depth">
-
-              <option value="2" data-i18n="depthH1H2">H1-H2</option>
-              <option value="3" selected data-i18n="depthH1H3">H1-H3</option>
-              <option value="4" data-i18n="depthH1H4">H1-H4</option>
-              <option value="5" data-i18n="depthH1H5">H1-H5</option>
-              <option value="6" data-i18n="depthH1H6">H1-H6</option>
-
+          <select
+            id="toc-popover-depth-select"
+            data-i18n-aria-label="outlineDepthLabel"
+            aria-label="Outline depth"
+          >
+            <option value="2" data-i18n="depthH1H2">H1-H2</option>
+            <option value="3" selected data-i18n="depthH1H3">H1-H3</option>
+            <option value="4" data-i18n="depthH1H4">H1-H4</option>
+            <option value="5" data-i18n="depthH1H5">H1-H5</option>
+            <option value="6" data-i18n="depthH1H6">H1-H6</option>
           </select>
         </div>
         <div id="toc-popover-filter-row" class="toc-filter-row" hidden>
-          <input id="toc-popover-filter" type="search" data-i18n-placeholder="filterHeadingsPlaceholder" data-i18n-aria-label="a11yFilterHeadings" placeholder="Filter headings..." aria-label="Filter headings" autocomplete="off" />
+          <input
+            id="toc-popover-filter"
+            type="search"
+            data-i18n-placeholder="filterHeadingsPlaceholder"
+            data-i18n-aria-label="a11yFilterHeadings"
+            placeholder="Filter headings..."
+            aria-label="Filter headings"
+            autocomplete="off"
+          />
         </div>
-        <nav id="toc-popover-tree" class="toc-tree toc-popover-tree" data-i18n-aria-label="a11yTableOfContents" aria-label="Table of contents"></nav>
+        <nav
+          id="toc-popover-tree"
+          class="toc-tree toc-popover-tree"
+          data-i18n-aria-label="a11yTableOfContents"
+          aria-label="Table of contents"
+        ></nav>
       </section>
 
       <main id="viewer-main" class="viewer-main">
-        <div id="file-tabs" class="file-tabs" data-i18n-aria-label="a11yFileTabs" aria-label="Open files" hidden>
-          <button id="btn-file-tabs-scroll-left" class="file-tabs-scroll file-tabs-scroll-left" type="button" data-i18n-aria-label="a11yScrollFileTabsLeft" data-i18n-title="a11yScrollFileTabsLeft" aria-label="Scroll file tabs left" title="Scroll file tabs left" hidden disabled>
+        <div
+          id="file-tabs"
+          class="file-tabs"
+          data-i18n-aria-label="a11yFileTabs"
+          aria-label="Open files"
+          hidden
+        >
+          <button
+            id="btn-file-tabs-scroll-left"
+            class="file-tabs-scroll file-tabs-scroll-left"
+            type="button"
+            data-i18n-aria-label="a11yScrollFileTabsLeft"
+            data-i18n-title="a11yScrollFileTabsLeft"
+            aria-label="Scroll file tabs left"
+            title="Scroll file tabs left"
+            hidden
+            disabled
+          >
             <svg class="button-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-              <path d="M10 3.5 5.5 8 10 12.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              <path
+                d="M10 3.5 5.5 8 10 12.5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </button>
           <div id="file-tabs-viewport" class="file-tabs-viewport">
-            <div id="file-tabs-list" class="file-tabs-list" role="tablist" data-i18n-aria-label="a11yFileTabs" aria-label="Open files"></div>
+            <div
+              id="file-tabs-list"
+              class="file-tabs-list"
+              role="tablist"
+              data-i18n-aria-label="a11yFileTabs"
+              aria-label="Open files"
+            ></div>
           </div>
-          <button id="btn-file-tabs-scroll-right" class="file-tabs-scroll file-tabs-scroll-right" type="button" data-i18n-aria-label="a11yScrollFileTabsRight" data-i18n-title="a11yScrollFileTabsRight" aria-label="Scroll file tabs right" title="Scroll file tabs right" hidden disabled>
+          <button
+            id="btn-file-tabs-scroll-right"
+            class="file-tabs-scroll file-tabs-scroll-right"
+            type="button"
+            data-i18n-aria-label="a11yScrollFileTabsRight"
+            data-i18n-title="a11yScrollFileTabsRight"
+            aria-label="Scroll file tabs right"
+            title="Scroll file tabs right"
+            hidden
+            disabled
+          >
             <svg class="button-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-              <path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              <path
+                d="M6 3.5 10.5 8 6 12.5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </button>
         </div>
 
         <div id="viewer-scroll" class="viewer-scroll">
-          <div id="viewer-loading" class="viewer-loading" role="status" aria-live="polite" aria-atomic="true" hidden>
+          <div
+            id="viewer-loading"
+            class="viewer-loading"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+            hidden
+          >
             <div class="viewer-loading-card">
               <span class="viewer-loading-spinner" aria-hidden="true"></span>
-              <span id="viewer-loading-label" class="viewer-loading-label">Loading document ...</span>
+              <span id="viewer-loading-label" class="viewer-loading-label"
+                >Loading document ...</span
+              >
             </div>
           </div>
           <header class="toolbar">
-          <div class="doc-heading">
-            <h1 id="doc-title" data-i18n="appName">Dev File Viewer</h1>
-            <div class="doc-source-row">
-              <button id="btn-reload-document" class="doc-source-action" type="button" data-i18n-title="a11yReloadDocument" data-i18n-aria-label="a11yReloadDocument" title="Reload document" aria-label="Reload document" hidden disabled>
-                <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                  <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                  <path d="M8 16H3v5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                  <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                  <path d="M21 3v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-              </button>
-              <p id="doc-source" data-i18n="docSourceEmpty">Open a Markdown or source file, folder, or URL.</p>
-            </div>
-          </div>
-          <div class="toolbar-meta">
-            <div class="viewer-font-size" data-i18n-aria-label="a11yViewerTextSizeSetting" aria-label="Viewer text size setting">
-              <label for="viewer-font-size-range" data-i18n="viewerTextSizeLabel">Text Size</label>
-              <div class="viewer-font-size-controls">
-                <input id="viewer-font-size-range" class="viewer-font-size-range" type="range" min="12" max="24" step="1" value="15" data-i18n-aria-label="a11yViewerTextSize" aria-label="Viewer text size" />
-                <input id="viewer-font-size-input" class="viewer-font-size-input" type="number" min="12" max="24" step="1" value="15" inputmode="numeric" data-i18n-aria-label="a11yViewerTextSizePixels" aria-label="Viewer text size in pixels" />
-                <span class="viewer-font-size-unit" aria-hidden="true">px</span>
+            <div class="doc-heading">
+              <h1 id="doc-title" data-i18n="appName">Dev File Viewer</h1>
+              <div class="doc-source-row">
+                <button
+                  id="btn-reload-document"
+                  class="doc-source-action"
+                  type="button"
+                  data-i18n-title="a11yReloadDocument"
+                  data-i18n-aria-label="a11yReloadDocument"
+                  title="Reload document"
+                  aria-label="Reload document"
+                  hidden
+                  disabled
+                >
+                  <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path
+                      d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                    <path
+                      d="M8 16H3v5"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                    <path
+                      d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                    <path
+                      d="M21 3v5h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </button>
+                <p id="doc-source" data-i18n="docSourceEmpty">
+                  Open a Markdown or source file, folder, or URL.
+                </p>
               </div>
             </div>
-            <span id="doc-format" class="format-badge" data-i18n="formatMarkdown">Markdown</span>
-          </div>
+            <div class="toolbar-meta">
+              <div
+                class="viewer-font-size"
+                data-i18n-aria-label="a11yViewerTextSizeSetting"
+                aria-label="Viewer text size setting"
+              >
+                <label for="viewer-font-size-range" data-i18n="viewerTextSizeLabel"
+                  >Text Size</label
+                >
+                <div class="viewer-font-size-controls">
+                  <input
+                    id="viewer-font-size-range"
+                    class="viewer-font-size-range"
+                    type="range"
+                    min="12"
+                    max="24"
+                    step="1"
+                    value="15"
+                    data-i18n-aria-label="a11yViewerTextSize"
+                    aria-label="Viewer text size"
+                  />
+                  <input
+                    id="viewer-font-size-input"
+                    class="viewer-font-size-input"
+                    type="number"
+                    min="12"
+                    max="24"
+                    step="1"
+                    value="15"
+                    inputmode="numeric"
+                    data-i18n-aria-label="a11yViewerTextSizePixels"
+                    aria-label="Viewer text size in pixels"
+                  />
+                  <span class="viewer-font-size-unit" aria-hidden="true">px</span>
+                </div>
+              </div>
+              <span id="doc-format" class="format-badge" data-i18n="formatMarkdown">Markdown</span>
+            </div>
           </header>
 
-          <section id="status" class="status info" data-i18n="viewerInitialStatus">
-          </section>
+          <section id="status" class="status info" data-i18n="viewerInitialStatus"></section>
 
           <article id="preview" class="markdown-body" tabindex="0"></article>
 
           <div id="scroll-nav" class="scroll-nav" hidden>
-            <button id="btn-scroll-top" class="scroll-nav-btn" type="button" data-i18n-title="a11yScrollToTop" title="Scroll to top"></button>
-            <button id="btn-scroll-bottom" class="scroll-nav-btn" type="button" data-i18n-title="a11yScrollToBottom" title="Scroll to bottom"></button>
+            <button
+              id="btn-scroll-top"
+              class="scroll-nav-btn"
+              type="button"
+              data-i18n-title="a11yScrollToTop"
+              title="Scroll to top"
+            ></button>
+            <button
+              id="btn-scroll-bottom"
+              class="scroll-nav-btn"
+              type="button"
+              data-i18n-title="a11yScrollToBottom"
+              title="Scroll to bottom"
+            ></button>
           </div>
         </div>
       </main>
     </div>
-<div id="drop-overlay" class="drop-overlay" hidden aria-hidden="true">
-  <div class="drop-overlay-card">
-    <svg class="drop-overlay-icon" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
-      <path d="M42 30v8a4 4 0 0 1-4 4H10a4 4 0 0 1-4-4v-8" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
-      <path d="M14 22 24 32 34 22" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
-      <path d="M24 32V6" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
-    </svg>
-    <div>
-      <strong data-i18n="dropOverlayTitle">Drop file or folder to open</strong>
-      <span data-i18n="dropOverlayBody">Dev File Viewer will open supported developer files locally.</span>
+    <div id="drop-overlay" class="drop-overlay" hidden aria-hidden="true">
+      <div class="drop-overlay-card">
+        <svg class="drop-overlay-icon" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+          <path
+            d="M42 30v8a4 4 0 0 1-4 4H10a4 4 0 0 1-4-4v-8"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          <path
+            d="M14 22 24 32 34 22"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          <path
+            d="M24 32V6"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+        <div>
+          <strong data-i18n="dropOverlayTitle">Drop file or folder to open</strong>
+          <span data-i18n="dropOverlayBody"
+            >Dev File Viewer will open supported developer files locally.</span
+          >
+        </div>
+      </div>
     </div>
-  </div>
-</div>
     <script type="module" src="app.js"></script>
   </body>
 </html>

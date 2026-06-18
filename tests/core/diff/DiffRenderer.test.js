@@ -44,6 +44,8 @@ describe('DiffRenderer.render', () => {
 
   it('shows a no-hunk message for a file with metadata but no hunks', () => {
     new DiffRenderer().render('diff --git a/x.js b/x.js\n--- a/x.js\n+++ b/x.js\n', target);
-    expect(target.querySelector('.diff-file .diff-empty').textContent).toBe('No hunks in this diff file.');
+    expect(target.querySelector('.diff-file .diff-empty').textContent).toBe(
+      'No hunks in this diff file.'
+    );
   });
 });

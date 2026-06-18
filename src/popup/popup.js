@@ -28,15 +28,20 @@ function createSnapshotId() {
 // Mirrors getDocumentText()/isPlainTextDocument() in the content script.
 function captureDocumentSnapshot() {
   const body = document.body;
-  const onlyPre = !!(body && body.children.length === 1
-    && body.firstElementChild && body.firstElementChild.tagName === 'PRE');
+  const onlyPre = !!(
+    body &&
+    body.children.length === 1 &&
+    body.firstElementChild &&
+    body.firstElementChild.tagName === 'PRE'
+  );
   const source = onlyPre ? body.firstElementChild : body;
-  const text = (source && source.innerText)
-    || (document.documentElement && document.documentElement.innerText)
-    || '';
+  const text =
+    (source && source.innerText) ||
+    (document.documentElement && document.documentElement.innerText) ||
+    '';
   const mimeType = document.contentType || '';
-  const isPlainText = onlyPre
-    || /^(text\/plain|text\/markdown|application\/octet-stream)/i.test(mimeType);
+  const isPlainText =
+    onlyPre || /^(text\/plain|text\/markdown|application\/octet-stream)/i.test(mimeType);
   return { text, mimeType, title: document.title || '', url: location.href, isPlainText };
 }
 
@@ -83,9 +88,7 @@ async function refreshFileUrlStatus() {
   const isAllowed = await isFileUrlAccessAllowed();
 
   card.dataset.state = isAllowed ? 'enabled' : 'disabled';
-  status.textContent = isAllowed
-    ? t('popupFileUrlEnabled')
-    : t('popupFileUrlDisabled');
+  status.textContent = isAllowed ? t('popupFileUrlEnabled') : t('popupFileUrlDisabled');
 }
 
 document.querySelector('#open-current').addEventListener('click', async () => {

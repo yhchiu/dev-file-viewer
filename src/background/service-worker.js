@@ -32,7 +32,10 @@ function createSnapshotId() {
 async function cleanupExpiredSnapshots(now = Date.now()) {
   const all = await chrome.storage.session.get(null);
   const expiredKeys = Object.entries(all)
-    .filter(([key, value]) => key.startsWith(SNAPSHOT_PREFIX) && now - Number(value?.createdAt || 0) > SNAPSHOT_TTL_MS)
+    .filter(
+      ([key, value]) =>
+        key.startsWith(SNAPSHOT_PREFIX) && now - Number(value?.createdAt || 0) > SNAPSHOT_TTL_MS
+    )
     .map(([key]) => key);
 
   if (expiredKeys.length) await chrome.storage.session.remove(expiredKeys);
@@ -41,7 +44,8 @@ async function cleanupExpiredSnapshots(now = Date.now()) {
 async function openViewerForSnapshot(message, sender) {
   const tabId = sender.tab?.id;
   if (typeof tabId !== 'number') throw new Error('Missing sender tab.');
-  if (!isSupportedDocumentUrl(message.url || '')) throw new Error('Unsupported developer file URL.');
+  if (!isSupportedDocumentUrl(message.url || ''))
+    throw new Error('Unsupported developer file URL.');
 
   await cleanupExpiredSnapshots();
 

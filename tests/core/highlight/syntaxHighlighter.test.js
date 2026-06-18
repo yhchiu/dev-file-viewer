@@ -20,7 +20,9 @@ describe('normalizeLanguageName', () => {
 
 describe('highlightCodeToHtml', () => {
   it('HTML-escapes plaintext and unknown languages', () => {
-    expect(highlightCodeToHtml('<script>x</script>', 'plaintext')).toBe('&lt;script&gt;x&lt;/script&gt;');
+    expect(highlightCodeToHtml('<script>x</script>', 'plaintext')).toBe(
+      '&lt;script&gt;x&lt;/script&gt;'
+    );
     expect(highlightCodeToHtml('<b>', 'not-a-language')).toBe('&lt;b&gt;');
   });
 

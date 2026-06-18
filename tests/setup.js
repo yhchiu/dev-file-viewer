@@ -20,9 +20,8 @@ function getMessage(key, substitutions) {
   const entry = messages[key];
   if (!entry) return '';
 
-  const subs = substitutions == null
-    ? []
-    : Array.isArray(substitutions) ? substitutions : [substitutions];
+  const subs =
+    substitutions == null ? [] : Array.isArray(substitutions) ? substitutions : [substitutions];
   const placeholders = entry.placeholders || {};
 
   return entry.message.replace(/\$([a-zA-Z0-9_]+)\$/g, (whole, name) => {

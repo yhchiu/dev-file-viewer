@@ -1,5 +1,10 @@
 import { t } from '../../core/i18n/i18n.js';
-import { getArrowRightSmallIcon, getFolderClosedIcon, getFolderOpenIcon, getFileIcon } from '../../core/ui/icons.js';
+import {
+  getArrowRightSmallIcon,
+  getFolderClosedIcon,
+  getFolderOpenIcon,
+  getFileIcon
+} from '../../core/ui/icons.js';
 
 export class DirectoryTreeView {
   constructor(container) {
@@ -36,7 +41,10 @@ export class DirectoryTreeView {
       disclosure.className = 'tree-disclosure';
       disclosure.dataset.path = path;
       disclosure.setAttribute('aria-expanded', String(!collapsed));
-      disclosure.setAttribute('aria-label', t(collapsed ? 'a11yExpandSection' : 'a11yCollapseSection', [folderName]));
+      disclosure.setAttribute(
+        'aria-label',
+        t(collapsed ? 'a11yExpandSection' : 'a11yCollapseSection', [folderName])
+      );
       // eslint-disable-next-line no-unsanitized/property -- trusted static SVG icon
       disclosure.innerHTML = getArrowRightSmallIcon('tree-arrow-icon');
       disclosure.addEventListener('click', event => {
@@ -52,7 +60,8 @@ export class DirectoryTreeView {
       label.dataset.expanded = String(!collapsed);
       label.title = path || folderName;
       // eslint-disable-next-line no-unsanitized/property -- trusted static SVG icons; label text set via textContent below
-      label.innerHTML = getFolderClosedIcon('tree-item-icon tree-folder-icon tree-folder-icon-closed') +
+      label.innerHTML =
+        getFolderClosedIcon('tree-item-icon tree-folder-icon tree-folder-icon-closed') +
         getFolderOpenIcon('tree-item-icon tree-folder-icon tree-folder-icon-open') +
         '<span class="tree-folder-label"></span>';
       label.querySelector('.tree-folder-label').textContent = folderName;
@@ -80,7 +89,8 @@ export class DirectoryTreeView {
     button.title = node.path;
     button.dataset.path = node.path;
     // eslint-disable-next-line no-unsanitized/property -- trusted static SVG icon + markup; label text set via textContent below
-    button.innerHTML = '<span class="tree-file-spacer" aria-hidden="true"></span><span class="tree-file-inner">' +
+    button.innerHTML =
+      '<span class="tree-file-spacer" aria-hidden="true"></span><span class="tree-file-inner">' +
       getFileIcon('tree-item-icon tree-file-icon') +
       '<span class="tree-file-label"></span></span>';
     button.querySelector('.tree-file-label').textContent = node.name;
@@ -101,8 +111,9 @@ export class DirectoryTreeView {
   }
 
   markActivePath(path) {
-    const button = Array.from(this.container.querySelectorAll('.tree-file'))
-      .find(candidate => candidate.dataset.path === path);
+    const button = Array.from(this.container.querySelectorAll('.tree-file')).find(
+      candidate => candidate.dataset.path === path
+    );
     if (!button) return;
     this.activePath = path;
     this.expandAncestors(path);
@@ -139,11 +150,15 @@ export class DirectoryTreeView {
     for (const disclosure of this.container.querySelectorAll('.tree-disclosure')) {
       if ((disclosure.dataset.path || '') !== path) continue;
       disclosure.setAttribute('aria-expanded', String(!collapsed));
-      const label = Array.from(this.container.querySelectorAll('.tree-folder'))
-        .find(candidate => (candidate.dataset.path || '') === path);
+      const label = Array.from(this.container.querySelectorAll('.tree-folder')).find(
+        candidate => (candidate.dataset.path || '') === path
+      );
       if (label) label.dataset.expanded = String(!collapsed);
       const name = label?.textContent || t('treeFolderFallback');
-      disclosure.setAttribute('aria-label', t(collapsed ? 'a11yExpandSection' : 'a11yCollapseSection', [name]));
+      disclosure.setAttribute(
+        'aria-label',
+        t(collapsed ? 'a11yExpandSection' : 'a11yCollapseSection', [name])
+      );
     }
   }
 }

@@ -25,13 +25,19 @@ describe('MarkdownEngine — XSS sanitisation', () => {
   });
 
   it('strips event-handler attributes (onerror/onload)', async () => {
-    await engine.render('<img src="x" onerror="alert(1)">\n\n<svg onload="alert(1)"></svg>', target);
+    await engine.render(
+      '<img src="x" onerror="alert(1)">\n\n<svg onload="alert(1)"></svg>',
+      target
+    );
     expect(target.innerHTML.toLowerCase()).not.toContain('onerror');
     expect(target.innerHTML.toLowerCase()).not.toContain('onload');
   });
 
   it('neutralises javascript: links (markdown + raw html)', async () => {
-    await engine.render('[click](javascript:alert(1))\n\n<a href="javascript:alert(2)">raw</a>', target);
+    await engine.render(
+      '[click](javascript:alert(1))\n\n<a href="javascript:alert(2)">raw</a>',
+      target
+    );
     expect(target.innerHTML.toLowerCase()).not.toContain('javascript:');
   });
 
@@ -41,7 +47,10 @@ describe('MarkdownEngine — XSS sanitisation', () => {
   });
 
   it('strips external url() from inline styles (privacy beacon)', async () => {
-    await engine.render('<div style="background: url(http://evil.example/x.png); color: red">hi</div>', target);
+    await engine.render(
+      '<div style="background: url(http://evil.example/x.png); color: red">hi</div>',
+      target
+    );
     expect(target.innerHTML.toLowerCase()).not.toContain('url(');
     expect(target.innerHTML.toLowerCase()).not.toContain('evil.example');
   });

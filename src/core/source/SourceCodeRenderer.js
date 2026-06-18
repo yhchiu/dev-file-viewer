@@ -10,14 +10,18 @@ export const MAX_RENDERED_LINES = 50000;
 
 export class SourceCodeRenderer {
   render(sourceText, targetElement, context = {}) {
-    const language = normalizeLanguageName(context.language || sourceLanguageFromPath(context.name || context.url || context.path || ''));
+    const language = normalizeLanguageName(
+      context.language || sourceLanguageFromPath(context.name || context.url || context.path || '')
+    );
 
     targetElement.textContent = '';
     const pre = document.createElement('pre');
     pre.className = 'source-code-pre';
 
     const code = document.createElement('code');
-    code.className = language ? `language-${language} hljs source-code-lines` : 'hljs source-code-lines';
+    code.className = language
+      ? `language-${language} hljs source-code-lines`
+      : 'hljs source-code-lines';
     if (language && language !== 'plaintext') code.dataset.language = language;
 
     const normalizedText = String(sourceText || '').replace(/\r\n?/g, '\n');
@@ -64,10 +68,7 @@ export class SourceCodeRenderer {
       const notice = document.createElement('div');
       notice.className = 'source-truncated-notice';
       notice.setAttribute('role', 'status');
-      notice.textContent = t('sourceTruncatedNotice', [
-        String(renderedLines),
-        String(totalLines)
-      ]);
+      notice.textContent = t('sourceTruncatedNotice', [String(renderedLines), String(totalLines)]);
       targetElement.append(notice);
     }
 

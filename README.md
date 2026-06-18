@@ -7,6 +7,7 @@
 ## Features
 
 ### Rendering
+
 - **Markdown** with GitHub-flavored syntax, tables, and stable heading anchors
 - **Mermaid** diagrams from ` ```mermaid ` fenced code blocks
 - **Source code** viewer with syntax highlighting for dozens of languages, plus common extensionless files (`Dockerfile`, `Makefile`, `Gemfile`, `Rakefile`, …)
@@ -14,6 +15,7 @@
 - **Plain text** with line-ending detection
 
 ### Navigation
+
 - **Outline / Table of Contents** generated from headings, available as a sidebar tab and a low-distraction floating popover
 - Collapsible H1–H3 heading groups, active-section highlighting, and a heading filter for large documents
 - Draggable, pinnable floating Outline button
@@ -21,12 +23,14 @@
 - **Directory tree** sidebar for a user-selected local folder
 
 ### Opening files
+
 - **Open File** / **Open Folder** local pickers — no special Chrome setting required
 - **Open URL** for remote `http(s)` documents
 - **Automatic preview** in the browser for supported file types served as plain text, configurable per type
 - Optional `file://` URL preview (requires enabling Chrome's file-access permission)
 
 ### Customization
+
 - Selectable themes: System (light/dark), Bloom, Forge, and Folio
 - Adjustable content width: Narrow, Comfortable, Wide, or Full
 - Adjustable viewer text size
@@ -35,6 +39,7 @@
 - English, Traditional Chinese, and Simplified Chinese UI
 
 ### Privacy
+
 - 100% client-side; offline-only runtime — the parser, sanitizer, renderer, and Mermaid are all bundled inside the extension
 - No tracking, no analytics, no data collection
 

@@ -103,7 +103,9 @@ export class DiffRenderer {
       }
     }
 
-    return sections.filter(section => section.meta.length || section.hunks.length || section.oldFile || section.newFile);
+    return sections.filter(
+      section => section.meta.length || section.hunks.length || section.oldFile || section.newFile
+    );
   }
 
   renderFileSection(section, index) {
@@ -132,7 +134,9 @@ export class DiffRenderer {
     header.append(title, badge);
     root.append(header);
 
-    const metaLines = section.meta.filter(line => line && !line.startsWith('--- ') && !line.startsWith('+++ '));
+    const metaLines = section.meta.filter(
+      line => line && !line.startsWith('--- ') && !line.startsWith('+++ ')
+    );
     if (metaLines.length) {
       const meta = document.createElement('pre');
       meta.className = 'diff-meta';
@@ -224,7 +228,9 @@ export class DiffRenderer {
 }
 
 function normalizeFileLabel(value = '') {
-  return String(value).trim().replace(/^[ab]\//, '');
+  return String(value)
+    .trim()
+    .replace(/^[ab]\//, '');
 }
 
 function displayFileTitle(section) {
@@ -239,9 +245,7 @@ function displayFileTitle(section) {
 }
 
 function parseHunkStart(header, sign) {
-  const pattern = sign === '-'
-    ? /-(\d+)(?:,\d+)?/
-    : /\+(\d+)(?:,\d+)?/;
+  const pattern = sign === '-' ? /-(\d+)(?:,\d+)?/ : /\+(\d+)(?:,\d+)?/;
   const match = header.match(pattern);
   return match ? Number(match[1]) : 0;
 }
@@ -267,12 +271,13 @@ function diffStats(section) {
 }
 
 function uniqueFileSectionId(filePath, index) {
-  const slug = String(filePath || 'diff-file')
-    .toLowerCase()
-    .replace(/^[ab]\//, '')
-    .replace(/[^a-z0-9._/-]+/g, '-')
-    .replace(/[/.]+/g, '-')
-    .replace(/^-+|-+$/g, '') || 'diff-file';
+  const slug =
+    String(filePath || 'diff-file')
+      .toLowerCase()
+      .replace(/^[ab]\//, '')
+      .replace(/[^a-z0-9._/-]+/g, '-')
+      .replace(/[/.]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'diff-file';
 
   return `diff-file-${index + 1}-${slug}`;
 }

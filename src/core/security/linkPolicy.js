@@ -47,7 +47,11 @@ export function rewriteLinks(root, baseUrl, onOpenDocumentLink) {
     if (isSupportedViewerFile(resolved.pathname)) {
       link.addEventListener('click', event => {
         event.preventDefault();
-        onOpenDocumentLink?.({ href, url: resolved.href, kind: isRelative ? 'resolved-relative-document' : 'absolute-document' });
+        onOpenDocumentLink?.({
+          href,
+          url: resolved.href,
+          kind: isRelative ? 'resolved-relative-document' : 'absolute-document'
+        });
       });
     } else {
       link.setAttribute('target', '_blank');
@@ -74,5 +78,7 @@ function isRelativeHref(href) {
 }
 
 function stripHashAndQuery(value) {
-  return String(value || '').split('#', 1)[0].split('?', 1)[0];
+  return String(value || '')
+    .split('#', 1)[0]
+    .split('?', 1)[0];
 }

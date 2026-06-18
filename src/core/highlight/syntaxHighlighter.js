@@ -164,7 +164,7 @@ export function highlightMarkdownCodeBlocks(root) {
   const codeBlocks = root.querySelectorAll('pre > code');
   for (const code of codeBlocks) {
     const rawLanguage = [...code.classList]
-      .find((className) => className.startsWith('language-') || className.startsWith('lang-'))
+      .find(className => className.startsWith('language-') || className.startsWith('lang-'))
       ?.replace(/^language-/, '')
       ?.replace(/^lang-/, '');
 
@@ -202,7 +202,6 @@ export function highlightMarkdownCodeBlocks(root) {
   }
 }
 
-
 // Returns an HTML string safe to assign to innerHTML: highlight.js escapes its
 // input, and the unknown / plaintext / mermaid fallback goes through escapeHtml().
 // Callers therefore do not run it through DOMPurify.
@@ -210,7 +209,12 @@ export function highlightCodeToHtml(sourceText = '', languageName = '') {
   registerLanguages();
 
   const language = normalizeLanguageName(languageName);
-  if (!language || language === 'plaintext' || language === 'mermaid' || !hljs.getLanguage(language)) {
+  if (
+    !language ||
+    language === 'plaintext' ||
+    language === 'mermaid' ||
+    !hljs.getLanguage(language)
+  ) {
     return escapeHtml(sourceText);
   }
 

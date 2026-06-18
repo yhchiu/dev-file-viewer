@@ -12,7 +12,9 @@ export function installMarkdownCodeCopyButtons(root) {
     const pre = code.closest('pre');
     if (!pre || pre.querySelector(':scope > .markdown-code-toolbar')) continue;
 
-    const rawLanguage = [...code.classList].find(className => className === 'language-mermaid' || className === 'lang-mermaid');
+    const rawLanguage = [...code.classList].find(
+      className => className === 'language-mermaid' || className === 'lang-mermaid'
+    );
     if (rawLanguage) continue;
 
     const toolbar = document.createElement('div');
@@ -51,8 +53,9 @@ export function installMarkdownCodeCopyButtons(root) {
 }
 
 function detectCodeLanguage(code) {
-  const languageClass = [...code.classList]
-    .find(className => className.startsWith('language-') || className.startsWith('lang-'));
+  const languageClass = [...code.classList].find(
+    className => className.startsWith('language-') || className.startsWith('lang-')
+  );
 
   if (!languageClass) return '';
   return languageClass.replace(/^language-/, '').replace(/^lang-/, '');

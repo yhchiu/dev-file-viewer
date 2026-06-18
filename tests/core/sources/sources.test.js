@@ -41,7 +41,11 @@ describe('UrlSourceProvider.load', () => {
   }
 
   it('loads markdown and sets baseUrl to the url', async () => {
-    stubFetch(async () => ({ ok: true, headers: { get: () => 'text/markdown' }, text: async () => '# hi' }));
+    stubFetch(async () => ({
+      ok: true,
+      headers: { get: () => 'text/markdown' },
+      text: async () => '# hi'
+    }));
     const doc = await new UrlSourceProvider().load('https://x.com/readme.md');
     expect(doc.format).toBe('markdown');
     expect(doc.baseUrl).toBe('https://x.com/readme.md');
@@ -49,8 +53,15 @@ describe('UrlSourceProvider.load', () => {
   });
 
   it('throws on non-ok responses', async () => {
-    stubFetch(async () => ({ ok: false, status: 404, headers: { get: () => '' }, text: async () => '' }));
-    await expect(new UrlSourceProvider().load('https://x.com/missing.md')).rejects.toThrow(/HTTP 404/);
+    stubFetch(async () => ({
+      ok: false,
+      status: 404,
+      headers: { get: () => '' },
+      text: async () => ''
+    }));
+    await expect(new UrlSourceProvider().load('https://x.com/missing.md')).rejects.toThrow(
+      /HTTP 404/
+    );
   });
 
   it('classifies raw HTML source as source-code/html', async () => {
@@ -73,7 +84,12 @@ describe('FilePickerSourceProvider.loadFromFile', () => {
   it('reads a File into a document descriptor', async () => {
     const file = new File(['# hi'], 'readme.md', { type: 'text/markdown' });
     const doc = await new FilePickerSourceProvider().loadFromFile(file);
-    expect(doc).toMatchObject({ name: 'readme.md', format: 'markdown', sourceType: 'file', baseUrl: '' });
+    expect(doc).toMatchObject({
+      name: 'readme.md',
+      format: 'markdown',
+      sourceType: 'file',
+      baseUrl: ''
+    });
     expect(doc.text).toBe('# hi');
   });
 });
@@ -125,10 +141,13 @@ describe('DirectorySourceProvider.loadDirectoryHandle / buildTree', () => {
   function sampleRoot() {
     return dirHandle('proj', [
       ['.hidden', dirHandle('.hidden', [])],
-      ['src', dirHandle('src', [
-        ['a.js', fileHandle('a.js')],
-        ['notes.txt', fileHandle('notes.txt')]
-      ])],
+      [
+        'src',
+        dirHandle('src', [
+          ['a.js', fileHandle('a.js')],
+          ['notes.txt', fileHandle('notes.txt')]
+        ])
+      ],
       ['README.md', fileHandle('README.md')],
       ['image.png', fileHandle('image.png', [new Uint8Array([137, 80, 78, 71, 0, 1])])]
     ]);
@@ -149,10 +168,19 @@ describe('DirectorySourceProvider.loadDirectoryHandle / buildTree', () => {
     await provider.loadDirectoryHandle(sampleRoot());
     const { doc, node } = await provider.loadPath('src/a.js');
     expect(node.path).toBe('src/a.js');
-    expect(doc).toMatchObject({ name: 'a.js', sourceType: 'directory-file', path: 'src/a.js', baseUrl: '' });
+    expect(doc).toMatchObject({
+      name: 'a.js',
+      sourceType: 'directory-file',
+      path: 'src/a.js',
+      baseUrl: ''
+    });
     expect(doc.text).toContain('a.js');
     const { doc: unsupportedTextDoc } = await provider.loadPath('src/notes.txt');
-    expect(unsupportedTextDoc).toMatchObject({ name: 'notes.txt', sourceType: 'directory-file', path: 'src/notes.txt' });
+    expect(unsupportedTextDoc).toMatchObject({
+      name: 'notes.txt',
+      sourceType: 'directory-file',
+      path: 'src/notes.txt'
+    });
     expect(unsupportedTextDoc.text).toContain('notes.txt');
     await expect(provider.loadPath('missing/x.js')).rejects.toThrow(/not found/i);
   });
@@ -186,9 +214,7 @@ describe('DirectorySourceProvider.pickDirectory', () => {
 
   it('notifies when a selected folder starts loading', async () => {
     const calls = [];
-    const root = dirHandle('proj', [
-      ['README.md', fileHandle('README.md')]
-    ]);
+    const root = dirHandle('proj', [['README.md', fileHandle('README.md')]]);
     const originalEntries = root.entries;
     root.entries = async function* () {
       calls.push('entries');
@@ -219,7 +245,13 @@ function dirEntry(name, children) {
     name,
     createReader: () => {
       let served = false;
-      return { readEntries: ok => { if (served) return ok([]); served = true; ok(children); } };
+      return {
+        readEntries: ok => {
+          if (served) return ok([]);
+          served = true;
+          ok(children);
+        }
+      };
     }
   };
 }
@@ -234,7 +266,10 @@ describe('DirectorySourceProvider.loadDirectoryEntry / buildEntryTree', () => {
     ]);
     const { tree } = await provider.loadDirectoryEntry(root);
     expect(tree.children.map(c => c.name)).toEqual(['lib', 'guide.md']);
-    expect(tree.children.find(c => c.name === 'lib').children.map(c => c.name)).toEqual(['m.py', 'skip.bin']);
+    expect(tree.children.find(c => c.name === 'lib').children.map(c => c.name)).toEqual([
+      'm.py',
+      'skip.bin'
+    ]);
 
     const { doc } = await provider.loadPath('lib/m.py');
     expect(doc.text).toContain('m.py');
