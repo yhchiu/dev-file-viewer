@@ -50,9 +50,8 @@ import {
 } from './viewerHelpers.js';
 import { nextFrame } from './domUtils.js';
 import { AppearanceController } from './controllers/AppearanceController.js';
+import { ScrollMemoryController } from './controllers/ScrollMemoryController.js';
 
-const SCROLL_ENABLED_KEY = 'devFileViewer:rememberScrollEnabled';
-const SCROLL_POSITIONS_KEY = 'devFileViewer:scrollPositions';
 const SIDEBAR_COLLAPSED_KEY = 'devFileViewer:sidebarCollapsed';
 const SIDEBAR_WIDTH_KEY = 'devFileViewer:sidebarWidth';
 const TOC_POPOVER_PINNED_KEY = 'devFileViewer:tocPopoverPinned';
@@ -151,6 +150,7 @@ class DevFileViewerApp {
     this.directoryTree = new DirectoryTreeView(this.elements.tree);
 
     this.appearance = new AppearanceController(this);
+    this.scrollMemory = new ScrollMemoryController(this);
 
     this.currentDoc = null;
     this.currentDocKey = '';
@@ -163,9 +163,6 @@ class DevFileViewerApp {
     this.ignoreNextFileTabClick = false;
     this.currentFolderLoaded = false;
     this.currentFolderName = '';
-    this.rememberScrollEnabled = false;
-    this.scrollPositions = {};
-    this.scrollSaveTimer = 0;
     this.sidebarCollapsed = false;
     this.sidebarWidth = DEFAULT_SIDEBAR_WIDTH;
     this.resizeDrag = null;
@@ -204,7 +201,7 @@ class DevFileViewerApp {
     await this.restoreTocPopoverPinState();
     this.applySidebarTab('files', { showPanel: false });
     this.setSidebarPanel('open', { activeTarget: 'open-file' });
-    await this.restoreScrollSettings();
+    await this.scrollMemory.restore();
     this.bindEvents();
     await this.refreshFileUrlAccessStatus();
     await this.loadFromLaunchParams();
@@ -272,11 +269,9 @@ class DevFileViewerApp {
       this.setSidebarPanel('open', { activeTarget: 'open-file' });
       this.openLocalFile();
     });
-    this.elements.rememberScroll.addEventListener('change', () =>
-      this.setRememberScroll(this.elements.rememberScroll.checked)
-    );
     this.elements.manageAutoOpen?.addEventListener('click', () => chrome.runtime.openOptionsPage());
     this.appearance.bindEvents();
+    this.scrollMemory.bindEvents();
     window.addEventListener('dragenter', event => this.handleWindowDragEnter(event));
     window.addEventListener('dragover', event => this.handleWindowDragOver(event));
     window.addEventListener('dragleave', event => this.handleWindowDragLeave(event));
@@ -327,7 +322,7 @@ class DevFileViewerApp {
       'scroll',
       () => {
         this.saveActiveTabRuntimeScroll();
-        this.scheduleSaveScrollPosition();
+        this.scrollMemory.scheduleSaveScrollPosition();
         this.scheduleActiveHeadingUpdate();
       },
       { passive: true }
@@ -950,26 +945,6 @@ class DevFileViewerApp {
     this.updateFloatingOutlineState({ openPopover: !wasCollapsed && this.sidebarCollapsed });
   }
 
-  async restoreScrollSettings() {
-    const stored = await chrome.storage.session.get([SCROLL_ENABLED_KEY, SCROLL_POSITIONS_KEY]);
-    this.rememberScrollEnabled = Boolean(stored[SCROLL_ENABLED_KEY]);
-    this.scrollPositions = stored[SCROLL_POSITIONS_KEY] || {};
-    this.elements.rememberScroll.checked = this.rememberScrollEnabled;
-  }
-
-  async setRememberScroll(enabled) {
-    this.rememberScrollEnabled = Boolean(enabled);
-    this.elements.rememberScroll.checked = this.rememberScrollEnabled;
-    await chrome.storage.session.set({ [SCROLL_ENABLED_KEY]: this.rememberScrollEnabled });
-
-    if (this.rememberScrollEnabled) {
-      await this.saveCurrentScrollPosition();
-      this.setStatus(t('statusScrollEnabled'), 'info');
-    } else {
-      this.setStatus(t('statusScrollDisabled'), 'info');
-    }
-  }
-
   handleWindowDragEnter(event) {
     if (!this.dragEventHasFiles(event)) return;
     event.preventDefault();
@@ -1297,7 +1272,7 @@ class DevFileViewerApp {
 
   async clearViewerForFailedDocument(fileNode = {}) {
     this.saveActiveTabRuntimeScroll();
-    await this.saveCurrentScrollPosition();
+    await this.scrollMemory.saveCurrentScrollPosition();
     this.clearViewerLoading();
     if (this.currentDoc) {
       this.setDocumentReloadEnabled(true);
@@ -1332,7 +1307,7 @@ class DevFileViewerApp {
     const wasActive = tabKey === this.activeTabKey;
     if (wasActive && this.currentDoc) {
       this.saveActiveTabRuntimeScroll();
-      await this.saveCurrentScrollPosition();
+      await this.scrollMemory.saveCurrentScrollPosition();
     }
 
     this.openTabs.splice(tabIndex, 1);
@@ -2007,7 +1982,7 @@ class DevFileViewerApp {
 
     try {
       this.saveActiveTabRuntimeScroll();
-      await this.saveCurrentScrollPosition();
+      await this.scrollMemory.saveCurrentScrollPosition();
       this.clearSourceLineHighlight();
 
       const format = doc.format || detectFormat(doc);
@@ -2061,7 +2036,7 @@ class DevFileViewerApp {
           }
         }
         this.activateRenderedDocument(doc, nextDocKey);
-        await this.restoreOrResetScroll(doc, scrollOptions);
+        await this.scrollMemory.restoreOrResetScroll(doc, scrollOptions);
         this.setStatus(
           format === FORMAT_IDS.UNKNOWN
             ? t('statusUnsupportedFormat', [format])
@@ -2086,7 +2061,7 @@ class DevFileViewerApp {
           this.applySidebarTab('outline');
         }
         this.activateRenderedDocument(doc, nextDocKey);
-        await this.restoreOrResetScroll(doc, scrollOptions);
+        await this.scrollMemory.restoreOrResetScroll(doc, scrollOptions);
         this.setStatus(t('statusLoaded', [doc.name || t('commonDiffFile')]), 'success');
         return;
       }
@@ -2103,7 +2078,7 @@ class DevFileViewerApp {
       }
 
       this.activateRenderedDocument(doc, nextDocKey);
-      await this.restoreOrResetScroll(doc, scrollOptions);
+      await this.scrollMemory.restoreOrResetScroll(doc, scrollOptions);
       this.setStatus(t('statusLoaded', [doc.name || t('commonDocument')]), 'success');
     } finally {
       this.clearViewerLoading();
@@ -2180,41 +2155,6 @@ class DevFileViewerApp {
     return doc.sourceType || '';
   }
 
-  scheduleSaveScrollPosition() {
-    if (!this.rememberScrollEnabled || !this.currentDocKey) return;
-    clearTimeout(this.scrollSaveTimer);
-    this.scrollSaveTimer = setTimeout(() => {
-      this.saveCurrentScrollPosition().catch(() => {});
-    }, 180);
-  }
-
-  async saveCurrentScrollPosition() {
-    if (!this.rememberScrollEnabled || !this.currentDocKey) return;
-    this.scrollPositions[this.currentDocKey] = {
-      top: this.scrollRoot.scrollTop,
-      updatedAt: Date.now()
-    };
-    await chrome.storage.session.set({ [SCROLL_POSITIONS_KEY]: this.scrollPositions });
-  }
-
-  async restoreOrResetScroll(doc, options = {}) {
-    const docKey = this.getDocumentKey(doc);
-    const anchor = options.anchor;
-
-    await nextFrame();
-
-    if (anchor && this.scrollToAnchor(anchor)) return;
-
-    const saved = this.rememberScrollEnabled ? this.scrollPositions[docKey] : null;
-    if (Number.isFinite(options.scrollTop)) {
-      this.scrollRoot.scrollTop = options.scrollTop;
-    } else {
-      this.scrollRoot.scrollTop = Number.isFinite(saved?.top) ? saved.top : 0;
-    }
-    this.saveActiveTabRuntimeScroll();
-    this.scheduleActiveHeadingUpdate();
-  }
-
   scrollToAnchor(anchor, options = {}) {
     const id = safeDecodeURIComponent(String(anchor || '').replace(/^#/, ''));
     if (!id) return false;
@@ -2251,7 +2191,7 @@ class DevFileViewerApp {
 
     if (this.scrollToAnchor(href, { smooth: true, updateHash: true })) {
       event.preventDefault();
-      this.saveCurrentScrollPosition().catch(() => {});
+      this.scrollMemory.saveCurrentScrollPosition().catch(() => {});
     }
   }
 
@@ -2440,7 +2380,7 @@ class DevFileViewerApp {
         item.addEventListener('click', event => {
           event.preventDefault();
           this.scrollToAnchor(heading.id, { smooth: true, updateHash: true });
-          this.saveCurrentScrollPosition().catch(() => {});
+          this.scrollMemory.saveCurrentScrollPosition().catch(() => {});
           if (context === 'popover' && !this.tocPopoverPinned) this.closeTocPopover();
         });
         this.registerTocItem(heading.id, item);
@@ -2454,7 +2394,7 @@ class DevFileViewerApp {
           event.preventDefault();
           this.scrollToAnchor(anchorId, { smooth: true, updateHash: true });
           this.highlightSourceLine(anchorId);
-          this.saveCurrentScrollPosition().catch(() => {});
+          this.scrollMemory.saveCurrentScrollPosition().catch(() => {});
           if (context === 'popover' && !this.tocPopoverPinned) this.closeTocPopover();
         });
         this.registerTocItem(heading.id, item);
@@ -2464,7 +2404,7 @@ class DevFileViewerApp {
         item.addEventListener('click', event => {
           event.preventDefault();
           this.scrollToAnchor(heading.id, { smooth: true, updateHash: true });
-          this.saveCurrentScrollPosition().catch(() => {});
+          this.scrollMemory.saveCurrentScrollPosition().catch(() => {});
           if (context === 'popover' && !this.tocPopoverPinned) this.closeTocPopover();
         });
         this.registerTocItem(heading.id, item);
