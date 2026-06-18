@@ -155,6 +155,25 @@
     "message": "已重新加载 $NAME$。",
     "placeholders": { "name": { "content": "$1", "example": "README.md" } }
   },
+  "errorMissingUrl": { "message": "缺少网址。" },
+  "errorFailedToLoadUrl": {
+    "message": "加载 $URL$ 失败：HTTP $STATUS$",
+    "placeholders": {
+      "url": { "content": "$1", "example": "https://example.com/README.md" },
+      "status": { "content": "$2", "example": "404" }
+    }
+  },
+  "errorFolderPickerUnsupported": { "message": "此浏览器不支持文件夹选择器。请使用 Chrome 或基于 Chromium 的浏览器。" },
+  "errorNoFolderOpen": { "message": "当前没有打开任何文件夹。" },
+  "errorUnableToLoadFile": {
+    "message": "无法加载文件：$NAME$",
+    "placeholders": { "name": { "content": "$1", "example": "README.md" } }
+  },
+  "errorLinkedFileNotFound": {
+    "message": "在打开的文件夹中找不到链接的文件：$PATH$",
+    "placeholders": { "path": { "content": "$1", "example": "docs/missing.md" } }
+  },
+  "errorNoFileSelected": { "message": "未选择任何文件。" },
   "errorCannotReload": { "message": "此文档无法重新加载。请重新打开文件、文件夹或网址。" },
   "errorSnapshotUnavailable": { "message": "捕获的文档已不再可用。请重新打开 Markdown 文件或使用“打开文件”。" },
   "statusLoadingUrl": {

@@ -1,4 +1,5 @@
 import { ALL_SUPPORTED_EXTENSIONS, detectFormat } from '../format/fileTypes.js';
+import { t } from '../i18n/i18n.js';
 
 const SUPPORTED_EXTENSIONS = ALL_SUPPORTED_EXTENSIONS;
 
@@ -57,7 +58,7 @@ export class FilePickerSourceProvider {
       input.addEventListener('change', async () => {
         try {
           const file = input.files?.[0];
-          if (!file) return reject(new Error('No file selected.'));
+          if (!file) return reject(new Error(t('errorNoFileSelected')));
           options.onLoadStart?.(file.name);
           resolve(await this.loadFromFile(file));
         } catch (error) {

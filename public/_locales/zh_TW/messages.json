@@ -155,6 +155,25 @@
     "message": "已重新載入 $NAME$。",
     "placeholders": { "name": { "content": "$1", "example": "README.md" } }
   },
+  "errorMissingUrl": { "message": "缺少網址。" },
+  "errorFailedToLoadUrl": {
+    "message": "載入 $URL$ 失敗：HTTP $STATUS$",
+    "placeholders": {
+      "url": { "content": "$1", "example": "https://example.com/README.md" },
+      "status": { "content": "$2", "example": "404" }
+    }
+  },
+  "errorFolderPickerUnsupported": { "message": "此瀏覽器不支援資料夾選擇器。請使用 Chrome 或以 Chromium 為基礎的瀏覽器。" },
+  "errorNoFolderOpen": { "message": "目前沒有開啟任何資料夾。" },
+  "errorUnableToLoadFile": {
+    "message": "無法載入檔案：$NAME$",
+    "placeholders": { "name": { "content": "$1", "example": "README.md" } }
+  },
+  "errorLinkedFileNotFound": {
+    "message": "在開啟的資料夾中找不到連結的檔案：$PATH$",
+    "placeholders": { "path": { "content": "$1", "example": "docs/missing.md" } }
+  },
+  "errorNoFileSelected": { "message": "未選擇任何檔案。" },
   "errorCannotReload": { "message": "此文件無法重新載入。請重新開啟檔案、資料夾或網址。" },
   "errorSnapshotUnavailable": { "message": "擷取的文件已不再可用。請重新開啟 Markdown 檔案或使用「開啟檔案」。" },
   "statusLoadingUrl": {

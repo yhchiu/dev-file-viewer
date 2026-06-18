@@ -1,5 +1,6 @@
 import { isLikelyBinaryFile } from '../format/binarySniff.js';
 import { FilePickerSourceProvider } from './FilePickerSourceProvider.js';
+import { t } from '../i18n/i18n.js';
 
 const MAX_FILES = 2000;
 
@@ -14,7 +15,7 @@ export class DirectorySourceProvider {
 
   async pickDirectory(options = {}) {
     if (!('showDirectoryPicker' in window)) {
-      throw new Error('This browser does not support folder picker. Use Chrome or Chromium-based browsers.');
+      throw new Error(t('errorFolderPickerUnsupported'));
     }
 
     const directoryHandle = await window.showDirectoryPicker({ mode: 'read' });
@@ -44,7 +45,7 @@ async loadDirectoryEntry(directoryEntry) {
 async reloadDirectory() {
   if (this.rootHandle) return this.loadDirectoryHandle(this.rootHandle);
   if (this.rootEntry) return this.loadDirectoryEntry(this.rootEntry);
-  throw new Error('No folder is currently open.');
+  throw new Error(t('errorNoFolderOpen'));
 }
 
   async buildTree(directoryHandle, path = '') {
@@ -137,13 +138,13 @@ async buildEntryTree(directoryEntry, path = '') {
       const file = await fileFromEntry(fileNode.entry);
       return this.loadTextFile(file, { name: fileNode.name });
     }
-    throw new Error(`Unable to load file: ${fileNode?.name || 'unknown'}`);
+    throw new Error(t('errorUnableToLoadFile', [fileNode?.name || 'unknown']));
   }
 
   async loadTextFile(file, extra = {}) {
     if (await isLikelyBinaryFile(file)) {
       const fileName = extra.name || file?.name || 'unknown';
-      const error = new Error(`File appears to be binary and cannot be opened as text: ${fileName}`);
+      const error = new Error(t('errorBinaryFile', [fileName]));
       error.code = 'BINARY_FILE';
       error.fileName = fileName;
       throw error;
@@ -155,7 +156,7 @@ async buildEntryTree(directoryEntry, path = '') {
   async loadPath(path) {
     const node = this.fileIndex.get(path);
     if (!node) {
-      throw new Error(`Linked file was not found in the opened folder: ${path}`);
+      throw new Error(t('errorLinkedFileNotFound', [path]));
     }
     const doc = await this.loadFileNode(node);
     doc.name = node.name;

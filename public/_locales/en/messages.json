@@ -155,6 +155,25 @@
     "message": "Reloaded $NAME$.",
     "placeholders": { "name": { "content": "$1", "example": "README.md" } }
   },
+  "errorMissingUrl": { "message": "Missing URL." },
+  "errorFailedToLoadUrl": {
+    "message": "Failed to load $URL$: HTTP $STATUS$",
+    "placeholders": {
+      "url": { "content": "$1", "example": "https://example.com/README.md" },
+      "status": { "content": "$2", "example": "404" }
+    }
+  },
+  "errorFolderPickerUnsupported": { "message": "This browser does not support folder picker. Use Chrome or Chromium-based browsers." },
+  "errorNoFolderOpen": { "message": "No folder is currently open." },
+  "errorUnableToLoadFile": {
+    "message": "Unable to load file: $NAME$",
+    "placeholders": { "name": { "content": "$1", "example": "README.md" } }
+  },
+  "errorLinkedFileNotFound": {
+    "message": "Linked file was not found in the opened folder: $PATH$",
+    "placeholders": { "path": { "content": "$1", "example": "docs/missing.md" } }
+  },
+  "errorNoFileSelected": { "message": "No file selected." },
   "errorCannotReload": { "message": "This document cannot be reloaded. Open the file, folder, or URL again." },
   "errorSnapshotUnavailable": { "message": "The captured document is no longer available. Reopen the Markdown file or use Open File." },
   "statusLoadingUrl": {
