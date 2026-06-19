@@ -184,6 +184,10 @@
     "message": "已載入 $NAME$。",
     "placeholders": { "name": { "content": "$1", "example": "README.md" } }
   },
+  "statusSwitchedDocument": {
+    "message": "已切換至 $NAME$。",
+    "placeholders": { "name": { "content": "$1", "example": "README.md" } }
+  },
   "statusUnsupportedFormat": {
     "message": "不支援的格式：$FORMAT$。",
     "placeholders": { "format": { "content": "$1", "example": "binary" } }

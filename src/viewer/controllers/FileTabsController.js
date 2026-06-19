@@ -159,7 +159,8 @@ export class FileTabsController {
     }
 
     await this.host.renderDocument(tab.doc, {
-      scrollTop: Number.isFinite(tab.scrollTop) ? tab.scrollTop : null
+      scrollTop: Number.isFinite(tab.scrollTop) ? tab.scrollTop : null,
+      suppressLoading: true
     });
   }
 

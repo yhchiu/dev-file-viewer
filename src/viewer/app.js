@@ -580,7 +580,11 @@ class DevFileViewerApp {
   }
 
   async renderDocument(doc, options = {}) {
-    this.setViewerLoading(t('statusLoadingDocument', [doc.name || t('commonDocument')]));
+    // A tab switch re-renders a doc already held in memory; showing the loading
+    // overlay there wrongly implies the file is being re-read from its source.
+    if (!options.suppressLoading) {
+      this.setViewerLoading(t('statusLoadingDocument', [doc.name || t('commonDocument')]));
+    }
     await nextFrame();
 
     try {
@@ -590,6 +594,10 @@ class DevFileViewerApp {
 
       const format = doc.format || detectFormat(doc);
       const nextDocKey = this.getDocumentKey(doc);
+      // A tab switch re-renders cached content rather than reading the source,
+      // so it reports "switched" instead of "loaded".
+      const readyStatus = name =>
+        options.suppressLoading ? t('statusSwitchedDocument', [name]) : t('statusLoaded', [name]);
       const outlineOptions = { openPopover: nextDocKey !== this.currentDocKey };
       const runtimeScrollTop = this.fileTabs.getRuntimeScrollTopForDocument(nextDocKey, options);
       const scrollOptions =
@@ -643,10 +651,10 @@ class DevFileViewerApp {
         this.setStatus(
           format === FORMAT_IDS.UNKNOWN
             ? t('statusUnsupportedFormat', [format])
-            : t('statusLoaded', [
+            : readyStatus(
                 doc.name ||
                   (format === FORMAT_IDS.TEXT ? t('commonDocument') : t('commonSourceFile'))
-              ]),
+              ),
           format === FORMAT_IDS.UNKNOWN ? 'error' : 'success'
         );
         return;
@@ -665,7 +673,7 @@ class DevFileViewerApp {
         }
         this.fileTabs.activateRenderedDocument(doc, nextDocKey);
         await this.scrollMemory.restoreOrResetScroll(doc, scrollOptions);
-        this.setStatus(t('statusLoaded', [doc.name || t('commonDiffFile')]), 'success');
+        this.setStatus(readyStatus(doc.name || t('commonDiffFile')), 'success');
         return;
       }
 
@@ -682,7 +690,7 @@ class DevFileViewerApp {
 
       this.fileTabs.activateRenderedDocument(doc, nextDocKey);
       await this.scrollMemory.restoreOrResetScroll(doc, scrollOptions);
-      this.setStatus(t('statusLoaded', [doc.name || t('commonDocument')]), 'success');
+      this.setStatus(readyStatus(doc.name || t('commonDocument')), 'success');
     } finally {
       this.clearViewerLoading();
     }

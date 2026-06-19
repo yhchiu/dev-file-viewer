@@ -184,6 +184,10 @@
     "message": "Loaded $NAME$.",
     "placeholders": { "name": { "content": "$1", "example": "README.md" } }
   },
+  "statusSwitchedDocument": {
+    "message": "Switched to $NAME$.",
+    "placeholders": { "name": { "content": "$1", "example": "README.md" } }
+  },
   "statusUnsupportedFormat": {
     "message": "Unsupported format: $FORMAT$.",
     "placeholders": { "format": { "content": "$1", "example": "binary" } }
