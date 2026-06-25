@@ -272,6 +272,13 @@
   "a11yCopied": { "message": "已复制" },
   "a11yCopyFailed": { "message": "复制失败" },
 
+  "a11yZoomOpen": { "message": "打开放大视图" },
+  "a11yZoomIn": { "message": "放大" },
+  "a11yZoomOut": { "message": "缩小" },
+  "a11yZoomReset": { "message": "适应屏幕" },
+  "a11yZoomClose": { "message": "关闭放大视图" },
+  "a11yZoomView": { "message": "图表放大视图" },
+
   "onboardingPageTitle": { "message": "欢迎使用 Dev File Viewer" },
   "onboardingImgAlt": { "message": "Dev File Viewer — Markdown、Diff 与源代码查看器" },
   "onboardingEyebrow": { "message": "Dev File Viewer V2.9.3" },

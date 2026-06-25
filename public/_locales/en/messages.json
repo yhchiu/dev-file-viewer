@@ -272,6 +272,13 @@
   "a11yCopied": { "message": "Copied" },
   "a11yCopyFailed": { "message": "Copy failed" },
 
+  "a11yZoomOpen": { "message": "Open zoom view" },
+  "a11yZoomIn": { "message": "Zoom in" },
+  "a11yZoomOut": { "message": "Zoom out" },
+  "a11yZoomReset": { "message": "Fit to screen" },
+  "a11yZoomClose": { "message": "Close zoom view" },
+  "a11yZoomView": { "message": "Diagram zoom view" },
+
   "onboardingPageTitle": { "message": "Welcome to Dev File Viewer" },
   "onboardingImgAlt": { "message": "Dev File Viewer — Markdown, Diff & Source Viewer" },
   "onboardingEyebrow": { "message": "Dev File Viewer V2.9.3" },

@@ -14,6 +14,7 @@ export const features = Object.freeze({
   },
   plugins: {
     mermaid: true,
+    diagramZoom: true,
     emoji: false,
     math: false,
     toc: false,

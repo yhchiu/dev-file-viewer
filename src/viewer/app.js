@@ -17,6 +17,7 @@ import { DirectorySourceProvider } from '../core/sources/DirectorySourceProvider
 import { DirectoryTreeView } from '../features/sidebar/DirectoryTreeView.js';
 import { PluginRegistry } from '../plugins/PluginRegistry.js';
 import { mermaidPlugin } from '../plugins/mermaidPlugin.js';
+import { diagramZoomPlugin } from '../plugins/diagramZoomPlugin.js';
 import {
   copyExtensionSettingsUrl,
   isFileUrlAccessAllowed,
@@ -119,7 +120,7 @@ class DevFileViewerApp {
       dropOverlay: document.querySelector('#drop-overlay')
     };
 
-    this.plugins = new PluginRegistry([mermaidPlugin]);
+    this.plugins = new PluginRegistry([mermaidPlugin, diagramZoomPlugin]);
     this.markdown = new MarkdownEngine(this.plugins);
     this.sourceRenderer = new SourceCodeRenderer();
     this.diffRenderer = new DiffRenderer();

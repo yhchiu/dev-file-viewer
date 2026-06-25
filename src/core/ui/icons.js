@@ -52,3 +52,23 @@ export function getArrowUpIcon(className = '') {
 export function getArrowDownIcon(className = '') {
   return icon('arrow-down', className);
 }
+
+export function getExpandIcon(className = '') {
+  return icon('expand', className);
+}
+
+export function getZoomInIcon(className = '') {
+  return icon('zoom-in', className);
+}
+
+export function getZoomOutIcon(className = '') {
+  return icon('zoom-out', className);
+}
+
+export function getFitScreenIcon(className = '') {
+  return icon('fit-screen', className);
+}
+
+export function getCloseIcon(className = '') {
+  return icon('close', className);
+}

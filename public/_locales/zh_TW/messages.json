@@ -272,6 +272,13 @@
   "a11yCopied": { "message": "已複製" },
   "a11yCopyFailed": { "message": "複製失敗" },
 
+  "a11yZoomOpen": { "message": "開啟放大檢視" },
+  "a11yZoomIn": { "message": "放大" },
+  "a11yZoomOut": { "message": "縮小" },
+  "a11yZoomReset": { "message": "符合畫面" },
+  "a11yZoomClose": { "message": "關閉放大檢視" },
+  "a11yZoomView": { "message": "圖表放大檢視" },
+
   "onboardingPageTitle": { "message": "歡迎使用 Dev File Viewer" },
   "onboardingImgAlt": { "message": "Dev File Viewer — Markdown、Diff 與原始碼檢視器" },
   "onboardingEyebrow": { "message": "Dev File Viewer V2.9.3" },

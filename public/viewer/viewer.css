@@ -2977,3 +2977,170 @@ body[data-theme='dark'],
   background: var(--accent-soft);
   border-color: #1e3a8a;
 }
+
+/* Diagram & image zoom (mermaid + markdown images) */
+.mermaid {
+  position: relative;
+}
+
+.zoomable-image {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  line-height: 0;
+}
+
+.markdown-body .is-zoomable {
+  cursor: zoom-in;
+}
+
+.diagram-zoom-trigger {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 8px;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--panel) 88%, transparent);
+  border: 1px solid var(--line);
+  box-shadow: 0 4px 12px rgba(16, 24, 40, 0.08);
+  opacity: 0;
+  transition:
+    opacity 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.mermaid:hover .diagram-zoom-trigger,
+.zoomable-image:hover .diagram-zoom-trigger,
+.diagram-zoom-trigger:focus-visible {
+  opacity: 0.85;
+}
+
+.diagram-zoom-trigger:hover,
+.diagram-zoom-trigger:focus-visible {
+  color: var(--accent);
+  background: var(--panel);
+  border-color: var(--accent);
+  opacity: 1;
+}
+
+.diagram-zoom-icon {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+:root[data-theme='dark'] .diagram-zoom-trigger {
+  color: var(--muted);
+  background: rgba(17, 24, 39, 0.86);
+  border-color: var(--line);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
+}
+
+:root[data-theme='dark'] .diagram-zoom-trigger:hover,
+:root[data-theme='dark'] .diagram-zoom-trigger:focus-visible {
+  color: var(--accent);
+  background: var(--panel);
+  border-color: var(--accent);
+}
+
+/* Shared full-viewport lightbox */
+.diagram-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  padding: 16px;
+  background: rgba(2, 6, 23, 0.82);
+  backdrop-filter: blur(4px);
+}
+
+.diagram-lightbox[hidden] {
+  display: none;
+}
+
+.diagram-lightbox-stage {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  /* Empty backdrop closes on click; the diagram itself pans. */
+  cursor: zoom-out;
+  touch-action: none;
+}
+
+.diagram-lightbox-stage.is-panning,
+.diagram-lightbox-stage.is-panning .diagram-lightbox-content {
+  cursor: grabbing;
+}
+
+.diagram-lightbox-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  cursor: grab;
+  transform-origin: 0 0;
+  will-change: transform;
+  /* Restore the on-page card backing so mermaid diagrams and transparent
+     images stay readable against the dark backdrop. */
+  background: var(--mermaid-bg, #fff);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+}
+
+.diagram-lightbox-content svg,
+.diagram-lightbox-content img {
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.diagram-lightbox-toolbar {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.diagram-lightbox-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border-radius: 9px;
+  color: #e2e8f0;
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.diagram-lightbox-btn:hover,
+.diagram-lightbox-btn:focus-visible {
+  color: #fff;
+  background: rgba(148, 163, 184, 0.18);
+  border-color: rgba(148, 163, 184, 0.4);
+}
+
+.diagram-lightbox-btn .diagram-zoom-icon {
+  width: 20px;
+  height: 20px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .diagram-zoom-trigger {
+    transition: none;
+  }
+}
