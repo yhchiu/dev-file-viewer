@@ -4,7 +4,7 @@
     "date": "2026-06-26",
     "items": [
       {
-        "commit": "52da3d3fbd52c5fcdf6fe245a08146b4e019c2cb",
+        "commit": "eea29a95d1b747faee76164f54022aca3f576ed3",
         "type": "feat",
         "subject": "feat: add offline changelog page"
       },
