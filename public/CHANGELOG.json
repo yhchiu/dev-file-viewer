@@ -1,0 +1,583 @@
+[
+  {
+    "version": "3.0.0",
+    "date": "2026-06-26",
+    "items": [
+      {
+        "commit": "52da3d3fbd52c5fcdf6fe245a08146b4e019c2cb",
+        "type": "feat",
+        "subject": "feat: add offline changelog page"
+      },
+      {
+        "commit": "76837813e6c1626c01c721af947683962a6b7719",
+        "type": "feat",
+        "subject": "feat(viewer): add zoom/pan lightbox for mermaid diagrams and images"
+      },
+      {
+        "commit": "23c33a60e8b9ba7358b8a7e5ce19ebbe377a7712",
+        "type": "refactor",
+        "subject": "refactor(icons): consolidate all inline SVGs into one sprite"
+      },
+      {
+        "commit": "51f225c15da5324c388a876a3c0ba050c8ca8baa",
+        "type": "feat",
+        "subject": "feat(viewer): skip loading overlay on file-tab switch"
+      },
+      {
+        "commit": "dbd22729825f46e7e0ffa59fead8cc9de3ea2a4e",
+        "type": "refactor",
+        "subject": "refactor(viewer): document the app orchestrator role"
+      },
+      {
+        "commit": "dc4e4cb8a5aac7ed9d878da055efd2c4bdfb360e",
+        "type": "refactor",
+        "subject": "refactor(viewer): extract FileTabsController from app.js"
+      },
+      {
+        "commit": "5f0beff9423cbcc9dbfd8fc3e4a22bccddf7f1cb",
+        "type": "refactor",
+        "subject": "refactor(viewer): extract OutlineController from app.js"
+      },
+      {
+        "commit": "e0d777e24f8256e18cabf329693111d8b7684330",
+        "type": "refactor",
+        "subject": "refactor(viewer): extract SidebarController from app.js"
+      },
+      {
+        "commit": "ab3786a60aafe8eca63d6a066e7d31cff7e7afdc",
+        "type": "refactor",
+        "subject": "refactor(viewer): extract DropController from app.js"
+      },
+      {
+        "commit": "703fd61ab6326d6497e5bfb142306440f2362581",
+        "type": "refactor",
+        "subject": "refactor(viewer): extract ScrollMemoryController from app.js"
+      },
+      {
+        "commit": "37c0de2adb3bc5dbd1280a501219a518d782ca37",
+        "type": "refactor",
+        "subject": "refactor(viewer): extract AppearanceController from app.js"
+      },
+      {
+        "commit": "453bb45d79cb82d7a1deb02c2e666532a795dd14",
+        "type": "ci",
+        "subject": "ci: add GitHub Actions lint/test/build workflow"
+      },
+      {
+        "commit": "8fc23b1ca457d66c05b7f345d1c6ab49b5164803",
+        "type": "style",
+        "subject": "style: apply repo-wide Prettier formatting"
+      },
+      {
+        "commit": "d929cc4e1a952afec352f9d166a43931da7a88f3",
+        "type": "chore",
+        "subject": "chore(tooling): add ESLint and Prettier configuration"
+      },
+      {
+        "commit": "fbb301d202ec6c1420d8ee54b0b9ecd5724656eb",
+        "type": "perf",
+        "subject": "perf(viewer): lazy-load mermaid to shrink viewer cold start"
+      },
+      {
+        "commit": "c97c537bf2cf7806ab0552213ee6a406591ebde3",
+        "type": "feat",
+        "subject": "feat(i18n): localize source provider error messages"
+      },
+      {
+        "commit": "181d1498a38af133dc99935c18a4a00f11d39cd3",
+        "type": "perf",
+        "subject": "perf(viewer): cap rendered lines for very large source files"
+      },
+      {
+        "commit": "de52adeef7590937c7d700ac29a40819b83b98d3",
+        "type": "docs",
+        "subject": "docs(security): document the highlight.js escaping trust assumption"
+      },
+      {
+        "commit": "4a9a71ae31a2d0c2ab1f3593a3758b519657f2d8",
+        "type": "fix",
+        "subject": "fix(security): tighten DOMPurify configuration"
+      },
+      {
+        "commit": "5b1df114d9a2367f7612511bbdf9dc5caa886650",
+        "type": "fix",
+        "subject": "fix(format): unify supported-extension lists in fileTypes"
+      },
+      {
+        "commit": "5ad7d1eb7ec71302e8286c8b049f7e16cf7ffb3c",
+        "type": "refactor",
+        "subject": "refactor(permissions): make web (http/https) access opt-in"
+      },
+      {
+        "commit": "5d27180228a859e7adcd56b240fad6014667bfe0",
+        "type": "docs",
+        "subject": "docs: rewrite README around features, drop version notes"
+      },
+      {
+        "commit": "6cb5f00388defc6425d9941d6a58e7cfe6d56168",
+        "type": "fix",
+        "subject": "fix(viewer): show loading spinner during auto-open cold start"
+      },
+      {
+        "commit": "a219787811b3bf63e33a9e466503faede861b0a9",
+        "type": "fix",
+        "subject": "fix(viewer): remove focus outline on preview after keypress"
+      },
+      {
+        "commit": "bc3b608059b3ea2f1ae95ed1536f9a9e0129ae33",
+        "type": "feat",
+        "subject": "feat(settings): add configurable auto-open settings page"
+      },
+      {
+        "commit": "57ac0af27b40cfaa18bb609daa515c6efa52f1f1",
+        "type": "feat",
+        "subject": "feat(content): unify autoview file matching and support extensionless files"
+      },
+      {
+        "commit": "d93d8e3a123a012bcaf0a26eb95abe85ddd8a0e3",
+        "type": "fix",
+        "subject": "fix(viewer): stop setting aria-hidden on display:none sidebar regions"
+      },
+      {
+        "commit": "79e55bed6614f88df3dc9c1e091a679073da5f27",
+        "type": "refactor",
+        "subject": "refactor(viewer): move scroll memory card to the settings panel"
+      },
+      {
+        "commit": "68eadef103b8b61d7a297b5d7d3a8c18123b6795",
+        "type": "fix",
+        "subject": "fix(viewer): place floating outline button beside the status section"
+      },
+      {
+        "commit": "73befddaae1a99a1151d830af031c45e29ddd7b8",
+        "type": "chore",
+        "subject": "chore: change localized messages"
+      },
+      {
+        "commit": "55581819c22e2685545d808fb2a673f7360d9798",
+        "type": "feat",
+        "subject": "feat(viewer): theme scrollbars to match active theme"
+      },
+      {
+        "commit": "d22c278a9e5978ffc3c97fd4e77d3f014f62a23d",
+        "type": "feat",
+        "subject": "feat(viewer): redesign sidebar activity rail"
+      },
+      {
+        "commit": "c16596cd1d6038c24d91e86bb2619923e5fed3e9",
+        "type": "fix",
+        "subject": "fix(viewer): keep loading indicator visible when switching tabs"
+      },
+      {
+        "commit": "6155b9359075f70f363021305dc4f3f0eed82bb7",
+        "type": "feat",
+        "subject": "feat(viewer): support multiple file tabs"
+      },
+      {
+        "commit": "97ab36db7f0828e8a40ec05031b6ed9ce1f10451",
+        "type": "fix",
+        "subject": "fix(viewer): improve document navigation controls"
+      },
+      {
+        "commit": "ab87293d26d012520fc41a499290e837ca54eac8",
+        "type": "feat",
+        "subject": "feat(viewer): add Bloom, Forge, and Folio themes"
+      },
+      {
+        "commit": "85f9fa18c0723db0a6b1e459062736ed4c32c88d",
+        "type": "feat",
+        "subject": "feat(viewer): add floating scroll-to-top and scroll-to-bottom buttons"
+      },
+      {
+        "commit": "d66dce9de10528e1edfbebe6c4cc1d0c7452b64d",
+        "type": "feat",
+        "subject": "feat(viewer): update document.title when opening a file"
+      },
+      {
+        "commit": "ba31da9ef99770d743c52ca54f1bbc8000f10a28",
+        "type": "style",
+        "subject": "style(viewer): position floating outline button relative to preview top-right"
+      },
+      {
+        "commit": "b03513abddc39b1b5d35708616769b8b0ebae2ad",
+        "type": "refactor",
+        "subject": "refactor(icons): extract inline SVGs to standalone files"
+      },
+      {
+        "commit": "1582f85dcbd0ecd4f15cf6a0da02b93b446b99a1",
+        "type": "fix",
+        "subject": "fix(viewer): prevent outline popover list from overlapping filter"
+      },
+      {
+        "commit": "22a6ea53df9041ee4c2887cff673a1e9bab678ac",
+        "type": "fix",
+        "subject": "fix(viewer): auto-open outline popover when switching documents"
+      },
+      {
+        "commit": "ed8f935363c61d8ece2bdba6e74bb6b460e25b92",
+        "type": "feat",
+        "subject": "feat(viewer): add text size control"
+      },
+      {
+        "commit": "765df7546ad6f786636e9edf8dc58b7cb214d01c",
+        "type": "fix",
+        "subject": "fix(viewer): collapse folder tools before loading folders"
+      },
+      {
+        "commit": "98bbc9619c0acc791e69d873857041d6350eaed5",
+        "type": "feat",
+        "subject": "feat(viewer): support text files as plaintext"
+      },
+      {
+        "commit": "dd93d95c570e77bdda77e53d8fb6060993c8e123",
+        "type": "fix",
+        "subject": "fix(viewer): keep loading spinners animated"
+      },
+      {
+        "commit": "a15595d0221574bcb9403e6f963cf60878f54cae",
+        "type": "feat",
+        "subject": "feat(viewer): show loading state for directory tree"
+      },
+      {
+        "commit": "65ec6da218f2e0f9d94979d9527eb9bc0fb02bd9",
+        "type": "feat",
+        "subject": "feat(viewer): open outline popover when sidebar is hidden"
+      },
+      {
+        "commit": "7886b1d82d021a2cb2b0a82cb4338700d9f4de19",
+        "type": "fix",
+        "subject": "fix(viewer): block binary files from folder preview"
+      },
+      {
+        "commit": "58c7dfe0ec88a5ae247a0e484fdf72e5c7c9c562",
+        "type": "feat",
+        "subject": "feat(viewer): show all files in directory tree"
+      },
+      {
+        "commit": "5d11ac52bbc23c0adbe02433f32ad19c1609edeb",
+        "type": "refactor",
+        "subject": "refactor(viewer): soften outline pop-out button into a quiet icon action"
+      },
+      {
+        "commit": "dafef0b0f62fc8058411bf9322776ac58840cfa2",
+        "type": "feat",
+        "subject": "feat(viewer): show loading state while opening documents"
+      },
+      {
+        "commit": "ec77f9826d1a2287e8e1d3ac0d137c1fd9b12289",
+        "type": "refactor",
+        "subject": "refactor: unify icon system to Lucide line style"
+      },
+      {
+        "commit": "95bb175085a97ca32fd426914bf2627da7a8e465",
+        "type": "feat",
+        "subject": "feat: add folder and file icons for directory tree"
+      },
+      {
+        "commit": "09012939bef51e03da864637535387e67836b02f",
+        "type": "feat",
+        "subject": "feat: make directory tree collapsible"
+      },
+      {
+        "commit": "30e9999f6c7057f425a480eb40b243ade376108d",
+        "type": "test",
+        "subject": "test: add Vitest unit coverage"
+      },
+      {
+        "commit": "7ede03cd9adfc94a5241b3ce49f993fcb9d21a0b",
+        "type": "fix",
+        "subject": "fix: replace internal npm registry urls with public registry in lockfile"
+      },
+      {
+        "commit": "119a7aa209cf655c4deac808ae99d9cc5b598a06",
+        "type": "ui",
+        "subject": "ui: add subtle leaf dots for mixed toc trees to improve visual balance"
+      },
+      {
+        "commit": "0c338ece22e815bf49e0a432ab250207f266638b",
+        "type": "feat",
+        "subject": "feat: add i18n support and three locales: en, zh_TW, zh_CN"
+      }
+    ]
+  },
+  {
+    "version": "2.9.3",
+    "date": "2026-05-22",
+    "items": [
+      {
+        "commit": "ba6fc115023bb4a829fe976409ede650fac77612",
+        "type": "feat",
+        "subject": "feat: add full-window drag & drop to open file and folder"
+      }
+    ]
+  },
+  {
+    "version": "2.8.6",
+    "date": "2026-05-22",
+    "items": [
+      {
+        "commit": "6a4b743882cfeb120805d0817edc9deb3b13b204",
+        "type": "feat",
+        "subject": "feat: add folder and file reload button"
+      }
+    ]
+  },
+  {
+    "version": "2.8.3",
+    "date": "2026-05-22",
+    "items": [
+      {
+        "commit": "2cb2d2952b8eb983efb844c1c2ec2a955dd79da5",
+        "type": "feat",
+        "subject": "feat: add copy button for markdown code block"
+      }
+    ]
+  },
+  {
+    "version": "2.8.0",
+    "date": "2026-05-22",
+    "items": [
+      {
+        "commit": "5a80025d8c955fd9577474eaa6cdaec559813a09",
+        "type": "feat",
+        "subject": "feat: add line numbers / gutter for source code viewer"
+      }
+    ]
+  },
+  {
+    "version": "2.7.4",
+    "date": "2026-05-22",
+    "items": [
+      {
+        "commit": "ce9ac9b9b882617c7147f61eee61a8e16fc3ba8c",
+        "type": "feat",
+        "subject": "feat: highlight source code line after jumping from symbols outline"
+      }
+    ]
+  },
+  {
+    "version": "2.7.2",
+    "date": "2026-05-22",
+    "items": [
+      {
+        "commit": "2378f6fe0eb71b2c120131642384fb64d0328d38",
+        "type": "fix",
+        "subject": "fix: initial outline item active state"
+      }
+    ]
+  },
+  {
+    "version": "2.7.1",
+    "date": "2026-05-22",
+    "items": [
+      {
+        "commit": "978c517715109adbbf15953776ccea78f9cf23a3",
+        "type": "feat",
+        "subject": "feat: add source code outline tree for symbols"
+      }
+    ]
+  },
+  {
+    "version": "2.6.3",
+    "date": "2026-05-22",
+    "items": [
+      {
+        "commit": "9559de30cfd3f88c587be2913e8356b9a1e31169",
+        "type": "feat",
+        "subject": "feat: add an automatic HTML detection for Open URL / Tab"
+      }
+    ]
+  },
+  {
+    "version": "2.6.2",
+    "date": "2026-05-22",
+    "items": [
+      {
+        "commit": "cefcfdf6cc65241da58c5c790ebf5bbf36b81f9d",
+        "type": "feat",
+        "subject": "feat: add light / dark themes"
+      }
+    ]
+  },
+  {
+    "version": "2.5.5",
+    "date": "2026-05-22",
+    "items": [
+      {
+        "commit": "afd8328c38c8f79bed4823a3c06bc2e2395ea5f1",
+        "type": "feat",
+        "subject": "feat: add diff outline tree for changed files"
+      }
+    ]
+  },
+  {
+    "version": "2.5.2",
+    "date": "2026-05-22",
+    "items": [
+      {
+        "commit": "f6095ecfb36c7e4e7cca46f062cd01bd7719e8d3",
+        "type": "feat",
+        "subject": "feat: add diff / patch file unified (line-by-line) viewer"
+      }
+    ]
+  },
+  {
+    "version": "2.4.1",
+    "date": "2026-05-22",
+    "items": [
+      {
+        "commit": "a8a083d33325f26eaed9be96652585281bdc33d5",
+        "type": "feat",
+        "subject": "feat: add source code viewer"
+      }
+    ]
+  },
+  {
+    "version": "2.3.0",
+    "date": "2026-05-22",
+    "items": [
+      {
+        "commit": "e6867f0c7fb3e823f01a0290cbe1ced535ad5f8b",
+        "type": "feat",
+        "subject": "feat: add syntax highlighting for markdown code blocks"
+      }
+    ]
+  },
+  {
+    "version": "2.2.3",
+    "date": "2026-05-22",
+    "items": [
+      {
+        "commit": "e09ec8b6d79bc78115e2ba04aec0ab4ed5526b25",
+        "type": "feat",
+        "subject": "feat: add outline depth options"
+      }
+    ]
+  },
+  {
+    "version": "2.2.0",
+    "date": "2026-05-21",
+    "items": [
+      {
+        "commit": "c5c5d36e6d839c71254255797c818fa658336e77",
+        "type": "feat",
+        "subject": "feat: add collapsible outline heading groups"
+      }
+    ]
+  },
+  {
+    "version": "2.1.5",
+    "date": "2026-05-21",
+    "items": [
+      {
+        "commit": "e32072aa61b715ab40f3a03a663e5bc31602db71",
+        "type": "feat",
+        "subject": "feat: add drag-to-move, pinning, and popping out for outline button"
+      }
+    ]
+  },
+  {
+    "version": "2.1.0",
+    "date": "2026-05-21",
+    "items": [
+      {
+        "commit": "39de075918e131c960837f44071a3323fccc3e97",
+        "type": "feat",
+        "subject": "feat: add floating outline button and heading filter"
+      }
+    ]
+  },
+  {
+    "version": "2.0.1",
+    "date": "2026-05-21",
+    "items": [
+      {
+        "commit": "0e5eb830b9fccc261e7195193f8b572ab26fe4ab",
+        "type": "fix",
+        "subject": "fix: improve Outline Tab workflow"
+      }
+    ]
+  },
+  {
+    "version": "2.0.0",
+    "date": "2026-05-21",
+    "items": [
+      {
+        "commit": "fffd085c74708bff40369c291e4e3408e7601ce6",
+        "type": "feat",
+        "subject": "feat: add Table of Contents (TOC) / Outline Tab for Markdown H1-H3"
+      }
+    ]
+  },
+  {
+    "version": "1.1.8",
+    "date": "2026-05-21",
+    "items": [
+      {
+        "commit": "04578cbf639e47d4c7323e859afb78d3677aad28",
+        "type": "style",
+        "subject": "style: change logo and icon to blue-to-purple DF"
+      }
+    ]
+  },
+  {
+    "version": "1.1.6",
+    "date": "2026-05-21",
+    "items": [
+      {
+        "commit": "6c0a75348bed20d14144986aa82eeaacbffd9460",
+        "type": "feat",
+        "subject": "feat: add an adjustable viewer content width"
+      },
+      {
+        "commit": "9bbbc11610f0ebc316ee2abbae0f1e36e2e2db56",
+        "type": "chore",
+        "subject": "chore: add GPL-3.0 license"
+      }
+    ]
+  },
+  {
+    "version": "1.1.5",
+    "date": "2026-05-21",
+    "items": [
+      {
+        "commit": "45e218dd1ffd5624a09bfd3fcf808161cb7e2002",
+        "type": "feat",
+        "subject": "feat: sidebar collapse/expand and resizable with persisted preference"
+      }
+    ]
+  },
+  {
+    "version": "1.1.3",
+    "date": "2026-05-21",
+    "items": [
+      {
+        "commit": "87f9bf6277a1b04d5f2841a14d331c0e6610fcd3",
+        "type": "fix",
+        "subject": "fix: viewer layout issue with double scrollbar"
+      }
+    ]
+  },
+  {
+    "version": "1.1.2",
+    "date": "2026-05-21",
+    "items": [
+      {
+        "commit": "42a6d770659a3a9f2025019e03b7e81f37fce656",
+        "type": "feat",
+        "subject": "feat: add per-file scroll memory and support markdown links"
+      }
+    ]
+  },
+  {
+    "version": "1.1.1",
+    "date": "2026-05-21",
+    "items": [
+      {
+        "commit": "04de877e565d588e21e4a22b7c2d421cbebd636f",
+        "type": "fix",
+        "subject": "fix: improve local file workflow and support markdown table rendering"
+      }
+    ]
+  }
+]

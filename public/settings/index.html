@@ -45,6 +45,18 @@
             type="button"
             role="tab"
             aria-selected="false"
+            data-settings-nav="changelog"
+          >
+            <svg class="settings-nav-icon" aria-hidden="true" focusable="false">
+              <use href="../assets/icons/sprite.svg#outline" />
+            </svg>
+            <span data-i18n="navChangelog">Change log</span>
+          </button>
+          <button
+            class="settings-nav-item"
+            type="button"
+            role="tab"
+            aria-selected="false"
             data-settings-nav="about"
           >
             <svg class="settings-nav-icon" aria-hidden="true" focusable="false">
@@ -159,6 +171,28 @@
               them as plain text.
             </p>
             <div id="auto-open-types" class="type-groups"></div>
+          </section>
+        </section>
+
+        <section class="settings-panel" data-settings-panel="changelog" role="tabpanel" hidden>
+          <header class="settings-panel-head">
+            <h1 data-i18n="changelogHeading">Change log</h1>
+            <p class="settings-panel-intro" data-i18n="changelogIntro">
+              Release notes bundled with this extension.
+            </p>
+          </header>
+
+          <section class="settings-card">
+            <div id="changelog-list" class="changelog-list"></div>
+            <p
+              id="changelog-empty"
+              class="changelog-empty"
+              role="status"
+              data-i18n="changelogEmpty"
+              hidden
+            >
+              No change log entries available.
+            </p>
           </section>
         </section>
 

@@ -9,6 +9,22 @@ import { syncChromeTheme } from '../core/ui/chromeTheme.js';
 
 const AUTO_OPEN_KEY = 'devFileViewer:autoOpen';
 const WEB_ACCESS_ORIGINS = ['http://*/*', 'https://*/*'];
+const CHANGELOG_FILE = 'CHANGELOG.json';
+const CHANGELOG_REPO_URL = 'https://github.com/yhchiu/dev-file-viewer';
+const CHANGELOG_TYPE_LABEL_KEYS = {
+  feat: 'changelogTypeAdded',
+  fix: 'changelogTypeFixed',
+  refactor: 'changelogTypeChanged',
+  perf: 'changelogTypeChanged',
+  style: 'changelogTypeChanged',
+  ui: 'changelogTypeChanged',
+  docs: 'changelogTypeDocs',
+  test: 'changelogTypeMaintenance',
+  build: 'changelogTypeMaintenance',
+  ci: 'changelogTypeMaintenance',
+  chore: 'changelogTypeMaintenance',
+  revert: 'changelogTypeReverted'
+};
 
 localizeDocument();
 
@@ -232,6 +248,131 @@ function setupAbout() {
   });
 }
 
+/* ---------- Change log ---------- */
+
+function changelogTypeLabel(type) {
+  return t(CHANGELOG_TYPE_LABEL_KEYS[String(type || '').toLowerCase()] || 'changelogTypeChanged');
+}
+
+function changelogText(subject) {
+  const text = String(subject || '')
+    .split('\n')[0]
+    .replace(/^[a-z][a-z0-9-]*(\([^)]+\))?!?:\s*/i, '')
+    .trim();
+
+  if (!text) return '';
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+function changelogCommitUrl(commit) {
+  const hash = String(commit || '').trim();
+  return hash ? `${CHANGELOG_REPO_URL}/commit/${encodeURIComponent(hash)}` : '';
+}
+
+function renderChangelogItem(item) {
+  const text = changelogText(item?.subject);
+  if (!text) return null;
+
+  const url = changelogCommitUrl(item?.commit);
+  const row = document.createElement(url ? 'a' : 'div');
+  row.className = 'changelog-item';
+
+  if (url) {
+    row.href = url;
+    row.target = '_blank';
+    row.rel = 'noopener noreferrer';
+  }
+
+  const type = document.createElement('span');
+  type.className = 'changelog-type';
+  type.textContent = changelogTypeLabel(item?.type);
+  row.append(type);
+
+  const description = document.createElement('span');
+  description.className = 'changelog-text';
+  description.textContent = text;
+  row.append(description);
+
+  if (item?.commit) {
+    const commit = document.createElement('span');
+    commit.className = 'changelog-commit';
+    commit.textContent = String(item.commit).slice(0, 7);
+    row.append(commit);
+  }
+
+  return row;
+}
+
+function renderChangelogRelease(release) {
+  const rows = (Array.isArray(release?.items) ? release.items : [])
+    .map(item => renderChangelogItem(item))
+    .filter(Boolean);
+  if (!rows.length) return null;
+
+  const section = document.createElement('section');
+  section.className = 'changelog-release';
+
+  const header = document.createElement('div');
+  header.className = 'changelog-release-header';
+
+  const version = document.createElement('h2');
+  version.className = 'changelog-release-version';
+  version.textContent = release?.version ? `v${release.version}` : t('navChangelog');
+  header.append(version);
+
+  if (release?.date) {
+    const date = document.createElement('span');
+    date.className = 'changelog-release-date';
+    date.textContent = release.date;
+    header.append(date);
+  }
+
+  const items = document.createElement('div');
+  items.className = 'changelog-items';
+  items.append(...rows);
+
+  section.append(header, items);
+  return section;
+}
+
+function renderChangelog(entries, failed = false) {
+  const list = document.querySelector('#changelog-list');
+  const empty = document.querySelector('#changelog-empty');
+  if (!list || !empty) return;
+
+  list.textContent = '';
+
+  if (failed) {
+    empty.textContent = t('changelogLoadFailed');
+    empty.hidden = false;
+    return;
+  }
+
+  const releases = (Array.isArray(entries) ? entries : [])
+    .map(release => renderChangelogRelease(release))
+    .filter(Boolean);
+
+  if (!releases.length) {
+    empty.textContent = t('changelogEmpty');
+    empty.hidden = false;
+    return;
+  }
+
+  list.append(...releases);
+  empty.textContent = t('changelogEmpty');
+  empty.hidden = true;
+}
+
+async function loadChangelog() {
+  try {
+    const response = await fetch(chrome.runtime.getURL(CHANGELOG_FILE));
+    if (!response.ok) throw new Error('changelog-load-failed');
+    renderChangelog(await response.json());
+  } catch {
+    renderChangelog([], true);
+  }
+}
+
 /* ---------- init ---------- */
 
 async function init() {
@@ -241,6 +382,7 @@ async function init() {
   setupWebAccessToggle();
   setupFileUrlActions();
   setupAbout();
+  loadChangelog();
 
   await loadConfig();
   buildTypeList();
