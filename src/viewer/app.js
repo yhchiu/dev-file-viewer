@@ -25,7 +25,13 @@ import {
 } from '../core/browser/fileUrlAccess.js';
 import { ensureHeadingAnchors } from '../core/toc/headingIndex.js';
 import { localizeDocument, t } from '../core/i18n/i18n.js';
-import { extractHash, normalizeLinkData, safeDecodeURIComponent } from './viewerHelpers.js';
+import {
+  extractHash,
+  markdownViewToggleState,
+  nextMarkdownViewMode,
+  normalizeLinkData,
+  safeDecodeURIComponent
+} from './viewerHelpers.js';
 import { nextFrame } from './domUtils.js';
 import { AppearanceController } from './controllers/AppearanceController.js';
 import { ScrollMemoryController } from './controllers/ScrollMemoryController.js';
@@ -50,6 +56,7 @@ class DevFileViewerApp {
       title: document.querySelector('#doc-title'),
       source: document.querySelector('#doc-source'),
       reloadDocument: document.querySelector('#btn-reload-document'),
+      toggleSource: document.querySelector('#btn-toggle-source'),
       format: document.querySelector('#doc-format'),
       status: document.querySelector('#status'),
       preview: document.querySelector('#preview'),
@@ -167,6 +174,7 @@ class DevFileViewerApp {
       this.openLocalFile();
     });
     this.elements.reloadDocument.addEventListener('click', () => this.reloadCurrentDocument());
+    this.elements.toggleSource.addEventListener('click', () => this.toggleMarkdownViewMode());
     this.elements.openFolder.addEventListener('click', () => {
       this.sidebar.setSidebarPanel('open', { activeTarget: 'open-folder' });
       this.openLocalFolder();
@@ -368,6 +376,7 @@ class DevFileViewerApp {
     this.elements.source.textContent = message;
     this.elements.format.textContent = t('formatFolder');
     this.elements.preview.classList.remove('source-code-body', 'diff-body');
+    this.updateMarkdownViewToggle(FORMAT_IDS.UNKNOWN, '');
     this.elements.preview.textContent = '';
     this.scrollRoot.scrollTop = 0;
   }
@@ -397,6 +406,7 @@ class DevFileViewerApp {
     this.elements.source.textContent = path || t('statusSelectFromSidebar');
     this.elements.format.textContent = formatLabel(FORMAT_IDS.UNKNOWN);
     this.elements.preview.classList.remove('source-code-body', 'diff-body');
+    this.updateMarkdownViewToggle(FORMAT_IDS.UNKNOWN, '');
     this.elements.preview.textContent = '';
     this.scrollRoot.scrollTop = 0;
   }
@@ -415,6 +425,7 @@ class DevFileViewerApp {
     this.elements.source.textContent = message;
     this.elements.format.textContent = t('formatMarkdown');
     this.elements.preview.classList.remove('source-code-body', 'diff-body');
+    this.updateMarkdownViewToggle(FORMAT_IDS.UNKNOWN, '');
     this.elements.preview.textContent = '';
     this.scrollRoot.scrollTop = 0;
   }
@@ -538,6 +549,42 @@ class DevFileViewerApp {
     this.elements.reloadDocument.disabled = !enabled;
   }
 
+  // Reflect the current tab's Markdown view mode on the toggle button: the
+  // button only appears for Markdown docs, and swaps its icon/label to describe
+  // the action it performs (view source vs. view rendered).
+  updateMarkdownViewToggle(format, key) {
+    const button = this.elements.toggleSource;
+    if (!button) return;
+    if (format !== FORMAT_IDS.MARKDOWN) {
+      button.hidden = true;
+      return;
+    }
+    const { iconId, i18nKey, pressed } = markdownViewToggleState(this.fileTabs.getViewMode(key));
+    button.hidden = false;
+    button.setAttribute('aria-pressed', String(pressed));
+    button.title = t(i18nKey);
+    button.setAttribute('aria-label', t(i18nKey));
+    button.querySelector('use')?.setAttribute('href', `../assets/icons/sprite.svg#${iconId}`);
+  }
+
+  // Toggle the active Markdown document between its rendered and raw-source
+  // views, remembering the choice on the tab and re-rendering from the retained
+  // text (no re-fetch).
+  async toggleMarkdownViewMode() {
+    const doc = this.currentDoc;
+    if (!doc) return;
+    const format = doc.format || detectFormat(doc);
+    if (format !== FORMAT_IDS.MARKDOWN) return;
+
+    const nextMode = nextMarkdownViewMode(this.fileTabs.getViewMode(this.currentDocKey));
+    this.fileTabs.setViewMode(this.currentDocKey, nextMode);
+    await this.renderDocument(doc, { suppressLoading: true });
+    this.setStatus(
+      t(nextMode === 'source' ? 'statusMarkdownSourceView' : 'statusMarkdownRenderedView'),
+      'info'
+    );
+  }
+
   async createDirectoryDocument(fileNode) {
     const doc = await this.directorySource.loadFileNode(fileNode);
     doc.name = fileNode.name;
@@ -595,6 +642,11 @@ class DevFileViewerApp {
 
       const format = doc.format || detectFormat(doc);
       const nextDocKey = this.getDocumentKey(doc);
+      // A Markdown doc can be shown as its raw source; the choice is remembered
+      // per tab. The toggle button is only meaningful for Markdown documents.
+      const markdownSourceView =
+        format === FORMAT_IDS.MARKDOWN && this.fileTabs.getViewMode(nextDocKey) === 'source';
+      this.updateMarkdownViewToggle(format, nextDocKey);
       // A tab switch re-renders cached content rather than reading the source,
       // so it reports "switched" instead of "loaded".
       const readyStatus = name =>
@@ -614,7 +666,8 @@ class DevFileViewerApp {
         'source-code-body',
         format === FORMAT_IDS.SOURCE_CODE ||
           format === FORMAT_IDS.TEXT ||
-          format === FORMAT_IDS.UNKNOWN
+          format === FORMAT_IDS.UNKNOWN ||
+          markdownSourceView
       );
       this.elements.preview.classList.toggle('diff-body', format === FORMAT_IDS.DIFF);
 
@@ -678,15 +731,28 @@ class DevFileViewerApp {
         return;
       }
 
-      await this.markdown.render(doc.text, this.elements.preview, {
-        baseUrl: doc.baseUrl || doc.url || '',
-        onOpenDocumentLink: linkedUrl => this.openDocumentLink(linkedUrl, doc)
-      });
-      ensureHeadingAnchors(this.elements.preview);
-      this.outline.buildToc(outlineOptions);
-      this.outline.updateTocTitle(doc);
-      if (doc.sourceType !== 'directory-file' && this.outline.headings.length) {
-        this.sidebar.applySidebarTab('outline');
+      if (markdownSourceView) {
+        // Raw Markdown, reusing the source renderer (line numbers + Markdown
+        // syntax highlighting). No headings are anchored, so clear the outline.
+        if (!this.sourceRenderer) this.sourceRenderer = new SourceCodeRenderer();
+        this.sourceRenderer.render(doc.text, this.elements.preview, {
+          language: 'markdown',
+          name: doc.name || '',
+          url: doc.url || '',
+          path: doc.path || ''
+        });
+        this.outline.clearToc();
+      } else {
+        await this.markdown.render(doc.text, this.elements.preview, {
+          baseUrl: doc.baseUrl || doc.url || '',
+          onOpenDocumentLink: linkedUrl => this.openDocumentLink(linkedUrl, doc)
+        });
+        ensureHeadingAnchors(this.elements.preview);
+        this.outline.buildToc(outlineOptions);
+        this.outline.updateTocTitle(doc);
+        if (doc.sourceType !== 'directory-file' && this.outline.headings.length) {
+          this.sidebar.applySidebarTab('outline');
+        }
       }
 
       this.fileTabs.activateRenderedDocument(doc, nextDocKey);

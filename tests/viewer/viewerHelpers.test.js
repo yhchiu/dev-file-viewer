@@ -9,7 +9,9 @@ import {
   resolveThemePreference,
   themeLabel,
   contentWidthLabel,
-  symbolKindLabel
+  symbolKindLabel,
+  nextMarkdownViewMode,
+  markdownViewToggleState
 } from '../../src/viewer/viewerHelpers.js';
 
 describe('immediateParentId', () => {
@@ -92,6 +94,29 @@ describe('theme helpers', () => {
       appTheme: 'forge',
       colorScheme: 'dark',
       preference: 'system'
+    });
+  });
+});
+
+describe('markdown view mode helpers', () => {
+  it('toggles between rendered and source (round-trips)', () => {
+    expect(nextMarkdownViewMode('rendered')).toBe('source');
+    expect(nextMarkdownViewMode('source')).toBe('rendered');
+    // Unknown/undefined falls back to switching into source view.
+    expect(nextMarkdownViewMode(undefined)).toBe('source');
+    expect(nextMarkdownViewMode(nextMarkdownViewMode('rendered'))).toBe('rendered');
+  });
+
+  it('describes the toggle button for each mode', () => {
+    expect(markdownViewToggleState('rendered')).toEqual({
+      iconId: 'code',
+      i18nKey: 'a11yViewSource',
+      pressed: false
+    });
+    expect(markdownViewToggleState('source')).toEqual({
+      iconId: 'eye',
+      i18nKey: 'a11yViewRendered',
+      pressed: true
     });
   });
 });

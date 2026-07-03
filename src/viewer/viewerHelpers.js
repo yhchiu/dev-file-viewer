@@ -86,6 +86,26 @@ export function contentWidthLabel(value) {
   }
 }
 
+// The two Markdown preview modes: 'rendered' (HTML) and 'source' (raw text).
+export const MARKDOWN_VIEW_MODES = new Set(['rendered', 'source']);
+
+/** The mode a rendered↔source toggle switches to from the given mode. */
+export function nextMarkdownViewMode(mode) {
+  return mode === 'source' ? 'rendered' : 'source';
+}
+
+/**
+ * Presentation state for the Markdown source toggle button: which sprite icon
+ * to show, the i18n key for its title/label (describing the action the button
+ * performs), and its aria-pressed value. In rendered mode the button offers to
+ * "view source"; in source mode it offers to "view rendered".
+ */
+export function markdownViewToggleState(mode) {
+  return mode === 'source'
+    ? { iconId: 'eye', i18nKey: 'a11yViewRendered', pressed: true }
+    : { iconId: 'code', i18nKey: 'a11yViewSource', pressed: false };
+}
+
 export function normalizeLinkData(link) {
   if (typeof link === 'string') return { href: link, url: link, kind: 'absolute-document' };
   return link || {};

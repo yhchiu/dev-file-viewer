@@ -104,7 +104,8 @@ export class FileTabsController {
         title: this.getFileTabTitle(doc),
         sourceLabel: this.host.getDocumentSourceLabel(doc),
         pinned: false,
-        scrollTop: null
+        scrollTop: null,
+        viewMode: 'rendered'
       };
       this.openTabs.push(tab);
       this.openTabsByKey.set(key, tab);
@@ -133,6 +134,17 @@ export class FileTabsController {
 
   getFileTabTitle(doc) {
     return doc?.name || t('docTitleUntitled');
+  }
+
+  // Per-tab Markdown preview mode ('rendered' | 'source'). Defaults to
+  // 'rendered' for tabs not yet tracked (e.g. a first-time render).
+  getViewMode(key) {
+    return this.openTabsByKey.get(key)?.viewMode || 'rendered';
+  }
+
+  setViewMode(key, mode) {
+    const tab = this.openTabsByKey.get(key);
+    if (tab) tab.viewMode = mode;
   }
 
   saveActiveTabRuntimeScroll() {
