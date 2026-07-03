@@ -198,6 +198,7 @@
 }
 
 .file-tabs-list {
+  position: relative;
   flex: 1 1 auto;
   width: 100%;
   min-width: 0;
@@ -294,8 +295,45 @@
   outline-offset: -2px;
 }
 
+/* While a drag is active, other tabs slide aside smoothly to reveal the gap. */
+.file-tabs.is-tab-dragging,
+.file-tabs.is-tab-dragging .file-tab {
+  cursor: grabbing;
+}
+
+.file-tabs.is-tab-dragging .file-tab:not(.is-dragging) {
+  transition: transform 0.18s cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* The picked-up tab follows the pointer and lifts off the strip. */
 .file-tab.is-dragging {
-  opacity: 0.55;
+  z-index: 5;
+  opacity: 0.96;
+  background: var(--panel);
+  border-radius: 8px;
+  box-shadow:
+    0 10px 24px -8px rgba(0, 0, 0, 0.45),
+    0 0 0 1px var(--accent-soft);
+}
+
+/* Insertion caret marking where the tab will drop. */
+.file-tab-drop-indicator {
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+  transform: translateX(-1px);
+  pointer-events: none;
+  z-index: 4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .file-tabs.is-tab-dragging .file-tab:not(.is-dragging) {
+    transition: none;
+  }
 }
 
 .file-tab .button-icon {

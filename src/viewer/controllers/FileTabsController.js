@@ -456,7 +456,9 @@ export class FileTabsController {
       pinned: tab.pinned,
       startX: event.clientX,
       startY: event.clientY,
-      moved: false
+      moved: false,
+      visual: null,
+      targetIndex: -1
     };
 
     const onMove = moveEvent => this.updateFileTabDrag(moveEvent);
@@ -479,33 +481,102 @@ export class FileTabsController {
     const distance = Math.abs(event.clientX - drag.startX) + Math.abs(event.clientY - drag.startY);
     if (!drag.moved && distance <= 4) return;
 
-    drag.moved = true;
-    event.preventDefault();
-    this.elements.fileTabs?.classList.add('is-tab-dragging');
-
-    const targetTab = document
-      .elementFromPoint(event.clientX, event.clientY)
-      ?.closest('.file-tab[data-tab-key]');
-    if (!targetTab || !this.elements.fileTabsList?.contains(targetTab)) {
-      this.renderFileTabs();
-      return;
+    if (!drag.moved) {
+      drag.moved = true;
+      this.elements.fileTabs?.classList.add('is-tab-dragging');
+      this.beginFileTabDragVisual(drag);
     }
 
-    const moved = this.moveFileTabByPointer(
-      drag.key,
-      targetTab.dataset.tabKey,
-      event.clientX,
-      targetTab.getBoundingClientRect()
-    );
-    if (moved) this.renderFileTabs();
+    event.preventDefault();
+    this.updateFileTabDragVisual(drag, event.clientX);
+  }
+
+  // Snapshot the dragged tab and its same-group neighbours once, so pointer moves
+  // only write transforms (no re-render, no forced reflow). Uses layout offsets
+  // (unaffected by transforms) for placement and viewport centres for hit-testing.
+  beginFileTabDragVisual(drag) {
+    const list = this.elements.fileTabsList;
+    if (!list) return;
+
+    const groupTab = this.openTabsByKey.get(drag.key);
+    const items = Array.from(list.querySelectorAll('.file-tab[data-tab-key]'))
+      .map(el => ({ el, key: el.dataset.tabKey }))
+      .filter(item => this.openTabsByKey.get(item.key)?.pinned === groupTab?.pinned)
+      .map(item => {
+        const rect = item.el.getBoundingClientRect();
+        return {
+          ...item,
+          centerX: rect.left + rect.width / 2,
+          offsetLeft: item.el.offsetLeft,
+          width: item.el.offsetWidth
+        };
+      });
+
+    const homeIndex = items.findIndex(item => item.key === drag.key);
+    if (homeIndex < 0) return;
+
+    const advance =
+      items.length > 1
+        ? items[1].offsetLeft - items[0].offsetLeft
+        : items[0].width;
+    const gap = Math.max(0, advance - items[0].width);
+
+    let indicator = null;
+    if (items.length > 1) {
+      indicator = document.createElement('div');
+      indicator.className = 'file-tab-drop-indicator';
+      indicator.setAttribute('aria-hidden', 'true');
+      list.append(indicator);
+    }
+
+    const draggedEl = items[homeIndex].el;
+    draggedEl.classList.add('is-dragging');
+
+    drag.visual = { list, items, homeIndex, advance, gap, indicator, draggedEl };
+  }
+
+  updateFileTabDragVisual(drag, clientX) {
+    const visual = drag.visual;
+    if (!visual) return;
+
+    const { items, homeIndex, advance, gap, indicator, draggedEl } = visual;
+    const dx = clientX - drag.startX;
+    draggedEl.style.transform = `translateX(${dx}px) scale(1.03)`;
+
+    // Final group slot the dragged tab would occupy = how many other tabs sit
+    // to its left, measured against their original (pre-transform) centres.
+    let targetIndex = 0;
+    for (let i = 0; i < items.length; i += 1) {
+      if (i !== homeIndex && items[i].centerX < clientX) targetIndex += 1;
+    }
+    drag.targetIndex = targetIndex;
+
+    for (let i = 0; i < items.length; i += 1) {
+      if (i === homeIndex) continue;
+      let shift = 0;
+      if (targetIndex > homeIndex && i > homeIndex && i <= targetIndex) shift = -advance;
+      else if (targetIndex < homeIndex && i >= targetIndex && i < homeIndex) shift = advance;
+      items[i].el.style.transform = shift ? `translateX(${shift}px)` : '';
+    }
+
+    if (indicator) {
+      const left = items[0].offsetLeft + targetIndex * advance - gap / 2;
+      indicator.style.left = `${left}px`;
+    }
   }
 
   finishFileTabDrag(event) {
-    const moved = Boolean(this.fileTabDrag?.moved);
+    const drag = this.fileTabDrag;
+    const moved = Boolean(drag?.moved);
     this.fileTabDrag = null;
     this.elements.fileTabs?.classList.remove('is-tab-dragging');
 
     if (moved) {
+      if (drag.visual && drag.targetIndex >= 0) {
+        this.commitFileTabDrag(drag.key, drag.pinned, drag.targetIndex);
+      }
+      // renderFileTabs() rebuilds the strip, discarding the drag's inline
+      // transforms and the drop indicator in one shot.
       this.renderFileTabs();
       event.preventDefault();
       this.ignoreNextFileTabClick = true;
@@ -518,33 +589,17 @@ export class FileTabsController {
     this.updateFileTabsOverflowState();
   }
 
-  moveFileTabByPointer(dragKey, targetKey, clientX, targetRect) {
-    if (!dragKey || !targetKey || dragKey === targetKey) return false;
+  // Reorder the model to match where the drag settled. targetIndex is the final
+  // slot within the pinned/unpinned group; the group's offset anchors it into
+  // the full openTabs order.
+  commitFileTabDrag(key, pinned, targetIndex) {
+    const fromIndex = this.openTabs.findIndex(tab => tab.key === key);
+    if (fromIndex < 0) return;
 
-    const draggedTab = this.openTabsByKey.get(dragKey);
-    const targetTab = this.openTabsByKey.get(targetKey);
-    if (!draggedTab || !targetTab || draggedTab.pinned !== targetTab.pinned) return false;
+    const { start } = fileTabGroupBounds(this.openTabs, pinned);
+    if (fromIndex === start + targetIndex) return;
 
-    const fromIndex = this.openTabs.findIndex(tab => tab.key === dragKey);
-    const targetIndex = this.openTabs.findIndex(tab => tab.key === targetKey);
-    if (fromIndex < 0 || targetIndex < 0) return false;
-
-    const insertAfter = clientX > targetRect.left + targetRect.width / 2;
-    let insertIndex = targetIndex + (insertAfter ? 1 : 0);
     const [tab] = this.openTabs.splice(fromIndex, 1);
-    if (fromIndex < insertIndex) insertIndex -= 1;
-
-    insertIndex = this.clampFileTabInsertIndex(insertIndex, tab.pinned);
-    this.openTabs.splice(insertIndex, 0, tab);
-    return true;
-  }
-
-  clampFileTabInsertIndex(index, pinned) {
-    const bounds = fileTabGroupBounds(this.openTabs, pinned);
-    return Math.max(bounds.start, Math.min(bounds.end, index));
-  }
-
-  getFileTabGroupBounds(pinned) {
-    return fileTabGroupBounds(this.openTabs, pinned);
+    this.openTabs.splice(start + targetIndex, 0, tab);
   }
 }
