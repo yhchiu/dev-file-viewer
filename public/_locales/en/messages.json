@@ -269,6 +269,9 @@
   "diffNoContent": { "message": "No diff content found." },
   "diffNoHunks": { "message": "No hunks in this diff file." },
   "diffFileFallback": { "message": "Diff file" },
+  "diffViewMode": { "message": "Diff view mode" },
+  "diffViewUnified": { "message": "Unified" },
+  "diffViewSplit": { "message": "Split" },
 
   "treeFolderFallback": { "message": "Folder" },
 

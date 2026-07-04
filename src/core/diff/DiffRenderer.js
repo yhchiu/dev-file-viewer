@@ -1,14 +1,42 @@
 import { t } from '../i18n/i18n.js';
 
 export class DiffRenderer {
-  render(diffText, targetElement) {
+  constructor(options = {}) {
+    this.viewMode = normalizeDiffViewMode(options.viewMode);
+  }
+
+  render(diffText, targetElement, options = {}) {
+    this.viewMode = normalizeDiffViewMode(options.viewMode || this.viewMode);
     targetElement.textContent = '';
     targetElement.classList.add('diff-body');
+    targetElement.dataset.diffViewMode = this.viewMode;
 
     const wrapper = document.createElement('div');
     wrapper.className = 'diff-viewer';
+    wrapper.dataset.diffViewMode = this.viewMode;
     const sections = this.parseUnifiedDiff(diffText || '');
     const outlineFiles = [];
+    const hunkRecords = [];
+
+    const toolbar = this.renderViewToolbar();
+    wrapper.append(toolbar);
+
+    const applyViewMode = viewMode => {
+      this.viewMode = normalizeDiffViewMode(viewMode);
+      targetElement.dataset.diffViewMode = this.viewMode;
+      wrapper.dataset.diffViewMode = this.viewMode;
+      updateViewToolbar(toolbar, this.viewMode);
+
+      for (const { element, hunk } of hunkRecords) {
+        this.renderHunkBody(element, hunk, this.viewMode);
+      }
+    };
+
+    toolbar.addEventListener('click', event => {
+      const button = event.target.closest?.('[data-diff-view-mode]');
+      if (!button || !toolbar.contains(button)) return;
+      applyViewMode(button.dataset.diffViewMode);
+    });
 
     if (!sections.length) {
       const empty = document.createElement('div');
@@ -23,10 +51,34 @@ export class DiffRenderer {
       const rendered = this.renderFileSection(section, index);
       wrapper.append(rendered.element);
       outlineFiles.push(rendered.outline);
+      hunkRecords.push(...rendered.hunks);
     });
 
     targetElement.append(wrapper);
     return { files: outlineFiles };
+  }
+
+  renderViewToolbar() {
+    const toolbar = document.createElement('div');
+    toolbar.className = 'diff-view-toolbar';
+
+    const toggle = document.createElement('div');
+    toggle.className = 'diff-view-toggle';
+    toggle.setAttribute('role', 'group');
+    toggle.setAttribute('aria-label', t('diffViewMode'));
+
+    for (const mode of ['unified', 'split']) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'diff-view-toggle-button';
+      button.dataset.diffViewMode = mode;
+      button.textContent = t(mode === 'split' ? 'diffViewSplit' : 'diffViewUnified');
+      toggle.append(button);
+    }
+
+    toolbar.append(toggle);
+    updateViewToolbar(toolbar, this.viewMode);
+    return toolbar;
   }
 
   parseUnifiedDiff(text) {
@@ -151,21 +203,26 @@ export class DiffRenderer {
       root.append(empty);
       return {
         element: root,
+        hunks: [],
         outline: { id, path: filePath, text: filePath, stats, element: root }
       };
     }
 
+    const hunkRecords = [];
     for (const hunk of section.hunks) {
-      root.append(this.renderHunk(hunk));
+      const hunkElement = this.renderHunk(hunk, this.viewMode);
+      root.append(hunkElement);
+      hunkRecords.push({ element: hunkElement, hunk });
     }
 
     return {
       element: root,
+      hunks: hunkRecords,
       outline: { id, path: filePath, text: filePath, stats, element: root }
     };
   }
 
-  renderHunk(hunk) {
+  renderHunk(hunk, viewMode = this.viewMode) {
     const hunkEl = document.createElement('div');
     hunkEl.className = 'diff-hunk';
 
@@ -174,8 +231,22 @@ export class DiffRenderer {
     header.textContent = hunk.header;
     hunkEl.append(header);
 
+    this.renderHunkBody(hunkEl, hunk, viewMode);
+    return hunkEl;
+  }
+
+  renderHunkBody(hunkEl, hunk, viewMode = this.viewMode) {
+    hunkEl.querySelector('.diff-table')?.remove();
+    const table =
+      normalizeDiffViewMode(viewMode) === 'split'
+        ? this.renderSplitHunkTable(hunk)
+        : this.renderUnifiedHunkTable(hunk);
+    hunkEl.append(table);
+  }
+
+  renderUnifiedHunkTable(hunk) {
     const table = document.createElement('table');
-    table.className = 'diff-table';
+    table.className = 'diff-table diff-table-unified';
     const tbody = document.createElement('tbody');
     table.append(tbody);
 
@@ -222,9 +293,170 @@ export class DiffRenderer {
       tbody.append(row);
     }
 
-    hunkEl.append(table);
-    return hunkEl;
+    return table;
   }
+
+  renderSplitHunkTable(hunk) {
+    const table = document.createElement('table');
+    table.className = 'diff-table diff-table-split';
+    const tbody = document.createElement('tbody');
+    table.append(tbody);
+
+    let oldLine = hunk.oldLine;
+    let newLine = hunk.newLine;
+
+    for (let index = 0; index < hunk.lines.length; ) {
+      const line = hunk.lines[index];
+      const type = classifyDiffLine(line);
+
+      if (type === 'context') {
+        const code = line.startsWith(' ') ? line.slice(1) : line;
+        tbody.append(
+          createSplitRow({
+            rowClass: 'diff-line diff-line-context diff-split-line-context',
+            oldLine: String(oldLine++),
+            oldMarker: ' ',
+            oldCode: code,
+            newLine: String(newLine++),
+            newMarker: ' ',
+            newCode: code
+          })
+        );
+        index += 1;
+        continue;
+      }
+
+      if (type === 'note') {
+        tbody.append(
+          createSplitRow({
+            rowClass: 'diff-line diff-line-note diff-split-line-note',
+            oldCode: line
+          })
+        );
+        index += 1;
+        continue;
+      }
+
+      if (type === 'added' || type === 'removed') {
+        const removed = [];
+        const added = [];
+
+        while (index < hunk.lines.length) {
+          const changeLine = hunk.lines[index];
+          const changeType = classifyDiffLine(changeLine);
+          if (changeType !== 'added' && changeType !== 'removed') break;
+
+          if (changeType === 'removed') {
+            removed.push({ line: String(oldLine++), code: changeLine.slice(1) });
+          } else {
+            added.push({ line: String(newLine++), code: changeLine.slice(1) });
+          }
+          index += 1;
+        }
+
+        const rowCount = Math.max(removed.length, added.length);
+        for (let offset = 0; offset < rowCount; offset += 1) {
+          const oldChange = removed[offset];
+          const newChange = added[offset];
+          tbody.append(
+            createSplitRow({
+              rowClass: 'diff-line diff-split-line-change',
+              oldLine: oldChange?.line || '',
+              oldMarker: oldChange ? '−' : '',
+              oldCode: oldChange?.code || '',
+              oldClasses: oldChange ? ['diff-split-removed'] : ['diff-split-empty'],
+              newLine: newChange?.line || '',
+              newMarker: newChange ? '+' : '',
+              newCode: newChange?.code || '',
+              newClasses: newChange ? ['diff-split-added'] : ['diff-split-empty']
+            })
+          );
+        }
+        continue;
+      }
+
+      tbody.append(
+        createSplitRow({
+          rowClass: 'diff-line diff-line-context diff-split-line-context',
+          oldCode: line,
+          newCode: line
+        })
+      );
+      index += 1;
+    }
+
+    return table;
+  }
+}
+
+function updateViewToolbar(toolbar, viewMode) {
+  const normalizedMode = normalizeDiffViewMode(viewMode);
+  for (const button of toolbar.querySelectorAll('[data-diff-view-mode]')) {
+    const active = button.dataset.diffViewMode === normalizedMode;
+    button.classList.toggle('is-active', active);
+    button.setAttribute('aria-pressed', String(active));
+  }
+}
+
+function normalizeDiffViewMode(value) {
+  return value === 'split' ? 'split' : 'unified';
+}
+
+function createSplitRow({
+  rowClass,
+  oldLine = '',
+  oldMarker = '',
+  oldCode = '',
+  oldClasses = [],
+  newLine = '',
+  newMarker = '',
+  newCode = '',
+  newClasses = []
+}) {
+  const row = document.createElement('tr');
+  row.className = rowClass;
+
+  const oldNumberCell = createSplitCell(
+    'diff-line-number diff-line-number-old diff-split-old',
+    oldLine,
+    oldClasses
+  );
+  const oldMarkerCell = createSplitCell(
+    'diff-marker diff-marker-old diff-split-old',
+    oldMarker,
+    oldClasses
+  );
+  const oldCodeCell = createSplitCell(
+    'diff-code diff-code-old diff-split-old',
+    oldCode,
+    oldClasses
+  );
+  const newNumberCell = createSplitCell(
+    'diff-line-number diff-line-number-new diff-split-new',
+    newLine,
+    newClasses
+  );
+  const newMarkerCell = createSplitCell(
+    'diff-marker diff-marker-new diff-split-new',
+    newMarker,
+    newClasses
+  );
+  const newCodeCell = createSplitCell(
+    'diff-code diff-code-new diff-split-new',
+    newCode,
+    newClasses
+  );
+
+  row.append(oldNumberCell, oldMarkerCell, oldCodeCell, newNumberCell, newMarkerCell, newCodeCell);
+  return row;
+}
+
+function createSplitCell(className, text, extraClasses = []) {
+  const cell = document.createElement('td');
+  cell.className = className;
+  for (const extraClass of extraClasses) cell.classList.add(extraClass);
+  cell.textContent = text;
+  return cell;
 }
 
 function normalizeFileLabel(value = '') {

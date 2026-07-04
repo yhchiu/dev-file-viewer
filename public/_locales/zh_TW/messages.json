@@ -269,6 +269,9 @@
   "diffNoContent": { "message": "找不到 Diff 內容。" },
   "diffNoHunks": { "message": "此 Diff 檔案中沒有變更區塊。" },
   "diffFileFallback": { "message": "Diff 檔案" },
+  "diffViewMode": { "message": "Diff 檢視模式" },
+  "diffViewUnified": { "message": "Unified" },
+  "diffViewSplit": { "message": "Split" },
 
   "treeFolderFallback": { "message": "資料夾" },
 

@@ -269,6 +269,9 @@
   "diffNoContent": { "message": "找不到 Diff 内容。" },
   "diffNoHunks": { "message": "此 Diff 文件中没有更改块。" },
   "diffFileFallback": { "message": "Diff 文件" },
+  "diffViewMode": { "message": "Diff 视图模式" },
+  "diffViewUnified": { "message": "Unified" },
+  "diffViewSplit": { "message": "Split" },
 
   "treeFolderFallback": { "message": "文件夹" },
 

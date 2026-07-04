@@ -1048,7 +1048,8 @@ select {
 @media (max-width: 820px) {
   .toolbar,
   .status,
-  .markdown-body {
+  .markdown-body,
+  .diff-body {
     width: 100%;
     max-width: none;
   }
@@ -1089,6 +1090,15 @@ select {
   }
   .markdown-body {
     padding: 22px;
+  }
+  .diff-view-toolbar {
+    justify-content: stretch;
+  }
+  .diff-view-toggle {
+    width: 100%;
+  }
+  .diff-view-toggle-button {
+    min-width: 0;
   }
 }
 
@@ -1722,6 +1732,51 @@ body.markdown-width-full .diff-body,
   line-height: 1.45;
 }
 
+.diff-view-toolbar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.diff-view-toggle {
+  display: inline-grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel-2);
+}
+
+.diff-view-toggle-button {
+  min-width: 82px;
+  padding: 5px 10px;
+  border: 0;
+  border-radius: 7px;
+  color: var(--muted);
+  background: transparent;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.diff-view-toggle-button:hover,
+.diff-view-toggle-button:focus-visible {
+  color: var(--accent);
+  background: var(--accent-soft);
+  outline: 0;
+}
+
+.diff-view-toggle-button.is-active {
+  color: var(--fg);
+  background: var(--panel);
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.08);
+}
+
 .diff-file {
   border: 1px solid var(--line);
   border-radius: 14px;
@@ -1797,6 +1852,11 @@ body.markdown-width-full .diff-body,
   table-layout: auto;
 }
 
+.diff-table-split {
+  min-width: 980px;
+  table-layout: fixed;
+}
+
 .diff-line-number {
   width: 1%;
   min-width: 44px;
@@ -1823,6 +1883,20 @@ body.markdown-width-full .diff-body,
   width: 100%;
   padding: 0 12px 0 4px;
   white-space: pre;
+}
+
+.diff-table-split .diff-line-number {
+  width: 56px;
+  min-width: 56px;
+}
+
+.diff-table-split .diff-marker {
+  width: 28px;
+  min-width: 28px;
+}
+
+.diff-table-split .diff-code {
+  width: calc((100% - 168px) / 2);
 }
 
 .diff-line-added {
@@ -1932,6 +2006,30 @@ body.markdown-width-full .diff-body,
   white-space: pre;
 }
 
+.markdown-body.diff-body .diff-table-split {
+  min-width: 980px;
+  table-layout: fixed;
+}
+
+.markdown-body.diff-body .diff-table-split .diff-line-number {
+  width: 56px;
+  min-width: 56px;
+}
+
+.markdown-body.diff-body .diff-table-split .diff-marker {
+  width: 28px;
+  min-width: 28px;
+}
+
+.markdown-body.diff-body .diff-table-split .diff-code {
+  width: calc((100% - 168px) / 2);
+  padding-right: 10px;
+}
+
+.markdown-body.diff-body .diff-table-split .diff-code-old {
+  border-right: 1px solid #d0d7de;
+}
+
 .markdown-body.diff-body .diff-line-added,
 .markdown-body.diff-body .diff-line-added td {
   background: #ccffd8;
@@ -1964,6 +2062,30 @@ body.markdown-width-full .diff-body,
   background: #ffffff;
   color: var(--muted);
   font-style: italic;
+}
+
+.markdown-body.diff-body .diff-table-split .diff-split-added {
+  background: #ccffd8;
+}
+
+.markdown-body.diff-body .diff-table-split .diff-split-added.diff-line-number,
+.markdown-body.diff-body .diff-table-split .diff-split-added.diff-marker {
+  background: #abf2bc;
+  color: #1a7f37;
+}
+
+.markdown-body.diff-body .diff-table-split .diff-split-removed {
+  background: #ffebe9;
+}
+
+.markdown-body.diff-body .diff-table-split .diff-split-removed.diff-line-number,
+.markdown-body.diff-body .diff-table-split .diff-split-removed.diff-marker {
+  background: #ffd7d5;
+  color: #cf222e;
+}
+
+.markdown-body.diff-body .diff-table-split .diff-split-empty {
+  background: #f6f8fa;
 }
 
 /* V2.9.3 diff outline tree */
@@ -2126,6 +2248,17 @@ body.markdown-width-full .diff-body,
   border-color: var(--line);
 }
 
+:root[data-theme='dark'] .diff-view-toggle {
+  background: var(--panel-2);
+  border-color: var(--line);
+}
+
+:root[data-theme='dark'] .diff-view-toggle-button.is-active {
+  color: var(--fg);
+  background: var(--panel);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.28);
+}
+
 :root[data-theme='dark'] .diff-file-header,
 :root[data-theme='dark'] .diff-meta {
   background: var(--panel-2);
@@ -2175,6 +2308,43 @@ body.markdown-width-full .diff-body,
 :root[data-theme='dark'] .markdown-body.diff-body .diff-line-removed .diff-marker {
   background: var(--diff-removed-line-bg);
   color: #fca5a5;
+}
+
+:root[data-theme='dark'] .markdown-body.diff-body .diff-table-split .diff-code-old {
+  border-color: var(--line);
+}
+
+:root[data-theme='dark'] .markdown-body.diff-body .diff-table-split .diff-split-added {
+  background: var(--diff-added-bg);
+}
+
+:root[data-theme='dark']
+  .markdown-body.diff-body
+  .diff-table-split
+  .diff-split-added.diff-line-number,
+:root[data-theme='dark'] .markdown-body.diff-body .diff-table-split .diff-split-added.diff-marker {
+  background: var(--diff-added-line-bg);
+  color: #86efac;
+}
+
+:root[data-theme='dark'] .markdown-body.diff-body .diff-table-split .diff-split-removed {
+  background: var(--diff-removed-bg);
+}
+
+:root[data-theme='dark']
+  .markdown-body.diff-body
+  .diff-table-split
+  .diff-split-removed.diff-line-number,
+:root[data-theme='dark']
+  .markdown-body.diff-body
+  .diff-table-split
+  .diff-split-removed.diff-marker {
+  background: var(--diff-removed-line-bg);
+  color: #fca5a5;
+}
+
+:root[data-theme='dark'] .markdown-body.diff-body .diff-table-split .diff-split-empty {
+  background: #111827;
 }
 
 :root[data-theme='dark'] .hljs-comment,
