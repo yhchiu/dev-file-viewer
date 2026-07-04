@@ -515,10 +515,7 @@ export class FileTabsController {
     const homeIndex = items.findIndex(item => item.key === drag.key);
     if (homeIndex < 0) return;
 
-    const advance =
-      items.length > 1
-        ? items[1].offsetLeft - items[0].offsetLeft
-        : items[0].width;
+    const advance = items.length > 1 ? items[1].offsetLeft - items[0].offsetLeft : items[0].width;
     const gap = Math.max(0, advance - items[0].width);
 
     let indicator = null;
