@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   getFileName,
   getExtension,
+  getRecognizedExtension,
   isSupportedDocumentFile,
   isSupportedDiffFile,
   isSupportedTextFile,
@@ -32,6 +33,17 @@ describe('getFileName / getExtension', () => {
     expect(getExtension('Makefile')).toBe('');
     expect(getExtension('.gitignore')).toBe(''); // dotIndex 0 → no extension
     expect(getExtension('archive.tar.gz')).toBe('.gz');
+  });
+
+  it('recognises inner extensions before common example/default suffixes', () => {
+    expect(getExtension('config.yaml.example')).toBe('.example');
+    expect(getRecognizedExtension('config.yaml.example')).toBe('.yaml');
+    expect(getRecognizedExtension('config.ini.default')).toBe('.ini');
+    expect(getRecognizedExtension('config.json.sample')).toBe('.json');
+    expect(getRecognizedExtension('phpunit.xml.dist')).toBe('.xml');
+    expect(getRecognizedExtension('settings.toml.template')).toBe('.toml');
+    expect(getRecognizedExtension('https://x.test/config.YML.DEFAULT?raw=1')).toBe('.yml');
+    expect(getRecognizedExtension('notes.example')).toBe('.example');
   });
 });
 
@@ -76,6 +88,16 @@ describe('isSupported* predicates', () => {
     expect(isConfigDotfile('notes.txt')).toBe(false);
     expect(isSupportedViewerFile('/repo/.gitignore')).toBe(true);
   });
+
+  it('recognises files with common example/default suffixes by their inner extension', () => {
+    expect(isSupportedDocumentFile('README.md.example')).toBe(true);
+    expect(isSupportedDiffFile('changes.patch.dist')).toBe(true);
+    expect(isSupportedTextFile('notes.txt.default')).toBe(true);
+    expect(isSupportedSourceCodeFile('config.yaml.example')).toBe(true);
+    expect(isSupportedSourceCodeFile('config.ini.default')).toBe(true);
+    expect(isSupportedSourceCodeFile('Dockerfile.example')).toBe(true);
+    expect(isSupportedViewerFile('image.png.example')).toBe(false);
+  });
 });
 
 describe('ALL_SUPPORTED_EXTENSIONS', () => {
@@ -92,12 +114,15 @@ describe('matchedAutoOpenKey / AUTO_OPEN_CATEGORIES', () => {
     expect(matchedAutoOpenKey('https://x.com/d/readme.md?x=1')).toBe('.md');
     expect(matchedAutoOpenKey('a.PATCH')).toBe('.patch');
     expect(matchedAutoOpenKey('notes.txt')).toBe('.txt');
+    expect(matchedAutoOpenKey('config.yaml.example')).toBe('.yaml');
+    expect(matchedAutoOpenKey('config.ini.default')).toBe('.ini');
   });
 
   it('returns the lower-cased name for extensionless special files', () => {
     expect(matchedAutoOpenKey('/repo/Dockerfile')).toBe('dockerfile');
     expect(matchedAutoOpenKey('C:\\repo\\Makefile')).toBe('makefile');
     expect(matchedAutoOpenKey('CMakeLists.txt')).toBe('cmakelists.txt');
+    expect(matchedAutoOpenKey('Dockerfile.example')).toBe('dockerfile');
   });
 
   it('returns empty string for unsupported files', () => {
@@ -117,6 +142,8 @@ describe('sourceLanguageFromPath', () => {
     expect(sourceLanguageFromPath('a.ts')).toBe('typescript');
     expect(sourceLanguageFromPath('a.py')).toBe('python');
     expect(sourceLanguageFromPath('Dockerfile')).toBe('dockerfile');
+    expect(sourceLanguageFromPath('config.yaml.example')).toBe('yaml');
+    expect(sourceLanguageFromPath('config.ini.default')).toBe('ini');
     expect(sourceLanguageFromPath('mystery.unknown')).toBe('plaintext');
   });
 });
@@ -129,6 +156,10 @@ describe('detectFormat', () => {
     expect(detectFormat({ name: 'notes.txt' })).toBe(FORMAT_IDS.TEXT);
     expect(detectFormat({ name: 'notes.text' })).toBe(FORMAT_IDS.TEXT);
     expect(detectFormat({ name: 'CMakeLists.txt' })).toBe(FORMAT_IDS.SOURCE_CODE);
+    expect(detectFormat({ name: 'README.md.example' })).toBe(FORMAT_IDS.MARKDOWN);
+    expect(detectFormat({ name: 'changes.patch.dist' })).toBe(FORMAT_IDS.DIFF);
+    expect(detectFormat({ name: 'config.ini.default' })).toBe(FORMAT_IDS.SOURCE_CODE);
+    expect(detectFormat({ name: 'notes.txt.sample' })).toBe(FORMAT_IDS.TEXT);
     expect(detectFormat({ mimeType: 'text/markdown' })).toBe(FORMAT_IDS.MARKDOWN);
     expect(detectFormat({ mimeType: 'text/plain' })).toBe(FORMAT_IDS.TEXT);
     expect(detectFormat({ mimeType: 'application/json' })).toBe(FORMAT_IDS.SOURCE_CODE);

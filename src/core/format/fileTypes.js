@@ -80,6 +80,19 @@ export const ALL_SUPPORTED_EXTENSIONS = [
   ...SOURCE_CODE_EXTENSIONS
 ];
 
+const ALL_SUPPORTED_EXTENSION_SET = new Set(ALL_SUPPORTED_EXTENSIONS);
+
+const AUXILIARY_FILE_SUFFIXES = Object.freeze([
+  '.default',
+  '.defaults',
+  '.dist',
+  '.example',
+  '.sample',
+  '.template',
+  '.tmpl',
+  '.tpl'
+]);
+
 // Common config dotfiles whose leading dot is the whole name, so getExtension()
 // reads no extension for them. Recognized so they open as plain-text source via
 // the file picker and drag-and-drop. Matches the exact name or a `.env.local`
@@ -196,22 +209,60 @@ export function getExtension(value = '') {
   return fileName.slice(dotIndex).toLowerCase();
 }
 
+function stripAuxiliaryFileSuffixes(fileName = '') {
+  let strippedName = String(fileName);
+
+  while (strippedName) {
+    const lowerName = strippedName.toLowerCase();
+    const suffix = AUXILIARY_FILE_SUFFIXES.find(candidate => lowerName.endsWith(candidate));
+    if (!suffix) return strippedName;
+
+    const nextName = strippedName.slice(0, -suffix.length);
+    if (!nextName) return strippedName;
+    strippedName = nextName;
+  }
+
+  return strippedName;
+}
+
+function getFileTypeName(value = '') {
+  return stripAuxiliaryFileSuffixes(getFileName(value)).toLowerCase();
+}
+
+export function getRecognizedExtension(value = '') {
+  const fileName = getFileName(value);
+  const lowerFileName = fileName.toLowerCase();
+  const extension = getExtension(fileName);
+
+  if (!extension && ALL_SUPPORTED_EXTENSION_SET.has(lowerFileName)) return lowerFileName;
+  if (!AUXILIARY_FILE_SUFFIXES.includes(extension)) return extension;
+
+  const strippedFileName = stripAuxiliaryFileSuffixes(fileName);
+  const strippedExtension = getExtension(strippedFileName);
+  if (ALL_SUPPORTED_EXTENSION_SET.has(strippedExtension)) return strippedExtension;
+
+  const lowerStrippedFileName = strippedFileName.toLowerCase();
+  if (ALL_SUPPORTED_EXTENSION_SET.has(lowerStrippedFileName)) return lowerStrippedFileName;
+
+  return extension;
+}
+
 export function isSupportedDocumentFile(value = '') {
-  return DOCUMENT_EXTENSIONS.has(getExtension(value));
+  return DOCUMENT_EXTENSIONS.has(getRecognizedExtension(value));
 }
 
 export function isSupportedDiffFile(value = '') {
-  return DIFF_EXTENSIONS.has(getExtension(value));
+  return DIFF_EXTENSIONS.has(getRecognizedExtension(value));
 }
 
 export function isSupportedTextFile(value = '') {
-  return TEXT_EXTENSIONS.has(getExtension(value));
+  return TEXT_EXTENSIONS.has(getRecognizedExtension(value));
 }
 
 export function isSupportedSourceCodeFile(value = '') {
   return (
-    SOURCE_CODE_EXTENSIONS.has(getExtension(value)) ||
-    SPECIAL_SOURCE_FILE_NAMES.has(getFileName(value).toLowerCase()) ||
+    SOURCE_CODE_EXTENSIONS.has(getRecognizedExtension(value)) ||
+    SPECIAL_SOURCE_FILE_NAMES.has(getFileTypeName(value)) ||
     isConfigDotfile(value)
   );
 }
@@ -226,10 +277,10 @@ export function isSupportedViewerFile(value = '') {
 }
 
 export function sourceLanguageFromPath(value = '') {
-  const fileName = getFileName(value).toLowerCase();
+  const fileName = getFileTypeName(value);
   const special = SPECIAL_SOURCE_FILE_NAMES.get(fileName);
   if (special) return special;
-  return EXTENSION_LANGUAGE_MAP.get(getExtension(value)) || 'plaintext';
+  return EXTENSION_LANGUAGE_MAP.get(getRecognizedExtension(value)) || 'plaintext';
 }
 
 export function formatLabel(format) {
@@ -356,9 +407,9 @@ const ALL_AUTO_OPEN_EXTENSIONS = new Set([
 export function matchedAutoOpenKey(value = '') {
   // Check special filenames first (matching sourceLanguageFromPath), so a file
   // like CMakeLists.txt maps to its special key rather than the ".txt" key.
-  const fileName = getFileName(value).toLowerCase();
+  const fileName = getFileTypeName(value);
   if (SPECIAL_SOURCE_FILE_NAMES.has(fileName)) return fileName;
-  const extension = getExtension(value);
+  const extension = getRecognizedExtension(value);
   if (extension && ALL_AUTO_OPEN_EXTENSIONS.has(extension)) return extension;
   return '';
 }
