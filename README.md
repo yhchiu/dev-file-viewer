@@ -1,6 +1,6 @@
 # Dev File Viewer
 
-![Dev File Viewer brand mark](public/assets/brand/brand-mark.png)
+![Dev File Viewer brand mark](docs/brand/brand-mark.png)
 
 **Markdown, Diff & Source Viewer** — a privacy-first Chrome extension for previewing local and remote developer files. Everything is rendered locally inside the extension; no file contents are ever sent anywhere.
 
