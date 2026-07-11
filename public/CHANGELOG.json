@@ -1,8 +1,23 @@
 [
   {
-    "version": "3.1.1",
+    "version": "3.1.2",
     "date": "2026-07-11",
     "items": [
+      {
+        "commit": "51dfb210c7c23f6e61188c830f0d6810716a8cc5",
+        "type": "fix",
+        "subject": "fix(mermaid): add URL.canParse fallback for Chrome below 120"
+      },
+      {
+        "commit": "6f62e8b379a5718393f9447dde5e88c01ab72af8",
+        "type": "chore",
+        "subject": "chore: lower minimum Chrome version from 116 to 111"
+      },
+      {
+        "commit": "a557e9b1808d5f226b7484876bd7ba2cc903f704",
+        "type": "feat",
+        "subject": "feat(scripts): add version bump argument to git-log-json.sh"
+      },
       {
         "commit": "5ec169a0897ccb26611276a9eafcc39f58b0af70",
         "type": "chore",
@@ -12,7 +27,13 @@
         "commit": "8858f3e6a1bace1603be70db382567a912c8ebf3",
         "type": "chore",
         "subject": "chore: move brand assets out of public to shrink dist"
-      },
+      }
+    ]
+  },
+  {
+    "version": "3.1.1",
+    "date": "2026-07-11",
+    "items": [
       {
         "commit": "7cfe13cfa13874db2896cffc31581e436fa105ce",
         "type": "docs",
