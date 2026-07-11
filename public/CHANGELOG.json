@@ -1,5 +1,46 @@
 [
   {
+    "version": "3.1.1",
+    "date": "2026-07-11",
+    "items": [
+      {
+        "commit": "59ad018935babcc50a22534973ba40eb55ef59ab",
+        "type": "docs",
+        "subject": "docs: add release zip install instructions to README"
+      },
+      {
+        "commit": "d953becce061a07c5a497a109f984203befce7df",
+        "type": "fix",
+        "subject": "fix(scripts): zip dist contents so manifest.json is at zip root"
+      },
+      {
+        "commit": "7d1824f74ea484a0179d38f23ad24d16f13b8191",
+        "type": "ci",
+        "subject": "ci: add release workflow to publish extension zip"
+      },
+      {
+        "commit": "049cd19c7de53d3cdf87401027319705336a5910",
+        "type": "fix",
+        "subject": "fix(scripts): derive zip filename from manifest version"
+      },
+      {
+        "commit": "11ff8a37195081c14542fd9268f92ecfc993ff69",
+        "type": "chore",
+        "subject": "chore: add pre-push hook to run tests before pushing"
+      },
+      {
+        "commit": "3962f69239fc31ed0c1f6edea6bcb35c51320c3d",
+        "type": "chore",
+        "subject": "chore: add pre-commit hook to auto-format staged files"
+      },
+      {
+        "commit": "df251d8fba75e4bb11a4f94301c50396992dbc6d",
+        "type": "style",
+        "subject": "style: fix prettier formatting"
+      }
+    ]
+  },
+  {
     "version": "3.1.0",
     "date": "2026-07-11",
     "items": [
