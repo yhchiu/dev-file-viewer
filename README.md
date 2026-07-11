@@ -11,23 +11,15 @@
 - **Markdown** with GitHub-flavored syntax, tables, and stable heading anchors
 - **Mermaid** diagrams from ` ```mermaid ` fenced code blocks
 - **Source code** viewer with syntax highlighting for dozens of languages, plus common extensionless files (`Dockerfile`, `Makefile`, `Gemfile`, `Rakefile`, …)
-- **Diff / patch** viewer for `.diff` and `.patch`
+- **Diff / patch** viewer for `.diff` and `.patch` with unified/split view
 - **Plain text** with line-ending detection
 
 ### Navigation
 
 - **Outline / Table of Contents** generated from headings, available as a sidebar tab and a low-distraction floating popover
-- Collapsible H1–H3 heading groups, active-section highlighting, and a heading filter for large documents
 - Draggable, pinnable floating Outline button
-- **Multiple file tabs** with pin and close
 - **Directory tree** sidebar for a user-selected local folder
-
-### Opening files
-
-- **Open File** / **Open Folder** local pickers — no special Chrome setting required
-- **Open URL** for remote `http(s)` documents
-- **Automatic preview** in the browser for supported file types served as plain text, configurable per type
-- Optional `file://` URL preview (requires enabling Chrome's file-access permission)
+- **Multiple file tabs** with pin and close
 
 ### Customization
 
@@ -42,6 +34,23 @@
 
 - 100% client-side; offline-only runtime — the parser, sanitizer, renderer, and Mermaid are all bundled inside the extension
 - No tracking, no analytics, no data collection
+
+## Screenshots
+
+### Markdown Viewer with Directory Tree (Bloom Theme)
+![Markdown Viewer with Directory Tree (Bloom Theme)](screenshots/01-viewer-dirtree-theme-bloom.png)
+
+### Source Viewer with Outline Tree (Forge Theme)
+![Suspended Page](screenshots/02-viewer-outlinetree-theme-forge.png)
+
+### Viewer Settings (Folio Theme)
+![Basic Settings](screenshots/03-viewer-settings.png)
+
+### Draggable, pinnable floating Outline
+![Tab Migration](screenshots/04-floating-Outline.png)
+
+### Extension Settings
+![Session Management](screenshots/05-extension-settings.png)
 
 ## Installation
 
