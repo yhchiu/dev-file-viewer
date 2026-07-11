@@ -1,4 +1,5 @@
 import { features } from '../core/config/features.js';
+import { ensureUrlCanParse } from '../core/browser/urlCanParsePolyfill.js';
 
 let mermaidPromise;
 
@@ -7,6 +8,9 @@ let mermaidPromise;
 // viewer's initial bundle and only pays the download/parse cost when a document
 // actually contains a diagram.
 function loadMermaid() {
+  // mermaid's sanitize-url dependency needs URL.canParse (Chrome 120+); the
+  // extension supports Chrome 111+, so make sure a fallback is in place.
+  ensureUrlCanParse();
   if (!mermaidPromise) {
     mermaidPromise = import('mermaid').then(({ default: mermaid }) => {
       mermaid.initialize({

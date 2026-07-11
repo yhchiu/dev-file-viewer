@@ -56,4 +56,22 @@ describe('mermaidPlugin.afterRender', () => {
     await mermaidPlugin.afterRender(root);
     expect(mermaid.run).not.toHaveBeenCalled();
   });
+
+  // mermaid's sanitize-url dependency calls URL.canParse, which Chrome only
+  // ships from 120 while the extension supports 111+. The plugin must install
+  // a fallback before mermaid renders.
+  it('installs a URL.canParse fallback before running mermaid', async () => {
+    const original = URL.canParse;
+    delete URL.canParse; // simulate Chrome 111-119
+    try {
+      await mermaidPlugin.afterRender(rootWithDiagram());
+
+      expect(mermaid.run).toHaveBeenCalledTimes(1);
+      expect(typeof URL.canParse).toBe('function');
+      expect(URL.canParse('https://example.com/')).toBe(true);
+      expect(URL.canParse('not a url')).toBe(false);
+    } finally {
+      URL.canParse = original;
+    }
+  });
 });
