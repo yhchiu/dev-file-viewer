@@ -38,18 +38,23 @@
 ## Screenshots
 
 ### Markdown Viewer with Directory Tree (Bloom Theme)
+
 ![Markdown Viewer with Directory Tree (Bloom Theme)](screenshots/01-viewer-dirtree-theme-bloom.png)
 
 ### Source Viewer with Outline Tree (Forge Theme)
+
 ![Suspended Page](screenshots/02-viewer-outlinetree-theme-forge.png)
 
 ### Viewer Settings (Folio Theme)
+
 ![Basic Settings](screenshots/03-viewer-settings.png)
 
 ### Draggable, pinnable floating Outline
+
 ![Tab Migration](screenshots/04-floating-Outline.png)
 
 ### Extension Settings
+
 ![Session Management](screenshots/05-extension-settings.png)
 
 ## Installation
