@@ -1,5 +1,56 @@
 [
   {
+    "version": "3.1.0",
+    "date": "2026-07-11",
+    "items": [
+      {
+        "commit": "bed791239af12329c01e1d49453550fe85a61110",
+        "type": "docs",
+        "subject": "docs: update README and add screenshots"
+      },
+      {
+        "commit": "5bd0dc9c3d658225bad3d4d038ad969878f0d1a5",
+        "type": "style",
+        "subject": "style: fix prettier formatting"
+      },
+      {
+        "commit": "b98684bac90971446f94803e039d2548ed74ad0a",
+        "type": "ci",
+        "subject": "ci: upload dist artifact"
+      },
+      {
+        "commit": "bb75aff8fdd74ffc143517d5b8763463a75099b4",
+        "type": "ci",
+        "subject": "ci: update GitHub Actions to Node 24"
+      },
+      {
+        "commit": "ac61815d11d759d42f8670ed0bfa0ceae16dcc57",
+        "type": "style",
+        "subject": "style(diff): emphasize changed file titles"
+      },
+      {
+        "commit": "1f6b0703f838e146df0a3a15dac16d2eb1f16716",
+        "type": "feat",
+        "subject": "feat(diff): add split diff view toggle"
+      },
+      {
+        "commit": "82df8987e337fb1c33661cdc806cc797e6d02dd6",
+        "type": "fix",
+        "subject": "fix: detect file types before example suffixes"
+      },
+      {
+        "commit": "d7d4cfba61935c1a97efc6c939bc03fb8b3eddc5",
+        "type": "feat",
+        "subject": "feat(viewer): make file-tab drag-to-reorder clearer and more intuitive"
+      },
+      {
+        "commit": "031cd10d82b69094f2ebaf6c843a0c814ac6801b",
+        "type": "feat",
+        "subject": "feat(viewer): add source/rendered toggle for Markdown files"
+      }
+    ]
+  },
+  {
     "version": "3.0.0",
     "date": "2026-06-26",
     "items": [
