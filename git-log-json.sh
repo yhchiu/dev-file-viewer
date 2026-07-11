@@ -11,8 +11,59 @@ set -eu
 # committed bump roll into the working-tree (pending) version, which sits on top.
 #
 # The output is fully derived from git, so any manual edits to CHANGELOG.json
-# are overwritten on each run. Run from the directory that holds manifest.json
-# and CHANGELOG.json (public/).
+# are overwritten on each run. Can be run from anywhere; it works relative to
+# its own location (the repository root).
+#
+# Usage: ./git-log-json.sh [new-version]
+#
+# With a version argument (e.g. ./git-log-json.sh 3.1.1), package.json,
+# package-lock.json, and public/manifest.json are first updated to that
+# version, so the regenerated changelog lists it as the pending release.
+
+cd "$(dirname -- "$0")"
+
+# Optional version bump before the changelog is regenerated. Chrome manifest
+# versions are 2-4 dot-separated integers, so validate against that.
+if [ "$#" -ge 1 ]; then
+  new_version=$1
+  if ! printf '%s\n' "$new_version" | grep -Eq '^[0-9]+(\.[0-9]+){1,3}$'; then
+    echo "git-log-json.sh: invalid version '$new_version' (expected e.g. 3.1.1)" >&2
+    exit 1
+  fi
+
+  node - "$new_version" <<'NODE'
+const fs = require('fs');
+
+const version = process.argv[2];
+
+// Replace only the version value so hand-maintained files keep their
+// formatting. The first "version" string field in package.json and
+// manifest.json is the package/extension version ("manifest_version" and
+// "minimum_chrome_version" do not match the quoted-key pattern).
+function replaceVersion(fileName) {
+  const text = fs.readFileSync(fileName, 'utf8');
+  if (!/"version"\s*:\s*"/.test(text)) {
+    throw new Error(`No version field found in ${fileName}`);
+  }
+  fs.writeFileSync(fileName, text.replace(/("version"\s*:\s*")[^"]*(")/, `$1${version}$2`));
+  console.log(`${fileName}: version set to ${version}`);
+}
+
+replaceVersion('package.json');
+replaceVersion('public/manifest.json');
+
+// package-lock.json is machine-generated in npm's own 2-space format, which a
+// parse/stringify round-trip preserves; both of its version fields (top level
+// and packages[""]) need updating.
+if (fs.existsSync('package-lock.json')) {
+  const lock = JSON.parse(fs.readFileSync('package-lock.json', 'utf8'));
+  lock.version = version;
+  if (lock.packages && lock.packages['']) lock.packages[''].version = version;
+  fs.writeFileSync('package-lock.json', `${JSON.stringify(lock, null, 2)}\n`);
+  console.log(`package-lock.json: version set to ${version}`);
+}
+NODE
+fi
 
 cd public
 

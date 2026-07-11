@@ -4,7 +4,17 @@
     "date": "2026-07-11",
     "items": [
       {
-        "commit": "59ad018935babcc50a22534973ba40eb55ef59ab",
+        "commit": "5ec169a0897ccb26611276a9eafcc39f58b0af70",
+        "type": "chore",
+        "subject": "chore(i18n): update appDesc summaries for CWS listing"
+      },
+      {
+        "commit": "8858f3e6a1bace1603be70db382567a912c8ebf3",
+        "type": "chore",
+        "subject": "chore: move brand assets out of public to shrink dist"
+      },
+      {
+        "commit": "7cfe13cfa13874db2896cffc31581e436fa105ce",
         "type": "docs",
         "subject": "docs: add release zip install instructions to README"
       },
