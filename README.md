@@ -59,7 +59,7 @@
 
 ## Installation
 
-Requires Chrome 116 or newer.
+Requires Chrome 111 or newer.
 
 ### Option 1: Install from a release
 

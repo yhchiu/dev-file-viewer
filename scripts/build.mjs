@@ -14,7 +14,7 @@ const common = {
   bundle: true,
   minify: true,
   sourcemap: false,
-  target: ['chrome116'],
+  target: ['chrome111'],
   logLevel: 'info',
   legalComments: 'none'
 };

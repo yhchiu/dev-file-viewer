@@ -5,7 +5,7 @@
   "short_name": "__MSG_appShortName__",
   "version": "3.1.1",
   "description": "__MSG_appDesc__",
-  "minimum_chrome_version": "116",
+  "minimum_chrome_version": "111",
   "icons": {
     "16": "assets/icons/icon16.png",
     "32": "assets/icons/icon32.png",
