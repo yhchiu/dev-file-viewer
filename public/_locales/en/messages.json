@@ -1,7 +1,7 @@
 {
   "appName": { "message": "Dev File Viewer" },
   "appShortName": { "message": "Dev Viewer" },
-  "appDesc": { "message": "Markdown, Diff & Source Viewer. V2 includes Markdown Table of Contents / Outline navigation." },
+  "appDesc": { "message": "Preview Markdown, source code, and diffs locally with outline navigation, a directory tree, and themes. 100% offline and private." },
   "appTagline": { "message": "Markdown, Diff & Source Viewer" },
 
   "ctxOpenPage": { "message": "Open page with Dev File Viewer" },

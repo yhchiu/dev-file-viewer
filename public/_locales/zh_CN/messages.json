@@ -1,7 +1,7 @@
 {
   "appName": { "message": "Dev File Viewer" },
   "appShortName": { "message": "Dev Viewer" },
-  "appDesc": { "message": "Markdown、Diff 与源代码查看器。V2 新增 Markdown 目录／大纲导航。" },
+  "appDesc": { "message": "在本地预览 Markdown、源代码与 Diff 文件，提供大纲导航、目录树与多种主题。100% 离线运行，不收集任何数据。" },
   "appTagline": { "message": "Markdown、Diff 与源代码查看器" },
 
   "ctxOpenPage": { "message": "用 Dev File Viewer 打开页面" },
