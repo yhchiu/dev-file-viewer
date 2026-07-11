@@ -61,7 +61,15 @@
 
 Requires Chrome 116 or newer.
 
-Build from source and load the unpacked extension:
+### Option 1: Install from a release
+
+1. Download `dev-file-viewer-v<version>-dist.zip` from the [latest release](https://github.com/yhchiu/dev-file-viewer/releases/latest).
+2. Create a new, empty folder and extract the zip into it. The archive has no top-level folder, so extracting it directly into `Downloads` would scatter the files.
+3. Open `chrome://extensions`, enable **Developer mode**, click **Load unpacked**, and select that folder.
+
+Keep the folder in place after installing — Chrome loads the extension from it on every start.
+
+### Option 2: Build from source
 
 ```bash
 npm install
