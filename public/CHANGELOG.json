@@ -1,5 +1,16 @@
 [
   {
+    "version": "3.1.3",
+    "date": "2026-07-13",
+    "items": [
+      {
+        "commit": "4759e22482478c16d205d727d76d8f451cc97c94",
+        "type": "chore",
+        "subject": "chore: remove unnecessary tabs permission to eliminate CWS warning"
+      }
+    ]
+  },
+  {
     "version": "3.1.2",
     "date": "2026-07-11",
     "items": [
