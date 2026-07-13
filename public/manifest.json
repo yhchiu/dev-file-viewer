@@ -26,7 +26,7 @@
     "service_worker": "background/service-worker.js",
     "type": "module"
   },
-  "permissions": ["contextMenus", "storage", "tabs", "activeTab", "scripting"],
+  "permissions": ["contextMenus", "storage", "activeTab", "scripting"],
   "host_permissions": ["file:///*"],
   "optional_host_permissions": ["http://*/*", "https://*/*"],
   "content_scripts": [
