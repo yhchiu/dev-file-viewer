@@ -4,6 +4,8 @@
 
 **Markdown, Diff & Source Viewer** — a privacy-first Chrome extension for previewing local and remote developer files. Everything is rendered locally inside the extension; no file contents are ever sent anywhere.
 
+[Available in the Chrome Web Store](https://chromewebstore.google.com/detail/dev-file-viewer/gfjgmjflgdgdifmgfebfdcagcllglelm)
+
 ## Features
 
 ### Rendering
@@ -61,7 +63,15 @@
 
 Requires Chrome 111 or newer.
 
-### Option 1: Install from a release
+### Install from Chrome Web Store (Recommended)
+
+Install directly from the Chrome Web Store: [Dev File Viewer](https://chromewebstore.google.com/detail/dev-file-viewer/gfjgmjflgdgdifmgfebfdcagcllglelm)
+
+1. Visit the Chrome Web Store link above
+2. Click "Add to Chrome" button
+3. Confirm the installation when prompted
+
+### Install from a release
 
 1. Download `dev-file-viewer-v<version>-dist.zip` from the [latest release](https://github.com/yhchiu/dev-file-viewer/releases/latest).
 2. Create a new, empty folder and extract the zip into it. The archive has no top-level folder, so extracting it directly into `Downloads` would scatter the files.
@@ -69,7 +79,7 @@ Requires Chrome 111 or newer.
 
 Keep the folder in place after installing — Chrome loads the extension from it on every start.
 
-### Option 2: Build from source
+### Build from source
 
 ```bash
 npm install
