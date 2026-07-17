@@ -56,6 +56,7 @@ describe('webAutoview', () => {
       const [scripts] = chrome.scripting.registerContentScripts.mock.calls[0];
       expect(scripts[0].id).toBe(WEB_AUTOVIEW_SCRIPT_ID);
       expect(scripts[0].matches).toEqual(WEB_AUTOVIEW_ORIGINS);
+      expect(scripts[0].css).toEqual(['content/inline-preview.css']);
       expect(scripts[0].js).toEqual(['content/markdown-autoview.js']);
     });
 
@@ -66,6 +67,23 @@ describe('webAutoview', () => {
       await syncWebAutoviewRegistration();
 
       expect(chrome.scripting.registerContentScripts).toHaveBeenCalledTimes(1);
+    });
+
+    it('replaces an older registration that does not include Inline Preview CSS', async () => {
+      chrome.permissions.contains.mockResolvedValue(true);
+      registered.push({
+        id: WEB_AUTOVIEW_SCRIPT_ID,
+        matches: WEB_AUTOVIEW_ORIGINS,
+        js: ['content/markdown-autoview.js'],
+        runAt: 'document_idle',
+        persistAcrossSessions: true
+      });
+
+      await syncWebAutoviewRegistration();
+
+      expect(chrome.scripting.unregisterContentScripts).toHaveBeenCalledTimes(1);
+      expect(chrome.scripting.registerContentScripts).toHaveBeenCalledTimes(1);
+      expect(registered[0].css).toEqual(['content/inline-preview.css']);
     });
 
     it('unregisters the script when the permission is revoked', async () => {

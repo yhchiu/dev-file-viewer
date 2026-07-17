@@ -3,7 +3,8 @@ import { isSupportedViewerFile } from '../format/fileTypes.js';
 const SAFE_SCHEMES = new Set(['http:', 'https:', 'file:', 'mailto:']);
 const URL_SCHEME_RE = /^[a-zA-Z][a-zA-Z\d+.-]*:/;
 
-export function rewriteLinks(root, baseUrl, onOpenDocumentLink) {
+export function rewriteLinks(root, baseUrl, onOpenDocumentLink, options = {}) {
+  const supportedDocumentBehavior = options.supportedDocumentBehavior || 'viewer';
   for (const link of root.querySelectorAll('a[href]')) {
     const href = link.getAttribute('href');
     if (!href) continue;
@@ -18,10 +19,12 @@ export function rewriteLinks(root, baseUrl, onOpenDocumentLink) {
     if (isRelative && !baseUrl) {
       if (isSupportedViewerFile(stripHashAndQuery(href))) {
         link.setAttribute('rel', 'noopener noreferrer');
-        link.addEventListener('click', event => {
-          event.preventDefault();
-          onOpenDocumentLink?.({ href, kind: 'relative-document' });
-        });
+        if (supportedDocumentBehavior === 'viewer') {
+          link.addEventListener('click', event => {
+            event.preventDefault();
+            onOpenDocumentLink?.({ href, kind: 'relative-document' });
+          });
+        }
       } else {
         link.removeAttribute('href');
       }
@@ -45,14 +48,16 @@ export function rewriteLinks(root, baseUrl, onOpenDocumentLink) {
     link.setAttribute('rel', 'noopener noreferrer');
 
     if (isSupportedViewerFile(resolved.pathname)) {
-      link.addEventListener('click', event => {
-        event.preventDefault();
-        onOpenDocumentLink?.({
-          href,
-          url: resolved.href,
-          kind: isRelative ? 'resolved-relative-document' : 'absolute-document'
+      if (supportedDocumentBehavior === 'viewer') {
+        link.addEventListener('click', event => {
+          event.preventDefault();
+          onOpenDocumentLink?.({
+            href,
+            url: resolved.href,
+            kind: isRelative ? 'resolved-relative-document' : 'absolute-document'
+          });
         });
-      });
+      }
     } else {
       link.setAttribute('target', '_blank');
     }

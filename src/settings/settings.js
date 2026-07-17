@@ -4,10 +4,10 @@ import {
   openExtensionSettings
 } from '../core/browser/fileUrlAccess.js';
 import { localizeDocument, t } from '../core/i18n/i18n.js';
+import { localizeInlinePreviewDocument } from '../core/i18n/inlinePreviewI18n.js';
 import { AUTO_OPEN_CATEGORIES } from '../core/format/fileTypes.js';
 import { syncChromeTheme } from '../core/ui/chromeTheme.js';
-
-const AUTO_OPEN_KEY = 'devFileViewer:autoOpen';
+import { AUTO_OPEN_KEY, normalizeAutoOpenConfig } from '../core/config/autoOpen.js';
 const WEB_ACCESS_ORIGINS = ['http://*/*', 'https://*/*'];
 const CHANGELOG_FILE = 'CHANGELOG.json';
 const CHANGELOG_REPO_URL = 'https://github.com/yhchiu/dev-file-viewer';
@@ -27,6 +27,7 @@ const CHANGELOG_TYPE_LABEL_KEYS = {
 };
 
 localizeDocument();
+localizeInlinePreviewDocument();
 
 /* ---------- Category navigation ---------- */
 
@@ -58,16 +59,18 @@ function setupCategoryNav() {
 
 /* ---------- Auto-open config ---------- */
 
-const config = { enabled: true, disabled: new Set() };
+const config = { enabled: true, inlinePreview: false, disabled: new Set() };
 
 async function loadConfig() {
   try {
     const stored = await chrome.storage.local.get(AUTO_OPEN_KEY);
-    const saved = stored[AUTO_OPEN_KEY] || {};
-    config.enabled = saved.enabled !== false;
-    config.disabled = new Set(Array.isArray(saved.disabled) ? saved.disabled : []);
+    const saved = normalizeAutoOpenConfig(stored[AUTO_OPEN_KEY]);
+    config.enabled = saved.enabled;
+    config.inlinePreview = saved.inlinePreview;
+    config.disabled = new Set(saved.disabled);
   } catch {
     config.enabled = true;
+    config.inlinePreview = false;
     config.disabled = new Set();
   }
 }
@@ -76,7 +79,11 @@ let savedFlagTimer = 0;
 
 async function persistConfig() {
   await chrome.storage.local.set({
-    [AUTO_OPEN_KEY]: { enabled: config.enabled, disabled: [...config.disabled] }
+    [AUTO_OPEN_KEY]: {
+      enabled: config.enabled,
+      inlinePreview: config.inlinePreview,
+      disabled: [...config.disabled]
+    }
   });
 
   const flag = document.querySelector('#auto-open-saved');
@@ -140,7 +147,10 @@ function buildTypeList() {
 
 function syncUI() {
   const master = document.querySelector('#auto-open-master');
+  const inlinePreview = document.querySelector('#inline-preview-toggle');
   master.checked = config.enabled;
+  inlinePreview.checked = config.inlinePreview;
+  inlinePreview.disabled = !config.enabled;
 
   document.querySelector('#auto-open-types').classList.toggle('is-disabled', !config.enabled);
 
@@ -167,6 +177,11 @@ function syncUI() {
 }
 
 function setupAutoOpenControls() {
+  document.querySelector('#inline-preview-toggle').addEventListener('change', event => {
+    config.inlinePreview = event.target.checked;
+    persistConfig();
+  });
+
   document.querySelector('#auto-open-master').addEventListener('change', event => {
     config.enabled = event.target.checked;
     persistConfig();
@@ -175,6 +190,7 @@ function setupAutoOpenControls() {
 
   document.querySelector('#auto-open-reset').addEventListener('click', () => {
     config.enabled = true;
+    config.inlinePreview = false;
     config.disabled = new Set();
     persistConfig();
     syncUI();

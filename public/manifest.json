@@ -33,7 +33,8 @@
     {
       "matches": ["file:///*"],
       "js": ["content/markdown-autoview.js"],
-      "run_at": "document_idle"
+      "run_at": "document_idle",
+      "css": ["content/inline-preview.css"]
     }
   ],
   "content_security_policy": {

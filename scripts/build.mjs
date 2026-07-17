@@ -44,6 +44,16 @@ await build({
   format: 'iife'
 });
 
+// Mermaid is intentionally a separate IIFE. The service worker injects it only
+// after Inline Preview detects a Mermaid code block, so ordinary documents do
+// not pay the dependency's download/parse cost.
+await build({
+  ...common,
+  entryPoints: [path.join(root, 'src/content/inline-mermaid.js')],
+  outfile: path.join(dist, 'content/inline-mermaid.js'),
+  format: 'iife'
+});
+
 await build({
   ...common,
   entryPoints: [path.join(root, 'src/background/service-worker.js')],

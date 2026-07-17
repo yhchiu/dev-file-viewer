@@ -20,6 +20,9 @@ export default defineConfig({
         'src/popup/popup.js',
         'src/settings/settings.js',
         'src/content/markdown-autoview.js',
+        'src/content/inline-mermaid.js',
+        'src/content/autoView.js',
+        'src/content/inlinePreview.js',
         'src/background/service-worker.js',
         'src/core/browser/fileUrlAccess.js',
         'src/core/ui/chromeTheme.js'

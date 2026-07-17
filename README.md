@@ -82,7 +82,7 @@ Then open `chrome://extensions`, enable **Developer mode**, click **Load unpacke
 
 - **Open File / Open Folder** — preview local files without changing any Chrome setting. Open Folder builds a directory tree in the sidebar.
 - **Open URL** — paste a remote Markdown or source URL.
-- **Automatic preview** — when you open a supported file in the browser and it is served as plain text, the extension opens it in the viewer. Detection is routed through the background service worker so Chrome does not block the navigation.
+- **Automatic preview** — when you open a supported file in the browser and it is served as plain text, the full viewer opens automatically by default. Enable **Inline Preview** in Settings to render directly in the original page, keep the original `file://` or `http(s)://` URL, and allow translation, gesture, dictionary, and accessibility extensions to work with the rendered DOM. The Inline Preview toolbar includes an **Outline** popup for Markdown section navigation and a **Text size** control that shares the same 12–24 px preference as the Full Viewer. Mermaid fenced code blocks are rendered on demand through a separate lazy-loaded bundle, so ordinary Inline Preview pages do not load Mermaid.
 - **Settings** — open the options page (toolbar popup → **Open Settings**, or right-click the extension → **Options**) to choose which file types open automatically and to manage `file://` access.
 
 Once a document is open, use the activity rail to switch between the Open, Files, Outline, and Settings panels, the floating Outline button for a quick section jump, the divider to resize the sidebar (double-click to reset), and the file tabs to move between open documents.
@@ -102,7 +102,7 @@ The extension cannot enumerate local directories from a `file://` URL. The direc
 
 ## Configuration: auto-open file types
 
-The Settings page (**Auto-open** category) lists every supported file type, grouped by category — Markdown, Diff & patch, Source & config, Plain text, and extensionless files. Use the master switch to enable or disable automatic opening entirely, or toggle individual types. A file only opens automatically when the browser serves it as plain text. Preferences are stored locally in `chrome.storage.local`.
+The Settings page (**Auto-open** category) lists every supported file type, grouped by category — Markdown, Diff & patch, Source & config, Plain text, and extensionless files. Use the master switch to enable or disable automatic opening entirely, or toggle individual types. **Inline Preview is disabled by default**; turn it on to render automatic previews in the original page instead of redirecting them into the full `chrome-extension://` viewer. A file only opens automatically when the browser serves it as plain text. Preferences are stored locally in `chrome.storage.local`.
 
 ## Development
 
@@ -130,7 +130,7 @@ src/
   plugins/           Mermaid and the plugin registry
   core/
     browser/         file:// access helpers
-    config/          feature flags
+    config/          feature flags and auto-open preferences
     diff/            diff rendering and outline
     format/          file-type detection and the auto-open catalog
     highlight/       syntax highlighting

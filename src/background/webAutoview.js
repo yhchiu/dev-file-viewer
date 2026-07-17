@@ -13,6 +13,7 @@ export const WEB_AUTOVIEW_ORIGINS = ['http://*/*', 'https://*/*'];
 const WEB_AUTOVIEW_SCRIPT = {
   id: WEB_AUTOVIEW_SCRIPT_ID,
   matches: WEB_AUTOVIEW_ORIGINS,
+  css: ['content/inline-preview.css'],
   js: ['content/markdown-autoview.js'],
   runAt: 'document_idle',
   persistAcrossSessions: true
@@ -26,20 +27,40 @@ export async function hasWebAutoviewPermission() {
   }
 }
 
-async function isWebAutoviewRegistered() {
+async function getRegisteredWebAutoview() {
   try {
     const scripts = await chrome.scripting.getRegisteredContentScripts({
       ids: [WEB_AUTOVIEW_SCRIPT_ID]
     });
-    return scripts.length > 0;
+    return scripts[0] || null;
   } catch {
-    return false;
+    return null;
   }
 }
 
+function sameList(left = [], right = []) {
+  return left.length === right.length && left.every((value, index) => value === right[index]);
+}
+
+function isCurrentRegistration(script) {
+  return Boolean(
+    script &&
+    sameList(script.matches, WEB_AUTOVIEW_SCRIPT.matches) &&
+    sameList(script.css, WEB_AUTOVIEW_SCRIPT.css) &&
+    sameList(script.js, WEB_AUTOVIEW_SCRIPT.js) &&
+    script.runAt === WEB_AUTOVIEW_SCRIPT.runAt &&
+    script.persistAcrossSessions === WEB_AUTOVIEW_SCRIPT.persistAcrossSessions
+  );
+}
+
 export async function registerWebAutoview() {
-  if (await isWebAutoviewRegistered()) return;
+  const registered = await getRegisteredWebAutoview();
+  if (isCurrentRegistration(registered)) return;
+
   try {
+    if (registered) {
+      await chrome.scripting.unregisterContentScripts({ ids: [WEB_AUTOVIEW_SCRIPT_ID] });
+    }
     await chrome.scripting.registerContentScripts([WEB_AUTOVIEW_SCRIPT]);
   } catch (error) {
     console.warn('Dev File Viewer: failed to register web autoview script', error);
@@ -47,7 +68,7 @@ export async function registerWebAutoview() {
 }
 
 export async function unregisterWebAutoview() {
-  if (!(await isWebAutoviewRegistered())) return;
+  if (!(await getRegisteredWebAutoview())) return;
   try {
     await chrome.scripting.unregisterContentScripts({ ids: [WEB_AUTOVIEW_SCRIPT_ID] });
   } catch (error) {

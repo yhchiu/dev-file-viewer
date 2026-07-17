@@ -94,7 +94,7 @@ export class MarkdownEngine {
     // eslint-disable-next-line no-unsanitized/property -- cleanHtml is DOMPurify-sanitized output
     targetElement.innerHTML = cleanHtml;
     highlightMarkdownCodeBlocks(targetElement);
-    rewriteLinks(targetElement, context.baseUrl, context.onOpenDocumentLink);
+    rewriteLinks(targetElement, context.baseUrl, context.onOpenDocumentLink, context.linkOptions);
     await this.pluginRegistry.runAfterRender(targetElement, context);
     installMarkdownCodeCopyButtons(targetElement);
   }

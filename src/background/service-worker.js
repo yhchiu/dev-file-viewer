@@ -1,6 +1,8 @@
 import { t } from '../core/i18n/i18n.js';
 import { isSupportedViewerFile } from '../core/format/fileTypes.js';
 import { affectsWebOrigins, syncWebAutoviewRegistration } from './webAutoview.js';
+import { injectInlineMermaid } from './inlineMermaid.js';
+import { LOAD_INLINE_MERMAID_MESSAGE } from '../content/inlineMermaidProtocol.js';
 
 const SNAPSHOT_PREFIX = 'sourceSnapshot:';
 const SNAPSHOT_TTL_MS = 30 * 60 * 1000;
@@ -62,7 +64,12 @@ async function openViewerForSnapshot(message, sender) {
     }
   });
 
-  await chrome.tabs.update(tabId, { url: viewerSnapshotUrl(snapshotId) });
+  const url = viewerSnapshotUrl(snapshotId);
+  if (message.disposition === 'new-tab') {
+    await chrome.tabs.create({ url });
+  } else {
+    await chrome.tabs.update(tabId, { url });
+  }
   return { ok: true, snapshotId };
 }
 
@@ -107,6 +114,13 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 });
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message?.type === LOAD_INLINE_MERMAID_MESSAGE) {
+    injectInlineMermaid(sender)
+      .then(sendResponse)
+      .catch(error => sendResponse({ ok: false, error: error?.message || String(error) }));
+    return true;
+  }
+
   if (message?.type === 'OPEN_VIEWER_FOR_SNAPSHOT') {
     openViewerForSnapshot(message, sender)
       .then(sendResponse)

@@ -88,6 +88,19 @@ describe('rewriteLinks — relative documents', () => {
     });
   });
 
+  it('keeps supported document links as normal navigation in inline mode', () => {
+    const onOpen = vi.fn();
+    const root = build('<a href="docs/readme.md">doc</a>');
+    rewriteLinks(root, 'https://x.com/proj/', onOpen, {
+      supportedDocumentBehavior: 'navigate'
+    });
+    const a = root.querySelector('a');
+
+    expect(a.getAttribute('href')).toBe('https://x.com/proj/docs/readme.md');
+    expect(a.hasAttribute('target')).toBe(false);
+    expect(onOpen).not.toHaveBeenCalled();
+  });
+
   it('without baseUrl, intercepts supported relative docs without rewriting href', () => {
     const onOpen = vi.fn();
     const root = build('<a href="other.md">rel</a>');

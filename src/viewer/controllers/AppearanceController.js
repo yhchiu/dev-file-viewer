@@ -6,29 +6,25 @@ import {
   themeLabel
 } from '../viewerHelpers.js';
 import { nextFrame } from '../domUtils.js';
+import {
+  DEFAULT_VIEWER_FONT_SIZE,
+  VIEWER_FONT_SIZE_KEY,
+  clampViewerFontSize,
+  viewerFontSizeProgress
+} from '../../core/ui/viewerFontSize.js';
+
+export { clampViewerFontSize } from '../../core/ui/viewerFontSize.js';
 
 const THEME_KEY = 'devFileViewer:theme';
 const CONTENT_WIDTH_KEY = 'devFileViewer:contentWidth';
-const VIEWER_FONT_SIZE_KEY = 'devFileViewer:viewerFontSize';
-
 const DEFAULT_THEME = 'system';
 const DEFAULT_CONTENT_WIDTH = 'comfortable';
-const DEFAULT_VIEWER_FONT_SIZE = 15;
-const MIN_VIEWER_FONT_SIZE = 12;
-const MAX_VIEWER_FONT_SIZE = 24;
 const CONTENT_WIDTHS = {
   narrow: '760px',
   comfortable: '920px',
   wide: '1180px',
   full: '100%'
 };
-
-/** Clamp/round a viewer font size to the supported range, falling back to the default. */
-export function clampViewerFontSize(value) {
-  const numericSize = Number(value);
-  if (!Number.isFinite(numericSize)) return DEFAULT_VIEWER_FONT_SIZE;
-  return Math.min(Math.max(Math.round(numericSize), MIN_VIEWER_FONT_SIZE), MAX_VIEWER_FONT_SIZE);
-}
 
 // Owns the viewer appearance preferences: color theme, content width, and font
 // size. Each preference restores from chrome.storage.local, applies to the DOM
@@ -140,10 +136,7 @@ export class AppearanceController {
     this.viewerFontSize = clampViewerFontSize(value);
     this.elements.preview.style.setProperty('--viewer-font-size', `${this.viewerFontSize}px`);
     if (this.elements.viewerFontSizeRange) {
-      const progress =
-        ((this.viewerFontSize - MIN_VIEWER_FONT_SIZE) /
-          (MAX_VIEWER_FONT_SIZE - MIN_VIEWER_FONT_SIZE)) *
-        100;
+      const progress = viewerFontSizeProgress(this.viewerFontSize);
       this.elements.viewerFontSizeRange.value = String(this.viewerFontSize);
       this.elements.viewerFontSizeRange.style.setProperty(
         '--viewer-font-size-progress',
