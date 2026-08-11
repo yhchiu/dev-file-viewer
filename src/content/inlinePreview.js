@@ -10,7 +10,12 @@ import {
   lineEndingLabel,
   sourceLanguageFromPath
 } from '../core/format/fileTypes.js';
-import { buildHeadingIndex, ensureHeadingAnchors } from '../core/toc/headingIndex.js';
+import { ensureHeadingAnchors } from '../core/toc/headingIndex.js';
+import {
+  buildDiffOutlineEntries,
+  buildMarkdownOutlineEntries,
+  buildSourceOutlineEntries
+} from './inlineOutline.js';
 import { inlinePreviewMessage } from '../core/i18n/inlinePreviewI18n.js';
 import { PluginRegistry } from '../plugins/PluginRegistry.js';
 import { InlineMermaidClient } from './inlineMermaidClient.js';
@@ -283,6 +288,7 @@ function createShell(snapshot, doc = document) {
     outlineControl,
     outlineToggle,
     outlinePopover,
+    outlineTitle,
     outlineClose,
     outlineNav,
     fontSizeControl,
@@ -399,7 +405,7 @@ export class InlinePreview {
   }
 
   updateActiveHeading() {
-    if (!this.headings.length || this.mode !== 'preview') return;
+    if (!this.headings.length) return;
 
     const toolbarBottom = this.elements.toolbar?.getBoundingClientRect?.().bottom || 0;
     const threshold = toolbarBottom + 18;
@@ -431,8 +437,67 @@ export class InlinePreview {
     this.setOutlinePopover(false);
   }
 
-  buildOutline() {
-    this.headings = buildHeadingIndex(this.elements.preview, { maxLevel: 6 });
+  // Directories in a diff outline only group the rows below them, so they are
+  // plain labels; everything else links to its target inside the preview.
+  createOutlineRow(entry) {
+    const indent = `${Math.max(0, entry.level - 1) * 14}px`;
+
+    if (!entry.element) {
+      const group = this.doc.createElement('div');
+      group.className = 'dfv-inline-outline-group';
+      group.textContent = entry.text;
+      group.title = entry.title;
+      group.style.setProperty('--dfv-inline-outline-indent', indent);
+      return group;
+    }
+
+    const item = this.doc.createElement('a');
+    item.className = 'dfv-inline-outline-item';
+    item.href = `#${encodeURIComponent(entry.anchorId)}`;
+    item.title = entry.title;
+    item.dataset.headingId = entry.id;
+    item.style.setProperty('--dfv-inline-outline-indent', indent);
+
+    if (entry.badge || entry.meta) {
+      item.classList.add('dfv-inline-outline-detailed');
+      if (entry.badge) {
+        const badge = this.doc.createElement('span');
+        badge.className = 'dfv-inline-outline-badge';
+        badge.textContent = entry.badge;
+        item.append(badge);
+      }
+
+      const label = this.doc.createElement('span');
+      label.className = 'dfv-inline-outline-label';
+      label.textContent = entry.text;
+      item.append(label);
+
+      if (entry.meta) {
+        const meta = this.doc.createElement('span');
+        meta.className = 'dfv-inline-outline-meta';
+        meta.textContent = entry.meta;
+        item.append(meta);
+      }
+    } else {
+      item.textContent = entry.text;
+    }
+
+    item.addEventListener('click', event => {
+      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+        return;
+      }
+      event.preventDefault();
+      entry.element.scrollIntoView?.({ block: 'start' });
+      if (entry.kind === 'source-symbol') this.highlightSourceLine(entry.anchorId);
+      this.setActiveHeading(entry.id);
+      this.setOutlinePopover(false);
+    });
+
+    return item;
+  }
+
+  buildOutline(entries, title) {
+    this.headings = entries.filter(entry => entry.element);
     this.activeHeadingId = '';
     this.elements.outlineNav.replaceChildren();
 
@@ -441,38 +506,29 @@ export class InlinePreview {
       return;
     }
 
-    for (const heading of this.headings) {
-      const item = this.doc.createElement('a');
-      item.className = 'dfv-inline-outline-item';
-      item.href = `#${encodeURIComponent(heading.id)}`;
-      item.textContent = heading.text;
-      item.title = heading.text;
-      item.dataset.headingId = heading.id;
-      item.style.setProperty(
-        '--dfv-inline-outline-indent',
-        `${Math.max(0, heading.level - 1) * 14}px`
-      );
-      item.addEventListener('click', event => {
-        if (
-          event.button !== 0 ||
-          event.metaKey ||
-          event.ctrlKey ||
-          event.shiftKey ||
-          event.altKey
-        ) {
-          return;
-        }
-        event.preventDefault();
-        heading.element.scrollIntoView?.({ block: 'start' });
-        this.setActiveHeading(heading.id);
-        this.setOutlinePopover(false);
-      });
-      this.elements.outlineNav.append(item);
+    this.elements.outlineTitle.textContent = title;
+    for (const entry of entries) {
+      this.elements.outlineNav.append(this.createOutlineRow(entry));
     }
 
     this.elements.outlineToggle.hidden = false;
     this.elements.outlineToggle.disabled = false;
     this.scheduleActiveHeadingUpdate();
+  }
+
+  // Mark the line a symbol jump landed on, mirroring the full viewer.
+  highlightSourceLine(anchorId) {
+    for (const line of this.elements.preview.querySelectorAll(
+      '.source-line.is-symbol-highlighted'
+    )) {
+      line.classList.remove('is-symbol-highlighted');
+    }
+
+    if (!anchorId) return;
+    const target = this.elements.preview.querySelector(`#${CSS.escape(anchorId)}`);
+    if (target?.classList?.contains('source-line')) {
+      target.classList.add('is-symbol-highlighted');
+    }
   }
 
   async persistViewerFontSize(value) {
@@ -600,6 +656,10 @@ export class InlinePreview {
         name: this.snapshot.name,
         url: this.snapshot.url
       });
+      this.buildOutline(
+        buildSourceOutlineEntries(text, language, this.elements.preview),
+        inlinePreviewMessage('inlineOutlineSymbols')
+      );
       if (this.elements.toggleSource) {
         this.elements.toggleSource.textContent = inlinePreviewMessage('inlineShowPreview');
       }
@@ -608,10 +668,14 @@ export class InlinePreview {
 
     if (format === FORMAT_IDS.DIFF) {
       this.elements.preview.classList.add('diff-body');
-      this.diffRenderer.render(text, this.elements.preview, {
+      const diffOutline = this.diffRenderer.render(text, this.elements.preview, {
         name: this.snapshot.name,
         url: this.snapshot.url
       });
+      this.buildOutline(
+        buildDiffOutlineEntries(diffOutline?.files || []),
+        inlinePreviewMessage('inlineOutlineChangedFiles')
+      );
       return;
     }
 
@@ -629,7 +693,10 @@ export class InlinePreview {
     }
     if (renderSequence !== this.renderSequence) return;
 
-    this.buildOutline();
+    this.buildOutline(
+      buildMarkdownOutlineEntries(this.elements.preview),
+      inlinePreviewMessage('inlineOutlineOnThisPage')
+    );
     if (this.elements.toggleSource) {
       this.elements.toggleSource.textContent = inlinePreviewMessage('inlineShowSource');
     }

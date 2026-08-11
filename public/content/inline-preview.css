@@ -26,6 +26,11 @@
   --dfv-body-padding: 0;
   --dfv-source-line-number-fg: #8a94a6;
   --dfv-source-line-number-bg: #f6f8fa;
+  --dfv-symbol-highlight-bg: #fff8c5;
+  --dfv-symbol-highlight-marker: #f59e0b;
+  --dfv-symbol-highlight-border: rgba(245, 158, 11, 0.22);
+  --dfv-symbol-highlight-number-fg: #92400e;
+  --dfv-symbol-highlight-number-bg: #fff3a3;
   --dfv-mermaid-bg: #fff;
   --dfv-shadow: 0 4px 10px rgba(70, 55, 140, 0.06), 0 18px 50px rgba(70, 55, 140, 0.1);
   --dfv-inline-content-width: 920px;
@@ -80,6 +85,11 @@
   --dfv-body-padding: 26px 0 0;
   --dfv-source-line-number-fg: #94a3b8;
   --dfv-source-line-number-bg: #111827;
+  --dfv-symbol-highlight-bg: rgba(250, 204, 21, 0.18);
+  --dfv-symbol-highlight-marker: #facc15;
+  --dfv-symbol-highlight-border: rgba(250, 204, 21, 0.24);
+  --dfv-symbol-highlight-number-fg: #fde68a;
+  --dfv-symbol-highlight-number-bg: rgba(250, 204, 21, 0.14);
   --dfv-mermaid-bg: #f8fafc;
   --dfv-shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
   --dfv-diff-context: #0f172a;
@@ -300,6 +310,72 @@
 [data-dfv-inline-root] .dfv-inline-outline-item.is-active {
   color: var(--dfv-fg);
   background: var(--dfv-accent-soft);
+}
+/* Diff files and source symbols pair the label with a badge and/or a trailing
+   detail (+12 −3, L42); Markdown headings stay a single ellipsized line. */
+[data-dfv-inline-root] .dfv-inline-outline-detailed {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+[data-dfv-inline-root] .dfv-inline-outline-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+[data-dfv-inline-root] .dfv-inline-outline-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 34px;
+  height: 18px;
+  padding: 0 5px;
+  color: var(--dfv-muted);
+  background: var(--dfv-panel-2);
+  border: 1px solid var(--dfv-line);
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 850;
+  line-height: 1;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+[data-dfv-inline-root] .dfv-inline-outline-meta {
+  grid-column: 3;
+  justify-self: end;
+  color: var(--dfv-muted);
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+[data-dfv-inline-root] .dfv-inline-outline-item:hover .dfv-inline-outline-badge,
+[data-dfv-inline-root] .dfv-inline-outline-item.is-active .dfv-inline-outline-badge,
+[data-dfv-inline-root] .dfv-inline-outline-item:hover .dfv-inline-outline-meta,
+[data-dfv-inline-root] .dfv-inline-outline-item.is-active .dfv-inline-outline-meta {
+  color: var(--dfv-accent);
+}
+[data-dfv-inline-root] .dfv-inline-outline-item:hover .dfv-inline-outline-badge,
+[data-dfv-inline-root] .dfv-inline-outline-item.is-active .dfv-inline-outline-badge {
+  background: var(--dfv-accent-soft);
+  border-color: var(--dfv-accent);
+}
+/* Directory rows in a diff outline group the files below them; they are labels,
+   not links, so they carry no hover or active state. */
+[data-dfv-inline-root] .dfv-inline-outline-group {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 9px 9px 3px calc(9px + var(--dfv-inline-outline-indent, 0px));
+  overflow: hidden;
+  color: var(--dfv-muted);
+  font-size: 11px;
+  font-weight: 850;
+  line-height: 1.2;
+  letter-spacing: 0.03em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 [data-dfv-inline-root] .dfv-inline-text-size-popover {
   position: absolute;
@@ -714,6 +790,19 @@
 }
 [data-dfv-inline-root] .source-line:target {
   background: var(--dfv-accent-soft);
+}
+/* The line an outline symbol jumped to (mirrors .source-line.is-symbol-highlighted
+   in public/viewer/viewer.css). */
+[data-dfv-inline-root] .source-line.is-symbol-highlighted {
+  background: var(--dfv-symbol-highlight-bg);
+  box-shadow: inset 0 0 0 1px var(--dfv-symbol-highlight-border);
+}
+[data-dfv-inline-root] .source-line.is-symbol-highlighted .source-line-marker {
+  background: var(--dfv-symbol-highlight-marker);
+}
+[data-dfv-inline-root] .source-line.is-symbol-highlighted .source-line-number {
+  color: var(--dfv-symbol-highlight-number-fg);
+  background: var(--dfv-symbol-highlight-number-bg);
 }
 [data-dfv-inline-root] .source-truncated-notice {
   margin: 0;

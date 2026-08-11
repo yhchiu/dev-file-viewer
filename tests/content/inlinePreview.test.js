@@ -8,6 +8,35 @@ import { VIEWER_FONT_SIZE_KEY } from '../../src/core/ui/viewerFontSize.js';
 
 let storageChangeListener = null;
 
+const DIFF_TEXT = [
+  'diff --git a/src/core/a.js b/src/core/a.js',
+  '--- a/src/core/a.js',
+  '+++ b/src/core/a.js',
+  '@@ -1,2 +1,3 @@',
+  ' const a = 1;',
+  '-const b = 2;',
+  '+const b = 3;',
+  '+const c = 4;',
+  'diff --git a/README.md b/README.md',
+  '--- a/README.md',
+  '+++ b/README.md',
+  '@@ -1 +1,2 @@',
+  ' # Title',
+  '+Added line',
+  ''
+].join('\n');
+
+const SOURCE_TEXT = [
+  'export class Widget {',
+  '  render() {',
+  '    return null;',
+  '  }',
+  '}',
+  '',
+  'function helper() {}',
+  ''
+].join('\n');
+
 function setRawDocument(text, extra = '') {
   document.body.innerHTML = `<pre>${text}</pre>${extra}`;
   document.title = 'README';
@@ -246,6 +275,106 @@ describe('Inline Preview', () => {
         'location'
       );
     });
+  });
+
+  it('builds an outline of changed files for a diff', async () => {
+    setRawDocument('diff');
+    await renderInlinePreview({
+      url: 'file:///tmp/change.patch',
+      mimeType: 'text/plain',
+      text: DIFF_TEXT
+    });
+
+    const root = document.querySelector(INLINE_ROOT_SELECTOR);
+    const toggle = root.querySelector('[data-dfv-action="toggle-outline"]');
+    const items = [...root.querySelectorAll('.dfv-inline-outline-item')];
+
+    expect(toggle.hidden).toBe(false);
+    expect(root.querySelector('.dfv-inline-outline-title').textContent).toBe('Changed files');
+    expect(
+      [...root.querySelectorAll('.dfv-inline-outline-group')].map(row => row.textContent)
+    ).toEqual(['src/core']);
+    expect(items.map(item => item.querySelector('.dfv-inline-outline-label').textContent)).toEqual([
+      'a.js',
+      'README.md'
+    ]);
+    expect(items.map(item => item.querySelector('.dfv-inline-outline-meta').textContent)).toEqual([
+      '+2 −1',
+      '+1 −0'
+    ]);
+    // The nested file sits one level below its directory row.
+    expect(items[0].style.getPropertyValue('--dfv-inline-outline-indent')).toBe('14px');
+    expect(items[1].style.getPropertyValue('--dfv-inline-outline-indent')).toBe('0px');
+  });
+
+  it('scrolls to a diff file section from the outline', async () => {
+    setRawDocument('diff');
+    await renderInlinePreview({
+      url: 'file:///tmp/change.patch',
+      mimeType: 'text/plain',
+      text: DIFF_TEXT
+    });
+
+    const root = document.querySelector(INLINE_ROOT_SELECTOR);
+    const item = root.querySelectorAll('.dfv-inline-outline-item')[1];
+    const section = root.querySelector(`#${item.dataset.headingId}`);
+    section.scrollIntoView = vi.fn();
+
+    root.querySelector('[data-dfv-action="toggle-outline"]').click();
+    item.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, button: 0 }));
+
+    expect(section.classList.contains('diff-file')).toBe(true);
+    expect(section.scrollIntoView).toHaveBeenCalledWith({ block: 'start' });
+    expect(item.getAttribute('aria-current')).toBe('location');
+    expect(root.querySelector('.dfv-inline-outline-popover').hidden).toBe(true);
+  });
+
+  it('builds a symbol outline for source code and highlights the jumped-to line', async () => {
+    setRawDocument('source');
+    await renderInlinePreview({
+      url: 'file:///tmp/widget.js',
+      mimeType: 'text/plain',
+      text: SOURCE_TEXT
+    });
+
+    const root = document.querySelector(INLINE_ROOT_SELECTOR);
+    const items = [...root.querySelectorAll('.dfv-inline-outline-item')];
+    const line = root.querySelector('#L2');
+    line.scrollIntoView = vi.fn();
+
+    expect(root.querySelector('[data-dfv-action="toggle-outline"]').hidden).toBe(false);
+    expect(root.querySelector('.dfv-inline-outline-title').textContent).toBe('Symbols');
+    expect(items.map(item => item.querySelector('.dfv-inline-outline-label').textContent)).toEqual([
+      'Widget',
+      'render',
+      'helper'
+    ]);
+    expect(items.map(item => item.querySelector('.dfv-inline-outline-badge').textContent)).toEqual([
+      'class',
+      'meth',
+      'fn'
+    ]);
+    expect(items[1].querySelector('.dfv-inline-outline-meta').textContent).toBe('L2');
+    expect(items[1].getAttribute('href')).toBe('#L2');
+
+    items[1].dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, button: 0 }));
+
+    expect(line.scrollIntoView).toHaveBeenCalledWith({ block: 'start' });
+    expect(line.classList.contains('is-symbol-highlighted')).toBe(true);
+  });
+
+  it('hides the outline for source files without symbol extraction', async () => {
+    setRawDocument('css');
+    await renderInlinePreview({
+      url: 'file:///tmp/theme.css',
+      mimeType: 'text/plain',
+      text: 'body {\n  color: red;\n}'
+    });
+
+    const root = document.querySelector(INLINE_ROOT_SELECTOR);
+    expect(root.querySelector('.source-code-lines')).not.toBeNull();
+    expect(root.querySelector('[data-dfv-action="toggle-outline"]').hidden).toBe(true);
+    expect(root.querySelectorAll('.dfv-inline-outline-item')).toHaveLength(0);
   });
 
   it('restores the shared text size preference in the toolbar and preview', async () => {
