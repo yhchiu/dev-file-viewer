@@ -11,27 +11,6 @@ export function immediateParentId(node) {
   return parentIds?.length ? parentIds[parentIds.length - 1] : '';
 }
 
-export function symbolKindLabel(kind) {
-  switch (kind) {
-    case 'class':
-      return t('symbolClass');
-    case 'interface':
-      return t('symbolInterface');
-    case 'method':
-      return t('symbolMethod');
-    case 'function':
-      return t('symbolFunction');
-    case 'type':
-      return t('symbolType');
-    case 'enum':
-      return t('symbolEnum');
-    case 'module':
-      return t('symbolModule');
-    default:
-      return t('symbolGeneric');
-  }
-}
-
 export function normalizeDroppedEntryPath(path = '') {
   const value = String(path || '').replace(/\\/g, '/');
   return value.startsWith('/') ? value.slice(1) : value;

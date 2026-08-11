@@ -9,7 +9,6 @@ import {
   resolveThemePreference,
   themeLabel,
   contentWidthLabel,
-  symbolKindLabel,
   nextMarkdownViewMode,
   markdownViewToggleState
 } from '../../src/viewer/viewerHelpers.js';
@@ -71,8 +70,6 @@ describe('label helpers (i18n-backed)', () => {
     expect(themeLabel('system')).toBe('System (Light/Dark)');
     expect(contentWidthLabel('full')).toBe('Full width');
     expect(contentWidthLabel('narrow')).toBe('Narrow');
-    expect(symbolKindLabel('function')).toBe('fn');
-    expect(symbolKindLabel('class')).toBe('class');
   });
 });
 

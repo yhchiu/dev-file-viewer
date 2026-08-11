@@ -2,8 +2,9 @@ import { t } from '../../core/i18n/i18n.js';
 import { buildHeadingIndex, buildHeadingTree } from '../../core/toc/headingIndex.js';
 import { buildDiffOutlineTree } from '../../core/diff/diffOutlineTree.js';
 import { buildSourceSymbolTree, extractSourceSymbols } from '../../core/source/sourceSymbols.js';
+import { symbolKindLabel } from '../../core/source/symbolLabels.js';
 import { getArrowRightIcon, getFolderClosedIcon, getFileIcon } from '../../core/ui/icons.js';
-import { immediateParentId, symbolKindLabel } from '../viewerHelpers.js';
+import { immediateParentId } from '../viewerHelpers.js';
 
 const TOC_POPOVER_PINNED_KEY = 'devFileViewer:tocPopoverPinned';
 const TOC_FILTER_THRESHOLD = 12;
