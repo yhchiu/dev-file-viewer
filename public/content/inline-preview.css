@@ -841,6 +841,8 @@
 }
 [data-dfv-inline-root] .diff-table-split .diff-code {
   width: calc((100% - 168px) / 2);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
 [data-dfv-inline-root] .diff-table-split .diff-code-old {
   border-right: 1px solid var(--dfv-line);

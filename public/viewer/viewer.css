@@ -1935,8 +1935,12 @@ body.markdown-width-full .diff-body,
   min-width: 28px;
 }
 
+/* Split columns have a fixed width, so long lines must wrap.
+   With `white-space: pre` they overflow the cell and paint over the other side. */
 .diff-table-split .diff-code {
   width: calc((100% - 168px) / 2);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
 
 .diff-line-added {
@@ -2007,7 +2011,10 @@ body.markdown-width-full .diff-body,
   vertical-align: top;
 }
 
-.markdown-body.diff-body .diff-table tr:nth-child(even) td {
+/* Cancel the Markdown zebra striping. Unified rows carry their colour on the
+   row, so cells may inherit it; split rows colour each side separately, so
+   inheriting there would wipe the added/removed background off every even row. */
+.markdown-body.diff-body .diff-table-unified tr:nth-child(even) td {
   background: inherit;
 }
 
@@ -2064,6 +2071,8 @@ body.markdown-width-full .diff-body,
 .markdown-body.diff-body .diff-table-split .diff-code {
   width: calc((100% - 168px) / 2);
   padding-right: 10px;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
 
 .markdown-body.diff-body .diff-table-split .diff-code-old {
