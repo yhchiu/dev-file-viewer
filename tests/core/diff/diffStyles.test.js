@@ -149,6 +149,51 @@ describe('inline preview diff styles follow the viewer', () => {
   });
 });
 
+// The source view shares its markup with the viewer too, and the same <pre>
+// specificity trap applies: the preview's code-block styling outranks the
+// .source-code-pre rule unless that rule is scoped to the preview.
+describe('inline preview source view follows the viewer', () => {
+  const viewerCss = readCss('viewer/viewer.css');
+  const inlineCss = readCss('content/inline-preview.css');
+
+  const inlinePre = () =>
+    ruleBody(inlineCss, '[data-dfv-inline-root] .dfv-inline-preview .source-code-pre');
+
+  it('numbers lines with the viewer colours', () => {
+    const light = ruleBody(viewerCss, '.source-line-number');
+    const dark = ruleBody(viewerCss, ":root[data-theme='dark'] .source-line-number");
+    const base = ruleBody(inlineCss, '[data-dfv-inline-root]');
+    const forge = ruleBody(inlineCss, "[data-dfv-inline-root][data-dfv-theme='dark']");
+
+    expect(declaration(base, '--dfv-source-line-number-bg')).toBe(declaration(light, 'background'));
+    expect(declaration(base, '--dfv-source-line-number-fg')).toBe(declaration(light, 'color'));
+    expect(declaration(forge, '--dfv-source-line-number-bg')).toBe(declaration(dark, 'background'));
+    expect(declaration(forge, '--dfv-source-line-number-fg')).toBe(declaration(dark, 'color'));
+  });
+
+  it('sits the code block on the surface instead of in a card', () => {
+    // Every viewer theme strips .markdown-body: no background, border or shadow.
+    const body = ruleBody(inlineCss, '[data-dfv-inline-root] .dfv-inline-preview.source-code-body');
+
+    expect(declaration(body, 'background')).toBe('transparent');
+    expect(declaration(body, 'border')).toBe('0');
+    expect(declaration(body, 'box-shadow')).toBe('none');
+  });
+
+  it('keeps the code block flush and padded like the viewer', () => {
+    const viewerCode = ruleBody(viewerCss, '.markdown-body.source-code-body pre code.hljs');
+    const inlineCode = ruleBody(
+      inlineCss,
+      '[data-dfv-inline-root] .dfv-inline-preview.source-code-body pre code.hljs'
+    );
+
+    expect(declaration(inlinePre(), 'margin')).toBe('0');
+    expect(declaration(inlinePre(), 'padding')).toBe('14px');
+    expect(declaration(inlineCode, 'padding')).toBe(declaration(viewerCode, 'padding'));
+    expect(declaration(inlineCode, 'line-height')).toBe(declaration(viewerCode, 'line-height'));
+  });
+});
+
 // The inline preview mirrors the viewer's reading themes with its own --dfv-*
 // tokens. The diff chrome reads those tokens, so drift here shows up as a
 // mismatched file header, meta line and hunk header even when the rules agree.

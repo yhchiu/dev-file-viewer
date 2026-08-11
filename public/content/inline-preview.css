@@ -19,6 +19,13 @@
   --dfv-code-bg: #f4f3fb;
   --dfv-code-fg: #24292f;
   --dfv-code-radius: 14px;
+  --dfv-source-pre-radius: 14px;
+  --dfv-source-pre-border: 0;
+  --dfv-source-body-radius: 14px;
+  /* Forge and Folio pad .markdown-body down from the chrome; Bloom does not. */
+  --dfv-body-padding: 0;
+  --dfv-source-line-number-fg: #8a94a6;
+  --dfv-source-line-number-bg: #f6f8fa;
   --dfv-mermaid-bg: #fff;
   --dfv-shadow: 0 4px 10px rgba(70, 55, 140, 0.06), 0 18px 50px rgba(70, 55, 140, 0.1);
   --dfv-inline-content-width: 920px;
@@ -67,6 +74,12 @@
   --dfv-code-fg: #c2cbd9;
   /* Forge squares off code blocks (--forge-radius), and .diff-meta is a <pre>. */
   --dfv-code-radius: 8px;
+  --dfv-source-pre-radius: 8px;
+  --dfv-source-pre-border: 1px solid var(--dfv-line);
+  --dfv-source-body-radius: 8px;
+  --dfv-body-padding: 26px 0 0;
+  --dfv-source-line-number-fg: #94a3b8;
+  --dfv-source-line-number-bg: #111827;
   --dfv-mermaid-bg: #f8fafc;
   --dfv-shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
   --dfv-diff-context: #0f172a;
@@ -95,6 +108,10 @@
   --dfv-success: #1f5d4c;
   --dfv-code-bg: #f6f2e9;
   --dfv-code-fg: #3c352b;
+  /* Folio leaves .source-code-pre on the base 20px radius. */
+  --dfv-source-pre-radius: 20px;
+  --dfv-source-body-radius: 6px;
+  --dfv-body-padding: 26px 0 0;
   --dfv-shadow: none;
 }
 
@@ -424,7 +441,7 @@
   border-radius: 20px;
   box-shadow: var(--dfv-shadow);
   font-size: var(--dfv-inline-font-size);
-  line-height: 1.65;
+  line-height: 1.6;
 }
 [data-dfv-inline-root] .dfv-inline-preview h1,
 [data-dfv-inline-root] .dfv-inline-preview h2,
@@ -631,20 +648,33 @@
   color: #7ee787;
 }
 
+/* Every viewer theme strips .markdown-body back to bare content, so the source
+   view is the code block itself sitting on the surface, not a card. */
 [data-dfv-inline-root] .dfv-inline-preview.source-code-body {
-  padding: 0;
+  padding: var(--dfv-body-padding);
   overflow: hidden;
-  background: var(--dfv-code-bg);
+  background: transparent;
+  border: 0;
+  border-radius: var(--dfv-source-body-radius);
+  box-shadow: none;
 }
-[data-dfv-inline-root] .source-code-pre {
+/* Scoped past `.dfv-inline-preview pre`, which would otherwise set the margin,
+   border and radius of this block. */
+[data-dfv-inline-root] .dfv-inline-preview .source-code-pre {
   box-sizing: border-box;
   min-height: 64vh;
   margin: 0;
-  padding: 0;
+  padding: 14px;
   overflow: auto;
   background: var(--dfv-code-bg);
-  border: 0;
-  border-radius: 20px;
+  border: var(--dfv-source-pre-border);
+  border-radius: var(--dfv-source-pre-radius);
+}
+[data-dfv-inline-root] .dfv-inline-preview.source-code-body pre code.hljs {
+  min-width: max-content;
+  padding: 24px 26px;
+  font-size: var(--dfv-inline-font-size);
+  line-height: 1.55;
 }
 [data-dfv-inline-root] .source-code-lines {
   display: block;
@@ -655,7 +685,8 @@
   grid-template-columns:
     4px minmax(44px, calc(var(--source-line-number-width, 3ch) + 24px))
     max-content;
-  min-height: 1.55em;
+  min-height: 1.45em;
+  /* Larger than the viewer's 24px: the inline toolbar is sticky. */
   scroll-margin-top: 92px;
   white-space: pre;
 }
@@ -666,8 +697,8 @@
 [data-dfv-inline-root] .source-line-number {
   display: block;
   padding: 0 12px 0 8px;
-  color: var(--dfv-muted);
-  background: var(--dfv-panel-2);
+  color: var(--dfv-source-line-number-fg);
+  background: var(--dfv-source-line-number-bg);
   border-right: 1px solid var(--dfv-line);
   text-align: right;
   user-select: none;
@@ -695,11 +726,13 @@
 }
 
 [data-dfv-inline-root] .dfv-inline-preview.diff-body {
-  padding: 0;
+  padding: var(--dfv-body-padding);
   overflow: visible;
   background: transparent;
   border: 0;
+  border-radius: 0;
   box-shadow: none;
+  line-height: 1.45;
 }
 [data-dfv-inline-root] .diff-viewer {
   display: grid;
