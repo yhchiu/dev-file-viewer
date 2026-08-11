@@ -22,6 +22,7 @@
   --dfv-diff-removed: #ffebe9;
   --dfv-diff-removed-line: #ffd7d5;
   --dfv-diff-split-empty: #f6f8fa;
+  --dfv-diff-meta-bg: #fafbff;
 
   display: block;
   min-height: calc(100vh - 16px);
@@ -61,6 +62,7 @@
   --dfv-diff-removed: rgba(248, 113, 113, 0.16);
   --dfv-diff-removed-line: rgba(248, 113, 113, 0.24);
   --dfv-diff-split-empty: #111827;
+  --dfv-diff-meta-bg: var(--dfv-panel-2);
 }
 
 [data-dfv-inline-root][data-dfv-app-theme='folio'] {
@@ -737,7 +739,13 @@
   justify-content: space-between;
   gap: 14px;
   padding: 12px 16px 12px 18px;
-  background: var(--dfv-panel-2);
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--dfv-accent-soft) 72%, transparent),
+      transparent 64%
+    ),
+    var(--dfv-panel-2);
   border-bottom: 1px solid var(--dfv-line);
 }
 [data-dfv-inline-root] .diff-file-header::before {
@@ -768,10 +776,16 @@
   padding: 10px 14px;
   overflow-x: auto;
   color: var(--dfv-muted);
-  background: var(--dfv-panel-2);
+  background: var(--dfv-diff-meta-bg);
   border-bottom: 1px solid var(--dfv-line);
   font: inherit;
   white-space: pre;
+}
+/* .diff-meta is a <pre>, so the preview's code-block styling outranks the rule
+   above. The viewer's `pre` rule sets no margin, this one sets 1em, which broke
+   the meta line out of the file card. Match the viewer and sit flush. */
+[data-dfv-inline-root] .dfv-inline-preview .diff-meta {
+  margin: 0;
 }
 [data-dfv-inline-root] .diff-hunk {
   overflow-x: auto;

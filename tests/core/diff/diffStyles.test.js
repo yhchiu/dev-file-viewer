@@ -44,11 +44,15 @@ describe('split diff stylesheets', () => {
   });
 });
 
-// The inline preview renders the same diff markup as the viewer, so its colours
-// must follow the viewer's. The viewer is the reference for both values below.
+// The inline preview renders the same diff markup as the viewer, so its styling
+// must follow the viewer's. The viewer is the reference for every value below.
 describe('inline preview diff styles follow the viewer', () => {
   const viewerCss = readCss('viewer/viewer.css');
   const inlineCss = readCss('content/inline-preview.css');
+
+  // The two stylesheets name the same colour through differently prefixed
+  // variables, so compare the declarations with the prefix and layout removed.
+  const normalize = value => value.replace(/\s+/g, '').replace(/--dfv-/g, '--');
 
   it('uses the viewer filler colour for empty split cells', () => {
     const light = declaration(
@@ -99,5 +103,28 @@ describe('inline preview diff styles follow the viewer', () => {
         'box-shadow'
       )
     ).toBe(dark);
+  });
+
+  it('washes the file header with the same accent gradient', () => {
+    const viewer = declaration(ruleBody(viewerCss, '.diff-file-header'), 'background');
+    const inline = declaration(
+      ruleBody(inlineCss, '[data-dfv-inline-root] .diff-file-header'),
+      'background'
+    );
+
+    expect(normalize(inline)).toBe(normalize(viewer));
+  });
+
+  it('keeps the meta line flush inside the file card', () => {
+    // .diff-meta is a <pre>: in the inline preview the code-block styling
+    // outranks the .diff-meta rule and adds a 1em margin, so the reset needs the
+    // preview ancestor to win.
+    expect(declaration(ruleBody(viewerCss, '.diff-meta'), 'margin')).toBe('0');
+    expect(
+      declaration(
+        ruleBody(inlineCss, '[data-dfv-inline-root] .dfv-inline-preview .diff-meta'),
+        'margin'
+      )
+    ).toBe('0');
   });
 });
