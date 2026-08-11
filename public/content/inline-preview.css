@@ -21,6 +21,7 @@
   --dfv-diff-added-line: #abf2bc;
   --dfv-diff-removed: #ffebe9;
   --dfv-diff-removed-line: #ffd7d5;
+  --dfv-diff-split-empty: #f6f8fa;
 
   display: block;
   min-height: calc(100vh - 16px);
@@ -59,6 +60,7 @@
   --dfv-diff-added-line: rgba(34, 197, 94, 0.24);
   --dfv-diff-removed: rgba(248, 113, 113, 0.16);
   --dfv-diff-removed-line: rgba(248, 113, 113, 0.24);
+  --dfv-diff-split-empty: #111827;
 }
 
 [data-dfv-inline-root][data-dfv-app-theme='folio'] {
@@ -717,6 +719,10 @@
 [data-dfv-inline-root] .diff-view-toggle-button.is-active {
   color: var(--dfv-fg);
   background: var(--dfv-panel);
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.08);
+}
+[data-dfv-inline-root][data-dfv-theme='dark'] .diff-view-toggle-button.is-active {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.28);
 }
 [data-dfv-inline-root] .diff-file {
   overflow: hidden;
@@ -878,7 +884,7 @@
   background: var(--dfv-diff-removed-line);
 }
 [data-dfv-inline-root] .diff-table-split .diff-split-empty {
-  background: var(--dfv-panel-2);
+  background: var(--dfv-diff-split-empty);
 }
 [data-dfv-inline-root] .diff-line-note {
   color: var(--dfv-muted);
@@ -998,5 +1004,14 @@
   }
   [data-dfv-inline-root] .dfv-inline-preview.source-code-body {
     padding: 0;
+  }
+  [data-dfv-inline-root] .diff-view-toolbar {
+    justify-content: stretch;
+  }
+  [data-dfv-inline-root] .diff-view-toggle {
+    width: 100%;
+  }
+  [data-dfv-inline-root] .diff-view-toggle-button {
+    min-width: 0;
   }
 }

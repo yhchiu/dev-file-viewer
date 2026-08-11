@@ -16,6 +16,12 @@ const ruleBody = (css, selector) => {
   return css.slice(start, css.indexOf('}', start));
 };
 
+const declaration = (body, property) => {
+  const match = body.match(new RegExp(`${property}:\\s*([^;]+);`));
+  expect(match, `missing declaration: ${property}`).not.toBeNull();
+  return match[1].trim();
+};
+
 describe('split diff stylesheets', () => {
   it.each([
     ['viewer/viewer.css', '.diff-table-split .diff-code'],
@@ -35,5 +41,63 @@ describe('split diff stylesheets', () => {
     // the added/removed colour from every even row.
     expect(css).toContain('.diff-table-unified tr:nth-child(even) td');
     expect(css).not.toContain('.diff-table tr:nth-child(even) td');
+  });
+});
+
+// The inline preview renders the same diff markup as the viewer, so its colours
+// must follow the viewer's. The viewer is the reference for both values below.
+describe('inline preview diff styles follow the viewer', () => {
+  const viewerCss = readCss('viewer/viewer.css');
+  const inlineCss = readCss('content/inline-preview.css');
+
+  it('uses the viewer filler colour for empty split cells', () => {
+    const light = declaration(
+      ruleBody(viewerCss, '.markdown-body.diff-body .diff-table-split .diff-split-empty'),
+      'background'
+    );
+    const dark = declaration(
+      ruleBody(
+        viewerCss,
+        ":root[data-theme='dark'] .markdown-body.diff-body .diff-table-split .diff-split-empty"
+      ),
+      'background'
+    );
+
+    expect(
+      declaration(ruleBody(inlineCss, '[data-dfv-inline-root]'), '--dfv-diff-split-empty')
+    ).toBe(light);
+    expect(
+      declaration(
+        ruleBody(inlineCss, "[data-dfv-inline-root][data-dfv-theme='dark']"),
+        '--dfv-diff-split-empty'
+      )
+    ).toBe(dark);
+  });
+
+  it('raises the active view-toggle button like the viewer', () => {
+    const light = declaration(
+      ruleBody(viewerCss, '.diff-view-toggle-button.is-active'),
+      'box-shadow'
+    );
+    const dark = declaration(
+      ruleBody(viewerCss, ":root[data-theme='dark'] .diff-view-toggle-button.is-active"),
+      'box-shadow'
+    );
+
+    expect(
+      declaration(
+        ruleBody(inlineCss, '[data-dfv-inline-root] .diff-view-toggle-button.is-active'),
+        'box-shadow'
+      )
+    ).toBe(light);
+    expect(
+      declaration(
+        ruleBody(
+          inlineCss,
+          "[data-dfv-inline-root][data-dfv-theme='dark'] .diff-view-toggle-button.is-active"
+        ),
+        'box-shadow'
+      )
+    ).toBe(dark);
   });
 });

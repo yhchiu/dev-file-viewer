@@ -1762,6 +1762,7 @@ body.markdown-width-full .diff-body,
   font-size: 12px;
   font-weight: 800;
   line-height: 1.3;
+  cursor: pointer;
 }
 
 .diff-view-toggle-button:hover,
