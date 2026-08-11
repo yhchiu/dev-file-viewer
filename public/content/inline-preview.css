@@ -1,19 +1,23 @@
+/* Palette mirrors the viewer's reading themes (public/viewer/viewer-themes.css):
+   this block is Bloom, the dark block is Forge, and the last one is Folio. Keep
+   the values in step with that file so both surfaces render the same. */
 [data-dfv-inline-root] {
   color-scheme: light;
-  --dfv-bg: #f5f6fa;
-  --dfv-panel: #fff;
-  --dfv-panel-2: #fbfcff;
-  --dfv-fg: #1d2433;
-  --dfv-muted: #667085;
-  --dfv-line: #e4e7ef;
+  --dfv-bg: #f4f3fb;
+  --dfv-panel: #ffffff;
+  --dfv-panel-2: #f7f6fd;
+  --dfv-fg: #1c1830;
+  --dfv-muted: #6b6685;
+  --dfv-line: #eceaf6;
   --dfv-accent: #6d5bf6;
-  --dfv-accent-soft: rgba(109, 91, 246, 0.14);
+  --dfv-accent-soft: #efebff;
   --dfv-danger: #b42318;
   --dfv-success: #027a48;
-  --dfv-code-bg: #f6f8fa;
+  --dfv-code-bg: #f4f3fb;
   --dfv-code-fg: #24292f;
+  --dfv-code-radius: 14px;
   --dfv-mermaid-bg: #fff;
-  --dfv-shadow: 0 10px 26px rgba(16, 24, 40, 0.08);
+  --dfv-shadow: 0 4px 10px rgba(70, 55, 140, 0.06), 0 18px 50px rgba(70, 55, 140, 0.1);
   --dfv-inline-content-width: 920px;
   --dfv-inline-font-size: 15px;
   --dfv-diff-context: #fff;
@@ -23,6 +27,9 @@
   --dfv-diff-removed-line: #ffd7d5;
   --dfv-diff-split-empty: #f6f8fa;
   --dfv-diff-meta-bg: #fafbff;
+  --dfv-diff-hunk-fg: #4f46e5;
+  --dfv-diff-hunk-bg: #f4f4ff;
+  --dfv-diff-hunk-border: #ddddff;
 
   display: block;
   min-height: calc(100vh - 16px);
@@ -42,20 +49,22 @@
 [data-dfv-inline-root][data-dfv-app-theme='forge'],
 [data-dfv-inline-root][data-dfv-theme='dark'] {
   color-scheme: dark;
-  --dfv-bg: #0f172a;
-  --dfv-panel: #111827;
-  --dfv-panel-2: #182235;
-  --dfv-fg: #e5e7eb;
-  --dfv-muted: #9ca3af;
-  --dfv-line: #334155;
+  --dfv-bg: #0c1018;
+  --dfv-panel: #0e131d;
+  --dfv-panel-2: #141b27;
+  --dfv-fg: #e3e8f0;
+  --dfv-muted: #8b96a8;
+  --dfv-line: #1d2533;
   --dfv-accent: #3dd7c9;
-  --dfv-accent-soft: rgba(61, 215, 201, 0.16);
-  --dfv-danger: #fca5a5;
-  --dfv-success: #86efac;
-  --dfv-code-bg: #0b1220;
-  --dfv-code-fg: #d1d5db;
+  --dfv-accent-soft: rgba(61, 215, 201, 0.14);
+  --dfv-danger: #ff7a85;
+  --dfv-success: #5fd38a;
+  --dfv-code-bg: #080b11;
+  --dfv-code-fg: #c2cbd9;
+  /* Forge squares off code blocks (--forge-radius), and .diff-meta is a <pre>. */
+  --dfv-code-radius: 8px;
   --dfv-mermaid-bg: #f8fafc;
-  --dfv-shadow: 0 18px 50px rgba(0, 0, 0, 0.38);
+  --dfv-shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
   --dfv-diff-context: #0f172a;
   --dfv-diff-added: rgba(34, 197, 94, 0.16);
   --dfv-diff-added-line: rgba(34, 197, 94, 0.24);
@@ -63,18 +72,25 @@
   --dfv-diff-removed-line: rgba(248, 113, 113, 0.24);
   --dfv-diff-split-empty: #111827;
   --dfv-diff-meta-bg: var(--dfv-panel-2);
+  --dfv-diff-hunk-fg: #c4b5fd;
+  --dfv-diff-hunk-bg: rgba(99, 102, 241, 0.18);
+  --dfv-diff-hunk-border: rgba(129, 140, 248, 0.35);
 }
 
 [data-dfv-inline-root][data-dfv-app-theme='folio'] {
-  --dfv-bg: #f2efe8;
-  --dfv-panel: #fffdf7;
-  --dfv-panel-2: #f7f2e7;
-  --dfv-fg: #28342f;
-  --dfv-muted: #66736d;
-  --dfv-line: #d9d2c4;
+  --dfv-bg: #faf7f1;
+  --dfv-panel: #faf7f1;
+  --dfv-panel-2: #f4efe4;
+  --dfv-fg: #211d18;
+  --dfv-muted: #6f675c;
+  --dfv-line: #e7e0d3;
   --dfv-accent: #1f5d4c;
-  --dfv-accent-soft: rgba(31, 93, 76, 0.14);
-  --dfv-code-bg: #f1eee6;
+  --dfv-accent-soft: #e8f0eb;
+  --dfv-danger: #9a2f2f;
+  --dfv-success: #1f5d4c;
+  --dfv-code-bg: #f6f2e9;
+  --dfv-code-fg: #3c352b;
+  --dfv-shadow: none;
 }
 
 [data-dfv-inline-root] .dfv-inline-toolbar,
@@ -457,7 +473,7 @@
   color: var(--dfv-code-fg);
   background: var(--dfv-code-bg);
   border: 1px solid var(--dfv-line);
-  border-radius: 14px;
+  border-radius: var(--dfv-code-radius);
 }
 [data-dfv-inline-root] .dfv-inline-preview pre code {
   padding: 0;
@@ -731,6 +747,7 @@
   background: var(--dfv-panel);
   border: 1px solid var(--dfv-line);
   border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(16, 24, 40, 0.04);
 }
 [data-dfv-inline-root] .diff-file-header {
   position: relative;
@@ -756,7 +773,9 @@
   content: '';
 }
 [data-dfv-inline-root] .diff-file-title {
+  position: relative;
   min-width: 0;
+  padding-left: 28px;
   overflow: hidden;
   color: var(--dfv-accent);
   font:
@@ -764,6 +783,25 @@
     sans-serif;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+[data-dfv-inline-root] .diff-file-title::before {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 17px;
+  height: 19px;
+  background:
+    linear-gradient(
+      135deg,
+      transparent 0 68%,
+      color-mix(in srgb, currentColor 20%, transparent) 68%
+    ),
+    color-mix(in srgb, var(--dfv-panel) 82%, var(--dfv-accent-soft));
+  border: 1.5px solid currentColor;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 3px color-mix(in srgb, var(--dfv-panel) 78%, transparent);
+  transform: translateY(-50%);
+  content: '';
 }
 [data-dfv-inline-root] .diff-file-stats {
   flex: 0 0 auto;
@@ -795,9 +833,9 @@
 }
 [data-dfv-inline-root] .diff-hunk-header {
   padding: 7px 12px;
-  color: var(--dfv-accent);
-  background: var(--dfv-accent-soft);
-  border-bottom: 1px solid var(--dfv-line);
+  color: var(--dfv-diff-hunk-fg);
+  background: var(--dfv-diff-hunk-bg);
+  border-bottom: 1px solid var(--dfv-diff-hunk-border);
   font-weight: 700;
   white-space: pre;
 }

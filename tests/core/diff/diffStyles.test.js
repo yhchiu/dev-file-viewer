@@ -115,6 +115,26 @@ describe('inline preview diff styles follow the viewer', () => {
     expect(normalize(inline)).toBe(normalize(viewer));
   });
 
+  it('draws the file title icon like the viewer', () => {
+    const viewer = ruleBody(viewerCss, '.diff-file-title::before');
+    const inline = ruleBody(inlineCss, '[data-dfv-inline-root] .diff-file-title::before');
+
+    for (const property of ['width', 'height', 'border', 'border-radius', 'background']) {
+      expect(normalize(declaration(inline, property)), property).toBe(
+        normalize(declaration(viewer, property))
+      );
+    }
+    expect(
+      declaration(ruleBody(inlineCss, '[data-dfv-inline-root] .diff-file-title'), 'padding-left')
+    ).toBe('28px');
+  });
+
+  it('gives the file card the viewer shadow', () => {
+    expect(
+      declaration(ruleBody(inlineCss, '[data-dfv-inline-root] .diff-file'), 'box-shadow')
+    ).toBe(declaration(ruleBody(viewerCss, '.diff-file'), 'box-shadow'));
+  });
+
   it('keeps the meta line flush inside the file card', () => {
     // .diff-meta is a <pre>: in the inline preview the code-block styling
     // outranks the .diff-meta rule and adds a 1em margin, so the reset needs the
@@ -126,5 +146,38 @@ describe('inline preview diff styles follow the viewer', () => {
         'margin'
       )
     ).toBe('0');
+  });
+});
+
+// The inline preview mirrors the viewer's reading themes with its own --dfv-*
+// tokens. The diff chrome reads those tokens, so drift here shows up as a
+// mismatched file header, meta line and hunk header even when the rules agree.
+describe('inline preview palette follows the viewer themes', () => {
+  const themesCss = readCss('viewer/viewer-themes.css');
+  const inlineCss = readCss('content/inline-preview.css');
+
+  const TOKENS = [
+    'bg',
+    'panel',
+    'panel-2',
+    'fg',
+    'muted',
+    'line',
+    'accent',
+    'accent-soft',
+    'code-bg'
+  ];
+
+  it.each([
+    ['bloom', ":root[data-app-theme='bloom']", '[data-dfv-inline-root]'],
+    ['forge', ":root[data-app-theme='forge']", "[data-dfv-inline-root][data-dfv-theme='dark']"],
+    ['folio', ":root[data-app-theme='folio']", "[data-dfv-inline-root][data-dfv-app-theme='folio']"]
+  ])('matches the %s palette', (_theme, viewerSelector, inlineSelector) => {
+    const viewer = ruleBody(themesCss, viewerSelector);
+    const inline = ruleBody(inlineCss, inlineSelector);
+
+    for (const token of TOKENS) {
+      expect(declaration(inline, `--dfv-${token}`), token).toBe(declaration(viewer, `--${token}`));
+    }
   });
 });
