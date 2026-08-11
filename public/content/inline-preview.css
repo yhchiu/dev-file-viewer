@@ -4,6 +4,9 @@
 [data-dfv-inline-root] {
   color-scheme: light;
   --dfv-bg: #f4f3fb;
+  /* Ground the content sits on. Mirrors .viewer-main, which Bloom paints with
+     --panel (the reading pane is a white card) and Forge/Folio with --bg. */
+  --dfv-surface: var(--dfv-panel);
   --dfv-panel: #ffffff;
   --dfv-panel-2: #f7f6fd;
   --dfv-fg: #1c1830;
@@ -35,7 +38,7 @@
   min-height: calc(100vh - 16px);
   padding: 22px 24px 42px;
   color: var(--dfv-fg);
-  background: var(--dfv-bg);
+  background: var(--dfv-surface);
   border-radius: 14px;
   font:
     15px/1.6 system-ui,
@@ -50,6 +53,7 @@
 [data-dfv-inline-root][data-dfv-theme='dark'] {
   color-scheme: dark;
   --dfv-bg: #0c1018;
+  --dfv-surface: var(--dfv-bg);
   --dfv-panel: #0e131d;
   --dfv-panel-2: #141b27;
   --dfv-fg: #e3e8f0;
@@ -79,6 +83,7 @@
 
 [data-dfv-inline-root][data-dfv-app-theme='folio'] {
   --dfv-bg: #faf7f1;
+  --dfv-surface: var(--dfv-bg);
   --dfv-panel: #faf7f1;
   --dfv-panel-2: #f4efe4;
   --dfv-fg: #211d18;

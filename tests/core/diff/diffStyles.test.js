@@ -22,6 +22,10 @@ const declaration = (body, property) => {
   return match[1].trim();
 };
 
+// The two stylesheets name the same colour through differently prefixed
+// variables, so compare declarations with the prefix and layout removed.
+const normalize = value => value.replace(/\s+/g, '').replace(/--dfv-/g, '--');
+
 describe('split diff stylesheets', () => {
   it.each([
     ['viewer/viewer.css', '.diff-table-split .diff-code'],
@@ -49,10 +53,6 @@ describe('split diff stylesheets', () => {
 describe('inline preview diff styles follow the viewer', () => {
   const viewerCss = readCss('viewer/viewer.css');
   const inlineCss = readCss('content/inline-preview.css');
-
-  // The two stylesheets name the same colour through differently prefixed
-  // variables, so compare the declarations with the prefix and layout removed.
-  const normalize = value => value.replace(/\s+/g, '').replace(/--dfv-/g, '--');
 
   it('uses the viewer filler colour for empty split cells', () => {
     const light = declaration(
@@ -168,11 +168,13 @@ describe('inline preview palette follows the viewer themes', () => {
     'code-bg'
   ];
 
-  it.each([
+  const THEMES = [
     ['bloom', ":root[data-app-theme='bloom']", '[data-dfv-inline-root]'],
     ['forge', ":root[data-app-theme='forge']", "[data-dfv-inline-root][data-dfv-theme='dark']"],
     ['folio', ":root[data-app-theme='folio']", "[data-dfv-inline-root][data-dfv-app-theme='folio']"]
-  ])('matches the %s palette', (_theme, viewerSelector, inlineSelector) => {
+  ];
+
+  it.each(THEMES)('matches the %s palette', (_theme, viewerSelector, inlineSelector) => {
     const viewer = ruleBody(themesCss, viewerSelector);
     const inline = ruleBody(inlineCss, inlineSelector);
 
@@ -180,4 +182,15 @@ describe('inline preview palette follows the viewer themes', () => {
       expect(declaration(inline, `--dfv-${token}`), token).toBe(declaration(viewer, `--${token}`));
     }
   });
+
+  it.each(THEMES)(
+    'grounds content on the %s reading pane colour',
+    (_theme, viewerSelector, inlineSelector) => {
+      // The diff file cards sit straight on this colour, so it shows between them.
+      const pane = declaration(ruleBody(themesCss, `${viewerSelector} .viewer-main`), 'background');
+      const surface = declaration(ruleBody(inlineCss, inlineSelector), '--dfv-surface');
+
+      expect(normalize(surface)).toBe(normalize(pane));
+    }
+  );
 });
