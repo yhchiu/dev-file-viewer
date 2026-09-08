@@ -1022,6 +1022,9 @@ select {
 .markdown-body tr:nth-child(even) td {
   background: #fcfdff;
 }
+.markdown-body table[data-front-matter] thead {
+  display: none;
+}
 .markdown-body img {
   max-width: 100%;
   height: auto;

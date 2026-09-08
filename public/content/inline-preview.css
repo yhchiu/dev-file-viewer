@@ -613,6 +613,9 @@
 [data-dfv-inline-root] .dfv-inline-preview table:not(.diff-table) tr:last-child td {
   border-bottom: 0;
 }
+[data-dfv-inline-root] .dfv-inline-preview table[data-front-matter] thead {
+  display: none;
+}
 [data-dfv-inline-root] .dfv-inline-preview img,
 [data-dfv-inline-root] .dfv-inline-preview svg {
   max-width: 100%;

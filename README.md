@@ -10,7 +10,7 @@
 
 ### Rendering
 
-- **Markdown** with GitHub-flavored syntax, tables, and stable heading anchors
+- **Markdown** with GitHub-flavored syntax, tables, YAML front matter, and stable heading anchors
 - **Mermaid** diagrams from ` ```mermaid ` fenced code blocks
 - **Source code** viewer with syntax highlighting for dozens of languages, plus common extensionless files (`Dockerfile`, `Makefile`, `Gemfile`, `Rakefile`, …)
 - **Diff / patch** viewer for `.diff` and `.patch` with unified/split view

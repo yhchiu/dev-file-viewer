@@ -4,6 +4,11 @@ import { features } from '../config/features.js';
 import { rewriteLinks } from '../security/linkPolicy.js';
 import { highlightMarkdownCodeBlocks } from '../highlight/syntaxHighlighter.js';
 import { installMarkdownCodeCopyButtons } from './codeCopyButtons.js';
+import {
+  extractFrontMatter,
+  markFrontMatterOutput,
+  mergeFrontMatterMarkdown
+} from './frontMatter.js';
 
 // Strip any inline-style declaration that references an external resource via
 // url(...). Even though DOMPurify sanitises CSS, an `background: url(http://...)`
@@ -35,7 +40,14 @@ export class MarkdownEngine {
   }
 
   async render(markdownText, targetElement, context = {}) {
-    const dirtyHtml = marked.parse(markdownText || '');
+    const source = markdownText || '';
+    const extracted = features.markdown.frontMatter
+      ? extractFrontMatter(source)
+      : { body: source, matter: null };
+    const markdown = extracted.matter
+      ? mergeFrontMatterMarkdown(extracted.body, extracted.matter)
+      : extracted.body;
+    const dirtyHtml = marked.parse(markdown);
     const cleanHtml = DOMPurify.sanitize(dirtyHtml, {
       USE_PROFILES: { html: true },
       // foreignObject (XHTML inside SVG) is a classic mutation-XSS vector and is
@@ -93,6 +105,7 @@ export class MarkdownEngine {
 
     // eslint-disable-next-line no-unsanitized/property -- cleanHtml is DOMPurify-sanitized output
     targetElement.innerHTML = cleanHtml;
+    if (extracted.matter) markFrontMatterOutput(targetElement, extracted.matter);
     highlightMarkdownCodeBlocks(targetElement);
     rewriteLinks(targetElement, context.baseUrl, context.onOpenDocumentLink, context.linkOptions);
     await this.pluginRegistry.runAfterRender(targetElement, context);

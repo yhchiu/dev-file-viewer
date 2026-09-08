@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { MarkdownEngine } from '../../../src/core/markdown/MarkdownEngine.js';
+import { buildHeadingIndex, ensureHeadingAnchors } from '../../../src/core/toc/headingIndex.js';
 
 const noopPlugins = { runAfterRender: async () => {} };
 
@@ -94,5 +95,74 @@ describe('MarkdownEngine — normal rendering', () => {
   it('resolves relative image sources against baseUrl', async () => {
     await engine.render('![alt](img/x.png)', target, { baseUrl: 'https://x.com/d/' });
     expect(target.querySelector('img')?.getAttribute('src')).toBe('https://x.com/d/img/x.png');
+  });
+});
+
+describe('MarkdownEngine — YAML front matter', () => {
+  let engine;
+  let target;
+
+  beforeEach(() => {
+    engine = new MarkdownEngine(noopPlugins);
+    target = newTarget();
+  });
+
+  it('strips the YAML block and shows a display-only metadata card', async () => {
+    await engine.render(
+      '---\ntitle: Hello\ntags: [a, b]\n---\n\n# Body\n\nSee http://example.com',
+      target
+    );
+
+    expect(target.querySelector('hr')).toBeNull();
+    expect(target.textContent).not.toMatch(/^title:/m);
+    expect(target.querySelector('h1')?.textContent).toBe('Body');
+    const table = target.querySelector('table[data-front-matter]');
+    expect(table).not.toBeNull();
+    expect(table.querySelector('thead')?.getAttribute('aria-hidden')).toBe('true');
+    expect([...table.querySelectorAll('thead th')].every(node => !node.textContent.trim())).toBe(
+      true
+    );
+    expect([...table.querySelectorAll('tbody td')].map(node => node.textContent)).toEqual([
+      'title',
+      'Hello',
+      'tags',
+      'a, b'
+    ]);
+    expect(table.querySelector('h1, h2, caption')).toBeNull();
+    ensureHeadingAnchors(target);
+    expect(buildHeadingIndex(target).map(heading => heading.text)).toEqual(['Body']);
+  });
+
+  it('keeps front-matter values as literal table text', async () => {
+    await engine.render(
+      '---\ntitle: Hello *world*\nurl: https://example.com/a|b\n---\n\n# Body',
+      target
+    );
+    const table = target.querySelector('table[data-front-matter]');
+    expect(table.querySelector('em, a, img')).toBeNull();
+    expect(table.textContent).toContain('Hello *world*');
+    expect(table.textContent).toContain('https://example.com/a|b');
+  });
+
+  it('does not interpret front-matter values as HTML', async () => {
+    await engine.render('---\ntitle: <img src="x" onerror="alert(1)">\n---\n\n# Body', target);
+    const table = target.querySelector('table[data-front-matter]');
+    expect(table?.textContent).toContain('<img src="x" onerror="alert(1)">');
+    expect(table?.querySelector('img')).toBeNull();
+    expect(target.querySelector('img[onerror], img[src="x"]')).toBeNull();
+  });
+
+  it('still strips a broken YAML block and shows the raw inner text', async () => {
+    await engine.render('---\ntitle: A\ntitle: B\n---\n\n# Body', target);
+    expect(target.querySelector('hr')).toBeNull();
+    expect(target.querySelector('h1')?.textContent).toBe('Body');
+    expect(target.querySelector('pre[data-front-matter-raw]')?.textContent).toContain('title: A');
+  });
+
+  it('leaves a leading thematic break alone when it is not front matter', async () => {
+    await engine.render('---\n\n# Body', target);
+    expect(target.querySelector('[data-front-matter]')).toBeNull();
+    expect(target.querySelector('hr')).not.toBeNull();
+    expect(target.querySelector('h1')?.textContent).toBe('Body');
   });
 });

@@ -1,6 +1,14 @@
+---
+title: Dev File Viewer Sample
+tags:
+  - markdown
+  - mermaid
+date: 2026-09-08
+---
+
 # Dev File Viewer Sample
 
-This sample verifies Markdown rendering, tables, Mermaid diagrams, and links.
+This sample verifies Markdown rendering, tables, Mermaid diagrams, links, and YAML front matter.
 
 ## Table Rendering
 

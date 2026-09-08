@@ -91,6 +91,28 @@ describe('Inline Preview', () => {
     expect(link.hasAttribute('target')).toBe(false);
   });
 
+  it('shows a front-matter card and keeps YAML out of the outline', async () => {
+    const text = '---\ntitle: Hello\n---\n\n# Body';
+    setRawDocument(text);
+    await renderInlinePreview({
+      url: 'https://example.com/project/README.md',
+      mimeType: 'text/plain',
+      text
+    });
+
+    const root = document.querySelector(INLINE_ROOT_SELECTOR);
+    const table = root.querySelector('table[data-front-matter]');
+    expect([...table.querySelectorAll('tbody td')].map(node => node.textContent)).toEqual([
+      'title',
+      'Hello'
+    ]);
+    expect(root.querySelector('.dfv-inline-preview hr')).toBeNull();
+    expect(root.querySelector('h1')?.textContent).toBe('Body');
+    expect(
+      [...root.querySelectorAll('.dfv-inline-outline-item')].map(item => item.textContent)
+    ).toEqual(['Body']);
+  });
+
   it('toggles Markdown between preview and source', async () => {
     setRawDocument('# Hello');
     await renderInlinePreview({

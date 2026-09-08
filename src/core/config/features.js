@@ -7,7 +7,8 @@ export const features = Object.freeze({
   markdown: {
     gfm: true,
     breaks: false,
-    headerIds: false
+    headerIds: false,
+    frontMatter: true
   },
   syntaxHighlighting: {
     markdownCodeBlocks: true
