@@ -394,8 +394,11 @@ describe('Inline Preview', () => {
     });
 
     const code = document.querySelector(`${INLINE_ROOT_SELECTOR} code`);
+    const toolbar = document.querySelector(`${INLINE_ROOT_SELECTOR} .markdown-code-toolbar`);
     expect(code.dataset.language).toBe('javascript');
     expect(code.className).toContain('language-javascript');
+    expect(toolbar.querySelector('.markdown-code-language').textContent).toBe('JAVASCRIPT');
+    expect(toolbar.querySelector('.markdown-code-copy')).not.toBeNull();
   });
 
   it('hides the outline for source files without symbol extraction', async () => {

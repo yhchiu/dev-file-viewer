@@ -25,6 +25,19 @@ describe('installMarkdownCodeCopyButtons', () => {
     expect(root.querySelector('.markdown-code-copy')).not.toBeNull();
   });
 
+  it('shows the language pill to the left of the copy button', () => {
+    const root = blockWith('language-js');
+    const code = root.querySelector('code');
+    code.dataset.language = 'javascript';
+    installMarkdownCodeCopyButtons(root);
+
+    const toolbar = root.querySelector('.markdown-code-toolbar');
+    const language = toolbar.querySelector('.markdown-code-language');
+    const copy = toolbar.querySelector('.markdown-code-copy');
+    expect(language.textContent).toBe('JAVASCRIPT');
+    expect([...toolbar.children]).toEqual([language, copy]);
+  });
+
   it('skips mermaid blocks', () => {
     const root = blockWith('language-mermaid', 'graph TD; A-->B;');
     installMarkdownCodeCopyButtons(root);

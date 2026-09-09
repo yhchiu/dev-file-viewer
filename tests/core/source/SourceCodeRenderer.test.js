@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   SourceCodeRenderer,
   MAX_RENDERED_LINES
@@ -6,9 +6,17 @@ import {
 
 const ZWSP = String.fromCharCode(0x200b);
 
+function setClipboard(writeText) {
+  Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+}
+
 let target;
 beforeEach(() => {
   target = document.createElement('div');
+});
+
+afterEach(() => {
+  delete navigator.clipboard;
 });
 
 describe('SourceCodeRenderer.render', () => {
@@ -29,6 +37,59 @@ describe('SourceCodeRenderer.render', () => {
   it('omits data-language for plaintext so the format badge stays hidden', () => {
     new SourceCodeRenderer().render('hello', target, { language: 'plaintext' });
     expect(target.querySelector('code').dataset.language).toBeUndefined();
+  });
+
+  it('puts a language pill and copy button in the source toolbar', () => {
+    new SourceCodeRenderer().render('const x = 1;', target, { language: 'javascript' });
+
+    const toolbar = target.querySelector('.markdown-code-toolbar');
+    const language = toolbar.querySelector('.markdown-code-language');
+    const copy = toolbar.querySelector('.markdown-code-copy');
+
+    expect(toolbar).not.toBeNull();
+    expect(target.querySelector('pre').classList.contains('has-code-copy-button')).toBe(true);
+    expect(language.textContent).toBe('JAVASCRIPT');
+    expect(language.hidden).toBe(false);
+    expect(copy).not.toBeNull();
+    expect(copy.getAttribute('aria-label')).toBe('Copy code');
+    expect([...toolbar.children]).toEqual([language, copy]);
+  });
+
+  it('hides the language pill for plaintext but still offers copy', () => {
+    new SourceCodeRenderer().render('hello', target, { language: 'plaintext' });
+
+    const language = target.querySelector('.markdown-code-language');
+    expect(target.querySelector('.markdown-code-copy')).not.toBeNull();
+    expect(language.hidden).toBe(true);
+    expect(language.textContent).toBe('');
+  });
+
+  it('copies the original source without line numbers', async () => {
+    const source = 'const x = 1;\nconst y = 2;';
+    setClipboard(vi.fn().mockResolvedValue(undefined));
+    new SourceCodeRenderer().render(source, target, { language: 'javascript' });
+
+    target.querySelector('.markdown-code-copy').click();
+    await vi.waitFor(() => expect(navigator.clipboard.writeText).toHaveBeenCalledWith(source));
+    expect(navigator.clipboard.writeText.mock.calls[0][0]).not.toMatch(/1const/);
+  });
+
+  it('copies the full original source when the view is truncated', async () => {
+    const source = Array.from({ length: 15 }, (_, i) => `line ${i}`).join('\n');
+    setClipboard(vi.fn().mockResolvedValue(undefined));
+    new SourceCodeRenderer().render(source, target, { language: 'javascript', maxLines: 10 });
+
+    target.querySelector('.markdown-code-copy').click();
+    await vi.waitFor(() => expect(navigator.clipboard.writeText).toHaveBeenCalledWith(source));
+  });
+
+  it('keeps CRLF when copying', async () => {
+    const source = 'a\r\nb';
+    setClipboard(vi.fn().mockResolvedValue(undefined));
+    new SourceCodeRenderer().render(source, target, { language: 'plaintext' });
+
+    target.querySelector('.markdown-code-copy').click();
+    await vi.waitFor(() => expect(navigator.clipboard.writeText).toHaveBeenCalledWith(source));
   });
 
   it('HTML-escapes plaintext content', () => {

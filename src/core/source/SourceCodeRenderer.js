@@ -1,6 +1,7 @@
 import { highlightCodeToHtml, normalizeLanguageName } from '../highlight/syntaxHighlighter.js';
 import { sourceLanguageFromPath } from '../format/fileTypes.js';
 import { t } from '../i18n/i18n.js';
+import { installCodeCopyToolbar } from '../ui/codeCopyToolbar.js';
 
 // Upper bound on rendered lines. Each line produces several DOM nodes, so a
 // pathological file (e.g. a huge minified blob) could otherwise create hundreds
@@ -62,6 +63,11 @@ export class SourceCodeRenderer {
     }
 
     pre.append(code);
+    const textToCopy = String(sourceText || '');
+    installCodeCopyToolbar(pre, {
+      language: language && language !== 'plaintext' ? language : '',
+      getText: () => textToCopy
+    });
     targetElement.append(pre);
 
     if (totalLines > renderedLines) {
