@@ -385,6 +385,19 @@ describe('Inline Preview', () => {
     expect(line.classList.contains('is-symbol-highlighted')).toBe(true);
   });
 
+  it('exposes the source language so the format badge can render', async () => {
+    setRawDocument('source');
+    await renderInlinePreview({
+      url: 'file:///tmp/hello.js',
+      mimeType: 'text/plain',
+      text: SOURCE_TEXT
+    });
+
+    const code = document.querySelector(`${INLINE_ROOT_SELECTOR} code`);
+    expect(code.dataset.language).toBe('javascript');
+    expect(code.className).toContain('language-javascript');
+  });
+
   it('hides the outline for source files without symbol extraction', async () => {
     setRawDocument('css');
     await renderInlinePreview({

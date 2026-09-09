@@ -192,6 +192,42 @@ describe('inline preview source view follows the viewer', () => {
     expect(declaration(inlineCode, 'padding')).toBe(declaration(viewerCode, 'padding'));
     expect(declaration(inlineCode, 'line-height')).toBe(declaration(viewerCode, 'line-height'));
   });
+
+  it('floats the language format badge into the top-right of a source file', () => {
+    const viewerBadge = ruleBody(viewerCss, '.markdown-body pre code.hljs[data-language]::before');
+    const inlineBadge = ruleBody(
+      inlineCss,
+      '[data-dfv-inline-root] .dfv-inline-preview pre code.hljs[data-language]::before'
+    );
+    const viewerHidden = ruleBody(
+      viewerCss,
+      '.markdown-body pre.has-code-copy-button > code.hljs[data-language]::before'
+    );
+    // Prettier wraps this selector, so match it across whitespace.
+    const inlineHiddenMatch = inlineCss.match(
+      /pre\.has-code-copy-button\s*>\s*code\.hljs\[data-language\]::before\s*\{[^}]+\}/
+    );
+    expect(inlineHiddenMatch, 'missing hide rule for copy-toolbar language badge').not.toBeNull();
+
+    expect(declaration(inlineBadge, 'content')).toBe(declaration(viewerBadge, 'content'));
+    expect(declaration(inlineBadge, 'float')).toBe(declaration(viewerBadge, 'float'));
+    expect(declaration(inlineBadge, 'text-transform')).toBe(
+      declaration(viewerBadge, 'text-transform')
+    );
+    expect(declaration(inlineBadge, 'font-size')).toBe(declaration(viewerBadge, 'font-size'));
+    expect(declaration(inlineBadge, 'font-weight')).toBe(declaration(viewerBadge, 'font-weight'));
+    expect(declaration(inlineBadge, 'border-radius')).toBe(
+      declaration(viewerBadge, 'border-radius')
+    );
+    expect(normalize(declaration(inlineBadge, 'color'))).toBe(
+      normalize(declaration(viewerBadge, 'color'))
+    );
+    expect(normalize(declaration(inlineBadge, 'background'))).toBe(
+      normalize(declaration(viewerBadge, 'background'))
+    );
+    expect(inlineHiddenMatch[0]).toContain(`content: ${declaration(viewerHidden, 'content')}`);
+    expect(inlineHiddenMatch[0]).toContain(`display: ${declaration(viewerHidden, 'display')}`);
+  });
 });
 
 // The inline preview mirrors the viewer's reading themes with its own --dfv-*

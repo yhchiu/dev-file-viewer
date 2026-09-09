@@ -23,6 +23,12 @@ describe('SourceCodeRenderer.render', () => {
     expect(lines[1].id).toBe('L2');
     expect(lines[0].querySelector('.source-line-number').textContent).toBe('1');
     expect(target.querySelector('code').className).toContain('language-javascript');
+    expect(target.querySelector('code').dataset.language).toBe('javascript');
+  });
+
+  it('omits data-language for plaintext so the format badge stays hidden', () => {
+    new SourceCodeRenderer().render('hello', target, { language: 'plaintext' });
+    expect(target.querySelector('code').dataset.language).toBeUndefined();
   });
 
   it('HTML-escapes plaintext content', () => {

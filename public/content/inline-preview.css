@@ -661,6 +661,29 @@
   white-space: pre;
   tab-size: 2;
 }
+/* Same language pill the viewer floats into the top-right of a source file.
+   Markdown fences hide this when the copy toolbar already shows the label. */
+[data-dfv-inline-root] .dfv-inline-preview pre code.hljs[data-language]::before {
+  content: attr(data-language);
+  float: right;
+  margin: -2px 0 8px 12px;
+  padding: 2px 7px;
+  border: 1px solid var(--dfv-line);
+  border-radius: 999px;
+  color: var(--dfv-muted);
+  background: var(--dfv-panel);
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.35;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
 [data-dfv-inline-root] .hljs-comment,
 [data-dfv-inline-root] .hljs-quote,
 [data-dfv-inline-root] .hljs-meta {
@@ -1086,6 +1109,13 @@
   .dfv-inline-preview
   pre.has-code-copy-button:has(.markdown-code-language[hidden]) {
   padding-right: 56px;
+}
+[data-dfv-inline-root]
+  .dfv-inline-preview
+  pre.has-code-copy-button
+  > code.hljs[data-language]::before {
+  content: none;
+  display: none;
 }
 [data-dfv-inline-root] .markdown-code-toolbar {
   position: absolute;
