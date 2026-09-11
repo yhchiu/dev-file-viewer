@@ -48,7 +48,7 @@ import { FileTabsController } from './controllers/FileTabsController.js';
 // DropController, SidebarController, OutlineController (TOC + floating outline),
 // and FileTabsController. Controllers call back via shared host services
 // (setStatus, scrollRoot, renderDocument, scrollToAnchor, getDocumentKey, ...).
-class DevFileViewerApp {
+export class DevFileViewerApp {
   constructor() {
     this.elements = {
       app: document.querySelector('#app'),
@@ -362,11 +362,15 @@ class DevFileViewerApp {
     }
   }
 
+  // Opening a folder replaces the sidebar tree only. Already-open documents
+  // stay in the tab strip and the current preview is left as-is; the empty
+  // "select a file" placeholder is only for a viewer that has nothing open.
   clearViewerForFolder(message = t('statusSelectFromSidebar')) {
-    this.fileTabs.clearAllFileTabs();
+    this.clearViewerLoading();
+    if (this.currentDoc || this.fileTabs.openTabs.length) return;
+
     this.currentDoc = null;
     this.currentDocKey = '';
-    this.clearViewerLoading();
     this.clearSourceLineHighlight();
     this.outline.clearToc();
     this.setDocumentReloadEnabled(false);
