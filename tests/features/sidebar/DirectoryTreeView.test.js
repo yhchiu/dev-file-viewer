@@ -97,4 +97,95 @@ describe('DirectoryTreeView', () => {
     ).toBe('true');
     expect(container.querySelector('.tree-file.active').dataset.path).toBe('src/a.js');
   });
+
+  it('preserves expanded folders when re-rendered with preserveExpanded', () => {
+    view.render(tree, () => {});
+    container.querySelector('.tree-disclosure[data-path="src"]').click();
+    expect(container.querySelector('.tree-children[data-path="src"]').hidden).toBe(false);
+
+    view.render(tree, () => {}, { preserveExpanded: true });
+
+    expect(container.querySelector('.tree-children[data-path="src"]').hidden).toBe(false);
+    expect(
+      container.querySelector('.tree-disclosure[data-path="src"]').getAttribute('aria-expanded')
+    ).toBe('true');
+    expect(container.querySelector('.tree-folder[data-path="src"]').dataset.expanded).toBe('true');
+  });
+
+  it('resets nested folders to collapsed without preserveExpanded', () => {
+    view.render(tree, () => {});
+    container.querySelector('.tree-disclosure[data-path="src"]').click();
+
+    view.render(tree, () => {});
+
+    expect(container.querySelector('.tree-children[data-path="src"]').hidden).toBe(true);
+    expect(
+      container.querySelector('.tree-disclosure[data-path="src"]').getAttribute('aria-expanded')
+    ).toBe('false');
+  });
+
+  it('keeps a re-collapsed folder collapsed across a preserved reload', () => {
+    view.render(tree, () => {});
+    const disclosure = container.querySelector('.tree-disclosure[data-path="src"]');
+    disclosure.click();
+    disclosure.click();
+
+    view.render(tree, () => {}, { preserveExpanded: true });
+
+    expect(container.querySelector('.tree-children[data-path="src"]').hidden).toBe(true);
+  });
+
+  it('collapses folders that appeared after a preserved reload', () => {
+    view.render(tree, () => {});
+    container.querySelector('.tree-disclosure[data-path="src"]').click();
+
+    const reloaded = {
+      ...tree,
+      children: [
+        tree.children[0],
+        {
+          type: 'directory',
+          name: 'docs',
+          path: 'docs',
+          children: [{ type: 'file', name: 'n.md', path: 'docs/n.md' }]
+        },
+        tree.children[1]
+      ]
+    };
+    view.render(reloaded, () => {}, { preserveExpanded: true });
+
+    expect(container.querySelector('.tree-children[data-path="src"]').hidden).toBe(false);
+    expect(container.querySelector('.tree-children[data-path="docs"]').hidden).toBe(true);
+  });
+
+  it('preserves nested expansion independently', () => {
+    const deep = {
+      type: 'directory',
+      name: 'proj',
+      path: '',
+      children: [
+        {
+          type: 'directory',
+          name: 'src',
+          path: 'src',
+          children: [
+            {
+              type: 'directory',
+              name: 'lib',
+              path: 'src/lib',
+              children: [{ type: 'file', name: 'a.js', path: 'src/lib/a.js' }]
+            }
+          ]
+        }
+      ]
+    };
+    view.render(deep, () => {});
+    container.querySelector('.tree-disclosure[data-path="src"]').click();
+    container.querySelector('.tree-disclosure[data-path="src/lib"]').click();
+
+    view.render(deep, () => {}, { preserveExpanded: true });
+
+    expect(container.querySelector('.tree-children[data-path="src"]').hidden).toBe(false);
+    expect(container.querySelector('.tree-children[data-path="src/lib"]').hidden).toBe(false);
+  });
 });

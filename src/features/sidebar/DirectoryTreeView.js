@@ -13,24 +13,42 @@ export class DirectoryTreeView {
     this.collapsedPaths = new Set();
   }
 
-  render(tree, onFileSelected) {
+  render(tree, onFileSelected, options = {}) {
+    const restore = options.preserveExpanded ? this.snapshotExpandedState() : null;
     this.container.classList.remove('empty');
     this.container.textContent = '';
     this.collapsedPaths = new Set();
     const rootList = document.createElement('ul');
     rootList.className = 'tree-root';
-    rootList.append(this.renderNode(tree, onFileSelected, 0));
+    rootList.append(this.renderNode(tree, onFileSelected, 0, restore));
     this.container.append(rootList);
   }
 
-  renderNode(node, onFileSelected, depth) {
+  // Paths that existed in the previous tree, plus which of them were collapsed.
+  // New folders after a reload are not in `directoryPaths` and fall back to the
+  // default (collapsed when nested).
+  snapshotExpandedState() {
+    return {
+      collapsedPaths: new Set(this.collapsedPaths),
+      directoryPaths: new Set(
+        Array.from(this.container.querySelectorAll('.tree-children'), el => el.dataset.path || '')
+      )
+    };
+  }
+
+  isInitiallyCollapsed(path, depth, restore) {
+    if (restore?.directoryPaths.has(path)) return restore.collapsedPaths.has(path);
+    return depth > 0;
+  }
+
+  renderNode(node, onFileSelected, depth, restore = null) {
     const item = document.createElement('li');
     item.className = 'tree-node';
 
     if (node.type === 'directory') {
       const folderName = node.name || t('treeFolderFallback');
       const path = node.path || '';
-      const collapsed = depth > 0;
+      const collapsed = this.isInitiallyCollapsed(path, depth, restore);
       if (collapsed) this.collapsedPaths.add(path);
 
       const row = document.createElement('div');
@@ -77,7 +95,7 @@ export class DirectoryTreeView {
       children.dataset.path = path;
       children.hidden = collapsed;
       for (const child of node.children) {
-        children.append(this.renderNode(child, onFileSelected, depth + 1));
+        children.append(this.renderNode(child, onFileSelected, depth + 1, restore));
       }
       item.append(children);
       return item;

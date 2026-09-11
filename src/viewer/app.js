@@ -434,18 +434,22 @@ export class DevFileViewerApp {
     this.scrollRoot.scrollTop = 0;
   }
 
-  renderDirectoryTree(tree) {
+  renderDirectoryTree(tree, options = {}) {
     this.setDirectoryRootName(tree?.name || this.currentFolderName);
-    this.directoryTree.render(tree, async fileNode => {
-      try {
-        this.setViewerLoading(t('statusLoadingDocument', [fileNode.name || t('commonDocument')]));
-        const doc = await this.createDirectoryDocument(fileNode);
-        await this.renderDocument(doc);
-      } catch (error) {
-        await this.clearViewerForFailedDocument(fileNode);
-        this.setStatus(this.getLoadErrorMessage(error), 'error');
-      }
-    });
+    this.directoryTree.render(
+      tree,
+      async fileNode => {
+        try {
+          this.setViewerLoading(t('statusLoadingDocument', [fileNode.name || t('commonDocument')]));
+          const doc = await this.createDirectoryDocument(fileNode);
+          await this.renderDocument(doc);
+        } catch (error) {
+          await this.clearViewerForFailedDocument(fileNode);
+          this.setStatus(this.getLoadErrorMessage(error), 'error');
+        }
+      },
+      options
+    );
     this.clearDirectoryTreeLoading();
   }
 
@@ -462,7 +466,7 @@ export class DevFileViewerApp {
       this.showDirectoryLoading(t('statusReloadingFolder'), this.currentFolderName);
       this.setStatus(t('statusReloadingFolder'), 'info');
       const { tree } = await this.directorySource.reloadDirectory();
-      this.renderDirectoryTree(tree);
+      this.renderDirectoryTree(tree, { preserveExpanded: true });
       this.currentFolderLoaded = true;
       this.setFolderReloadEnabled(true);
 
