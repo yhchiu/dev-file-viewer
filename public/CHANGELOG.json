@@ -1,5 +1,36 @@
 [
   {
+    "version": "3.2.1",
+    "date": "2026-09-11",
+    "items": [
+      {
+        "commit": "7e7b7eb80735eded71272f4121fa4ef277efbbcc",
+        "type": "fix",
+        "subject": "fix(sidebar): keep expanded folders after reload"
+      },
+      {
+        "commit": "79ddfc316ef85d82d59ccd4158b1267382e8601c",
+        "type": "feat",
+        "subject": "feat(viewer): keep open files when opening a folder"
+      },
+      {
+        "commit": "fcdb71ac3f0cd36cea4dbdf338d444b6f826b058",
+        "type": "feat",
+        "subject": "feat(source): add a copy button next to the language badge"
+      },
+      {
+        "commit": "12eade36977c940d506f0610bc5b8eb4a7082e53",
+        "type": "fix",
+        "subject": "fix(inline): show the source language badge in the top-right"
+      },
+      {
+        "commit": "2de31525a8057d969ef5f058b188d0d5a3b67f52",
+        "type": "feat",
+        "subject": "feat(markdown): show YAML front matter as a table"
+      }
+    ]
+  },
+  {
     "version": "3.2.0",
     "date": "2026-08-11",
     "items": [
